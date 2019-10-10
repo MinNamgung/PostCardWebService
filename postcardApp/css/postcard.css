@@ -1,0 +1,9 @@
+#postcardContainer {
+    min-width: 100px;
+    min-height: 100px;
+    width: 400px;
+    height: 300px;
+    outline: solid 1px black;
+    overflow: auto;
+    resize: both;
+}
