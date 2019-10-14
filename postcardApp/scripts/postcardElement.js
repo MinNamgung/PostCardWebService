@@ -23,5 +23,4 @@ Handles the ondrag event of a postcard element by repositioning the element.
 function onDrag(ev) {
     console.log(ev.target.offsetParent);
     let element = ev.target;
-    console.log("drag");
 }

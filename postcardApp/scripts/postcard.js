@@ -1,10 +1,10 @@
 /*
-This file contains functions related to the postcard's elements.
+This file contains functions related to the postcard and editing it.
 */
 
 //References the currently selected element
 let selectedElement;
-//Callbakc functions for undo commands.
+//Callback functions for undo commands.
 let undo = new Array();
 //Callback functions for redo commands.
 let redo = new Array();
@@ -136,6 +136,32 @@ function setSelectedBackground(color) {
         redo.push(() => setSelectedBackground(color));
     });
     selectedElement.style.background = color;
+    $("#postcardContainer").on("click", setSelected);
+    $("#colorPicker").on("change", setBackground);
+}
+
+function setSelectedElementGradientBackground() {
+    let firstColor = $("#gradientColor1").val();
+    let secondColor = $("#gradientColor2").val();
+    let orientation = $("#gradientOrientationSelector").val();
+    let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " +  secondColor + " 100%)";
+    selectedElement.style.background = backgroundStyle;
+}
+
+function setSelectedElementGradientBackground() {
+    let firstColor = $("#gradientColor1").val();
+    let secondColor = $("#gradientColor2").val();
+    let orientation = $("#gradientOrientationSelector").val();
+    let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " +  secondColor + " 100%)";
+    selectedElement.style.background = backgroundStyle;
+}
+
+function setSelectedElementGradientBackground() {
+    let firstColor = $("#gradientColor1").val();
+    let secondColor = $("#gradientColor2").val();
+    let orientation = $("#gradientOrientationSelector").val();
+    let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " +  secondColor + " 100%)";
+    selectedElement.style.background = backgroundStyle;
 }
 
 /*
@@ -178,4 +204,8 @@ Undoes the styling caused by setSelectedStyling.
 */
 function clearSelectedStyling() {
     selectedElement.style.border = "none";
+}
+
+function setSelected(event) {
+    selectedElement = event.target;
 }

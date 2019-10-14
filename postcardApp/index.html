@@ -34,9 +34,27 @@
       <div class="sidebar-heading">Postcard Designer </div>
       <div class="list-group list-group-flush">
         <a href="#" class="list-group-item list-group-item-action bg-light">Colors: <input id="colorPicker" type="color"></a>
+        <div class="list-group-item list-group-item-action bg-light">
+          Gradient:
+          <input id="gradientColor1" type=color>
+          <input id="gradientColor2" type=color>
+          Orientation:
+          <select id="gradientOrientationSelector">
+            <option>to bottom</option>
+            <option>to top</option>
+            <option>to right</option>
+            <option>to left</option>
+            <option>to top left</option>
+            <option>to top right</option>
+            <option>to bottom left</option>
+            <option>to bottom right</option>
+          </select>
+          <button onclick="setSelectedElementGradientBackground()">Apply</button>
+        </div>
         <a href="#" class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" data-type="input">Add Textbox</a>
           <input id="filePicker" type="file" accept="image/*" multiple class="list-group-item list-group-item-action bg-light" draggable="true"
            ondragstart="imageDragStarted(event)" data-type="image"> 
+        <a href="#" class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" data-type="image">Add Image</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">Import</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">Export</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">Save As</a>
@@ -80,7 +98,6 @@
 
       <div id="content-container" class="container-fluid">
         <div id="postcardContainer" class="container-fluid no-remove" ondrop="drop(event)" ondragover="allowDrop(event)">
-        </div>
       </div>
     </div>
     <!-- /#page-content-wrapper -->
