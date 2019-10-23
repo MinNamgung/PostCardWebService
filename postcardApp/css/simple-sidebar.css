@@ -52,3 +52,8 @@ body {
   margin: 20px;
   width: auto;
 }
+
+.dragImage {
+  position: absolute;
+  top: -150px;
+}
