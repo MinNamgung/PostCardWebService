@@ -55,8 +55,9 @@ function register(form){
 
         console.log(data);
 
-        $.post("/register",data,(dt,st)=>{
-            console.log(dt,st)
+        $.post("/register",data).done(res => {
+            console.log(res)
+            $("#reg-error").html(res.message);
         })
     }
 
@@ -91,8 +92,8 @@ function auth(form){
 
         console.log(data);
 
-        $.post("/login",data,(dt,st)=>{
-            console.log(dt,st)
+        $.post("/login",data).done(data => {            
+            $("#login-error").html(data.message);       
         })
     }
 
