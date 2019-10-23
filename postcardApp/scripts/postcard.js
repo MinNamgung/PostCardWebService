@@ -173,8 +173,7 @@ function onSelect(event) {
     if (selectedElement) {
         clearSelectedStyling();
     }
-    selectedElement = event.target;
-    setSelectedStyling();
+    setSelected(event.target);
 }
 
 /*
