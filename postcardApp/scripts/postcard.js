@@ -74,7 +74,7 @@ $(document).ready(function() {
     $("#postcardContainer").on("click", onSelect);
     $("#colorPicker").on("change", colorPickerChanged);
     $(document).keydown(function(e) {
-        if (e.key === "Delete") {
+        if (e.key === "Delete" || e.key === "Backspace") {
             deleteElement(selectedElement);
         }
         else if (e.keyCode === 90 && e.ctrlKey) {
