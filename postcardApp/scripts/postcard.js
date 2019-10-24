@@ -74,20 +74,23 @@ $(document).ready(function() {
     $("#postcardContainer").on("click", onSelect);
     $("#colorPicker").on("change", colorPickerChanged);
     $(document).keydown(function(e) {
-        if (e.key === "Delete") {
+        let keyCodes = 
+        {
+            Backspace: 8,
+            Delete: 46,
+            y: 89,
+            z: 90,
+        }
+        if (e.keyCode === keyCodes.Backspace || e.keyCode === keyCodes.Delete) {
             deleteElement(selectedElement);
         }
-        else if (e.keyCode === 90 && e.ctrlKey) {
-            //perform undo, 90 is z
-            console.log("undo");
+        else if (e.keyCode === keyCodes.z && e.ctrlKey) {
             let undoCallback = undo.pop();
             if (undoCallback) {
                 undoCallback();
             }
         }
-        else if (e.keyCode === 89 && e.ctrlKey) {
-            //perform redo, 89 is y
-            console.log("redo");
+        else if (e.keyCode === keyCodes.y && e.ctrlKey) {
             let redoCallback = redo.pop();
             if (redoCallback) {
                 redoCallback();
