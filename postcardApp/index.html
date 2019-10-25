@@ -110,7 +110,6 @@
     <div id="overlay">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
-
             <div class="modal-header">
               <h5 class="modal-title" id="exampleModalLabel">New message</h5>
               <button type="button" class="close" onclick="off()">
@@ -119,26 +118,18 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="name">
-                        Name:</label>
-                    <input type="text" class="form-control"
-                    id="name" name="name"   required maxlength="50" onkeyup="success()">
+                    <label for="name">Name: </label>
+                    <input type="text" class="form-control" id="name" name="name" required maxlength="50" placeholder="Name">
                 </div>
                 <div class="form-group">
-                    <label for="email">
-                        Email:</label>
-                    <input type="email" class="form-control"
-                    id="email" name="email" required maxlength="50" onkeyup="success()">
+                    <label for="email">Email: </label>
+                    <input type="email" class="form-control" id="email" name="email" required maxlength="50" placeholder="Email">
                 </div>
                 <div class="form-group">
-                    <label for="name">
-                        Message:</label>
-                    <textarea class="form-control" type="textarea" name="message"
-                    id="message" placeholder="Your Message Here"
-                    maxlength="6000" rows="7"></textarea>
+                    <label for="name">Message: </label>
+                    <textarea class="form-control" type="textarea" name="message" id="message" placeholder="Your Message Here" maxlength="6000" rows="7"></textarea>
                 </div>
-                <button type="submit" class="btn btn-lg btn-success btn-block" id="btnContactUs" onclick="onSendAlert()" disabled>Send →</button>
-                
+                <button type="submit" class="btn btn-lg btn-success btn-block" id="btnContactUs" onclick="">Send →</button>
             </div>
             <div class="modal-footer">
             </div>
@@ -160,26 +151,26 @@
       $("#wrapper").toggleClass("toggled");
     });
 
-  
-  
-  $(document).ready(function(){
-	  var from,to,subject,text;
+
+
+    $(document).ready(function(){
+
+    var from,to,subject,text;
+    var address = "http://localhost:8080/send";
+
 	  $("#btnContactUs").click(function(){		
-		to=$("#email").val().trim();
-		subject=$("#name").val().trim();
-		text=$("#message").val().trim();
-		
-		$.get("http://localhost:8080/send",{to:to,subject:subject,text:text},function(data){
-		if(data=="sent")
-		{
-      alert("email is sent! ")
-			//$("#message").empty().html("<p>Email is been sent at "+to+" . Please check inbox !</p>");
-		}
-
-});
-	});
-});
-
+		  to=$("#email").val().trim();
+		  subject=$("#name").val().trim();
+      text=$("#message").val().trim();
+      if(validateInput(to)){
+        $.get(address,{to:to,subject:subject,text:text},function(data){
+		      if(data=="sent"){
+            alert("email is sent! ")
+		      }
+        });
+      }
+	  });
+  });
 
   </script>
 

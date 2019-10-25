@@ -1,3 +1,6 @@
+//load environment variables 
+require('dotenv').config();
+
 var express=require('express');
 var nodemailer = require("nodemailer");
 var app = express();
@@ -9,10 +12,10 @@ var PORT = 8080
 var smtpTransport = nodemailer.createTransport({
     service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
+    port: process.env.Emailport,
     auth: {
-        user: 'postcardwebservice@gmail.com', //this is our team's fake company gmail account
-        pass: 'pcc13579'
+        user: process.env.Emailuser, //this is our team's fake company gmail account
+        pass: process.env.Emailpwd
     },
     tls: {rejectUnauthorized: false},
     debug:true
