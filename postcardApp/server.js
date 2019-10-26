@@ -1,5 +1,5 @@
 //load environment variables 
-require('dotenv').config();
+let env = require('dotenv').config();
 
 var express=require('express');
 var nodemailer = require("nodemailer");
@@ -47,6 +47,6 @@ app.get('/send',function(req,res){
 });
 
 //Run on the port defined in the .env file.
-app.listen(env.PORT, () => {
-    console.log('server start, ', env.PORT);
+app.listen(process.env.PORT, () => {
+    console.log('server start, ', process.env.PORT);
 });
