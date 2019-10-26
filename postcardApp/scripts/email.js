@@ -14,31 +14,60 @@ function clearInput() {
   document.getElementById("email").value="";
   document.getElementById("message").value="";
 }
-   
-function onSendAlert(){
-    alert('Success!');
-    off();
+
+/*
+Validates each email against the regex.
+If any don't match, false is returned.
+*/
+function validateEmails(emails) {
+  var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+  for (let i = 0; i < emails.length; i++) {
+    if (!emails[i].match(mailformat)) {
+      return false;
+    }
+  };
+  return true;
 }
 
 //Email validation 
-function validateInput(email){
-  var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-
-  if(document.getElementById("name").value.trim()===""){
+function validateInput(name, message){
+  if(name === "") {
     alert("You must enter a name!");
     return false;
   }
-  else if(!email.match(mailformat)){
-    alert("You must enter a valid email address!")
-    return false;
-  } 
-  else if(document.getElementById("message").value.trim()===""){
+  else if(message === "") {
     alert("You must enter a message!");
     return false;
   }
   else{
-    onSendAlert()
     clearInput()
+    off();
     return true 
   }
 }
+
+$(document).ready(function(){
+
+  var from,to,subject,message;
+  var address = "http://localhost:8080/send";
+
+  $("#btnContactUs").click(function(){		
+    let emails =$("#email").val().trim();
+    emails = emails.split(",").map(email => email.trim());
+    subject = $("#name").val().trim();
+    message = $("#message").val().trim();
+    if(validateInput(subject, message) && validateEmails(emails)){
+      let postcard = document.getElementById("postcardContainer");
+      elementToCanvas(postcard, (canvas) => {
+        let dataURL = canvas.toDataURL();
+        let data = {
+          to: emails,
+          subject: subject, 
+          text: message,
+          postcard: dataURL
+        };
+        $.post( address, data, (data) => console.log(data));
+      });
+    }
+  });
+});

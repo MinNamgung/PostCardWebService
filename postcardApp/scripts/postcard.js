@@ -243,11 +243,13 @@ Sets the selectedElement to the target of the event for which this function is a
 */
 function onSelect(event) {
     //prevent the event from triggering layered UI elements that have this same listener.
-    event.stopPropagation();
-    if (selectedElement) {
-        clearSelectedStyling();
+    if (event) {
+        event.stopPropagation();
+        if (selectedElement) {
+            clearSelectedStyling();
+        }
+        setSelected(event.target);
     }
-    setSelected(event.target);
 }
 
 /*
@@ -279,19 +281,41 @@ function clearSelectedStyling() {
 }
 
 /*
+Convers element to a canvas and calls onConversion when the conversion is completed.
+*/
+function elementToCanvas(element, onConversion) {
+    html2canvas(element).then((canvas) => onConversion(canvas));
+}
+
+/*
+Creates an image element containing a canvas.
+*/
+function canvasToImage(canvas, onImageLoad) {
+    let image = document.createElement("img");
+    image.crossOrigin = "Anonymous";
+    image.src = canvas.toDataURL();
+    return image;
+}
+
+/*
+Downloads the image element with the given name.
+*/
+function downloadImage(image, name) {
+    let downloadLink = document.createElement("a");
+    downloadLink.href = image.src;
+    downloadLink.download = name + ".png";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+}
+
+/*
 Downloads the postcard as an image.
 */
-function downloadPostcard() {
+function downloadPostcard(name) {
     let postcard = document.getElementById("postcardContainer");
     html2canvas(postcard).then((canvas) => {
-        let dataURL = canvas.toDataURL();
-        let image = document.createElement("img");
-        image.src = dataURL;
-        let downloadLink = document.createElement("a");
-        downloadLink.href = image.src;
-        downloadLink.download = "postcard.png";
-        document.body.appendChild(downloadLink);
-        downloadLink.click();
-        document.body.removeChild(downloadLink);
+        let image = canvasToImage(canvas);
+        downloadImage(image, name);
     });
 }

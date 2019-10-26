@@ -138,45 +138,16 @@
             </div>
           </div>
         </div>
-      </div>
-
-
-          
+      </div> 
     <!-- /#Email Modal -->
-
   </div>
   <!-- /#wrapper -->
-
   <!-- Menu Toggle Script -->
   <script>
     $("#menu-toggle").click(function(e) {
       e.preventDefault();
       $("#wrapper").toggleClass("toggled");
     });
-
-
-
-    $(document).ready(function(){
-
-    var from,to,subject,text;
-    var address = "http://localhost:8080/send";
-
-	  $("#btnContactUs").click(function(){		
-		  to=$("#email").val().trim();
-		  subject=$("#name").val().trim();
-      text=$("#message").val().trim();
-      if(validateInput(to)){
-        $.get(address,{to:to,subject:subject,text:text},function(data){
-		      if(data=="sent"){
-            alert("email is sent! ")
-		      }
-        });
-      }
-	  });
-  });
-
   </script>
-
 </body>
-
 </html>
