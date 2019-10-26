@@ -17,6 +17,7 @@
   <link href="css/simple-sidebar.css" rel="stylesheet">
   <link href="css/postcard.css" rel="stylesheet">
   <link href="css/postcard-textbox.css" rel="stylesheet">
+  <link href="css/email.css" rel="stylesheet">
   <link href="css/resize-handles.css" rel="stylesheet">
 
   <!-- Scripts-->
@@ -24,6 +25,7 @@
   <script type="text/JavaScript" src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
   <script type="text/JavaScript" src="scripts/postcardElement.js"></script>
   <script type="text/JavaScript" src="scripts/postcard.js"></script>
+  <script type="text/JavaScript" src="scripts/email.js"></script>
 </head>
 
 <body>
@@ -62,6 +64,7 @@
         <a href="#" class="list-group-item list-group-item-action bg-light">Export</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">Save As</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">View Templates</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light" onclick="on()" >Share</a>
       </div>
     </div>
     <!-- /#sidebar-wrapper -->
@@ -105,6 +108,41 @@
     </div>
     <!-- /#page-content-wrapper -->
 
+    <!-- Email Modal -->
+    <div id="overlay">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+              <button type="button" class="close" onclick="off()">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="name">Name: </label>
+                    <input type="text" class="form-control" id="name" name="name" required maxlength="50" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email: </label>
+                    <input type="email" class="form-control" id="email" name="email" required maxlength="50" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <label for="name">Message: </label>
+                    <textarea class="form-control" type="textarea" name="message" id="message" placeholder="Your Message Here" maxlength="6000" rows="7"></textarea>
+                </div>
+                <button type="submit" class="btn btn-lg btn-success btn-block" id="btnContactUs" onclick="">Send →</button>
+            </div>
+            <div class="modal-footer">
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+          
+    <!-- /#Email Modal -->
+
   </div>
   <!-- /#wrapper -->
 
@@ -114,6 +152,28 @@
       e.preventDefault();
       $("#wrapper").toggleClass("toggled");
     });
+
+
+
+    $(document).ready(function(){
+
+    var from,to,subject,text;
+    var address = "http://localhost:8080/send";
+
+	  $("#btnContactUs").click(function(){		
+		  to=$("#email").val().trim();
+		  subject=$("#name").val().trim();
+      text=$("#message").val().trim();
+      if(validateInput(to)){
+        $.get(address,{to:to,subject:subject,text:text},function(data){
+		      if(data=="sent"){
+            alert("email is sent! ")
+		      }
+        });
+      }
+	  });
+  });
+
   </script>
 
 </body>
