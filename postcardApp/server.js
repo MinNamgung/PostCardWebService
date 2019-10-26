@@ -4,9 +4,7 @@ require('dotenv').config();
 var express=require('express');
 var nodemailer = require("nodemailer");
 var app = express();
-var PORT = 8080
-
-
+var PORT = process.env.PORT
 
 //use smtp server 
 var smtpTransport = nodemailer.createTransport({
