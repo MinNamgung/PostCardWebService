@@ -1,5 +1,5 @@
 //load environment variables 
-let env = require('dotenv').config();
+require('dotenv').config();
 
 var express=require('express');
 var nodemailer = require("nodemailer");
