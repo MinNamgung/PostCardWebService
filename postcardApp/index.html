@@ -24,6 +24,7 @@
   <script type="text/JavaScript" src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
   <script type="text/JavaScript" src="scripts/postcardElement.js"></script>
   <script type="text/JavaScript" src="scripts/postcard.js"></script>
+  <script type="text/JavaScript" src="scripts/html2canvas.js"></script>
 </head>
 
 <body>
@@ -59,7 +60,7 @@
            ondragstart="imageDragStarted(event)" data-type="image"> 
         <a href="#" class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" data-type="image">Add Image</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">Import</a>
-        <a href="#" class="list-group-item list-group-item-action bg-light">Export</a>
+        <a id="exportLink" href="#" class="list-group-item list-group-item-action bg-light">Export</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">Save As</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">View Templates</a>
       </div>

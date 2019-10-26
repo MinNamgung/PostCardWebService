@@ -160,6 +160,7 @@ $(document).ready(function() {
     selectedElement = $("#postcardContainer")[0];
     setSelectedStyling();
     $("#postcardContainer").on("click", onSelect);
+    $("#exportLink").on("click", downloadPostcard);
     $("#colorPicker").on("change", colorPickerChanged);
     $(document).keydown(function(e) {
         let keyCodes = 
@@ -275,4 +276,22 @@ Undoes the styling caused by setSelectedStyling.
 */
 function clearSelectedStyling() {
     selectedElement.style.outlineColor = "transparent";
+}
+
+/*
+Downloads the postcard as an image.
+*/
+function downloadPostcard() {
+    let postcard = document.getElementById("postcardContainer");
+    html2canvas(postcard).then((canvas) => {
+        let dataURL = canvas.toDataURL();
+        let image = document.createElement("img");
+        image.src = dataURL;
+        let downloadLink = document.createElement("a");
+        downloadLink.href = image.src;
+        downloadLink.download = "postcard.png";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
+    });
 }
