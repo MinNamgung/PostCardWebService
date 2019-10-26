@@ -40,7 +40,6 @@ app.post('/send',function(req,res){
     fs.writeFileSync('image.png', buf);
     let recipients = Array.from(body.to);
     let recipientList = recipients.join(",");
-    console.log(recipientList);
 	var mailOptions={
 		to: recipientList,
 		subject: body.subject,
@@ -64,12 +63,7 @@ app.post('/send',function(req,res){
     });
 });
 
-app.post('/save', function(req,res){
-    let body = req.body;
-    console.log(body);
-});
-
 //Run on the port defined in the .env file.
-app.listen(8080, () => {
+app.listen(process.env.PORT, () => {
     console.log('server start, ', process.env.PORT);
 });

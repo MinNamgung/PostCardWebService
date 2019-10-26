@@ -48,7 +48,7 @@ function validateInput(name, message){
 
 $(document).ready(function(){
 
-  var from,to,subject,message;
+  var subject,message;
   var address = "http://localhost:8080/send";
 
   $("#btnContactUs").click(function(){		
