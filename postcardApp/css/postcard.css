@@ -3,7 +3,10 @@
     min-height: 100px;
     width: 400px;
     height: 300px;
-    outline: solid 1px black;
-    overflow: auto;
+    border: solid 1px black;
+    overflow: hidden;
     resize: both;
+    padding: 0px;
+    position: relative;
+    outline: solid 1px transparent;
 }

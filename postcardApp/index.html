@@ -8,7 +8,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Simple Sidebar - Start Bootstrap Template</title>
+  <title>Postcard Designer</title>
 
   <!-- Bootstrap core CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -17,6 +17,7 @@
   <link href="css/simple-sidebar.css" rel="stylesheet">
   <link href="css/postcard.css" rel="stylesheet">
   <link href="css/postcard-textbox.css" rel="stylesheet">
+  <link href="css/resize-handles.css" rel="stylesheet">
 
   <!-- Scripts-->
   <script type="text/JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -52,7 +53,8 @@
           </select>
           <button onclick="setSelectedElementGradientBackground()">Apply</button>
         </div>
-        <a href="#" class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" data-type="input">Add Textbox</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" 
+        onclick="sidebarClickTextBoxWithoutDrag(event)" data-type="input">Add Textbox</a>
           <input id="filePicker" type="file" accept="image/*" multiple class="list-group-item list-group-item-action bg-light" draggable="true"
            ondragstart="imageDragStarted(event)" data-type="image"> 
         <a href="#" class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" data-type="image">Add Image</a>

@@ -1,4 +1,16 @@
-postcard-textbox {
+.postcard-textbox {
+    width: 150px;
+    padding: 10px;
+    background: transparent;
+    outline: solid 2px transparent;
+    position: absolute;
+}
+
+.postcard-textarea{
     border: transparent;
     background: transparent;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    overflow: hidden;
 }

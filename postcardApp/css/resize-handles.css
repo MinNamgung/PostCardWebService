@@ -1,0 +1,24 @@
+ .ui-resizable-handle{
+    position: absolute;
+    padding: 8px;
+ }
+ .ui-resizable-handle.ui-resizable-ne {
+    right: 0;
+    top: 0;
+    cursor: ne-resize;
+ }
+ .ui-resizable-handle.ui-resizable-nw {
+    left: 0;
+    top: 0;
+    cursor: nw-resize;
+ }
+ .ui-resizable-handle.ui-resizable-se {
+    bottom: 0;
+    right: 0;
+    cursor: se-resize;
+ }
+ .ui-resizable-handle.ui-resizable-sw {
+    bottom: 0;
+    left: 0;
+    cursor: sw-resize;
+ }
