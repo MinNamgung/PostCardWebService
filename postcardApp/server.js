@@ -1,9 +1,15 @@
 //load environment variables 
 require('dotenv').config();
-
+let fs = require("fs");
 var express=require('express');
 var nodemailer = require("nodemailer");
+var bodyParser = require("body-parser");
 var app = express();
+app.use(bodyParser.json({limit: "50mb"}));
+app.use(bodyParser.urlencoded({
+    extended: true,
+    limit: "50mb"
+}));
 
 //use smtp server 
 var smtpTransport = nodemailer.createTransport({
@@ -27,22 +33,39 @@ app.get('/',function(req,res){
 });
 
 //get data from our client index page 
-app.get('/send',function(req,res){
+app.post('/send',function(req,res){
+    let body = req.body;
+    var data = body.postcard.replace(/^data:image\/\w+;base64,/, "");
+    var buf = new Buffer.from(data, 'base64');
+    let directory = "postcard" + Date.now();
+    fs.mkdirSync(directory);
+    let filename = "postcard.png";
+    let postcardPath = directory + "/" + filename;
+    fs.writeFileSync(postcardPath, buf);
+    let recipients = Array.from(body.to);
+    let recipientList = recipients.join(",");
 	var mailOptions={
-		to : req.query.to,
-		subject : req.query.subject,
-		text : req.query.text
-	}
-	console.log(mailOptions);
+		to: recipientList,
+		subject: body.subject,
+        text: body.text,
+        html: "<img src='cid:postcardImage'/>",
+        attachments: [{
+            filename: filename,
+            path: postcardPath,
+            cid: "postcardImage"
+        }]
+    }
 	smtpTransport.sendMail(mailOptions, function(error, response){
         if(error)
         {
             console.log(error);
-		    res.end("error");
+            res.end("error");
 	    } else {
             console.log("Mail is sent: " + response.message);
-		    res.end("sent");
-    	 }
+            res.end("sent");
+         }
+        fs.unlinkSync(postcardPath);
+        fs.rmdirSync(directory);
     });
 });
 
