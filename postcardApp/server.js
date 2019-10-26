@@ -37,17 +37,21 @@ app.post('/send',function(req,res){
     let body = req.body;
     var data = body.postcard.replace(/^data:image\/\w+;base64,/, "");
     var buf = new Buffer.from(data, 'base64');
-    fs.writeFileSync('image.png', buf);
+    let directory = "postcard" + Date.now();
+    fs.mkdirSync(directory);
+    let filename = "postcard.png";
+    let postcardPath = directory + "/" + filename;
+    fs.writeFileSync(postcardPath, buf);
     let recipients = Array.from(body.to);
     let recipientList = recipients.join(",");
 	var mailOptions={
 		to: recipientList,
 		subject: body.subject,
         text: body.text,
-        html: "Embedded image: <img src='cid:postcardImage'/>",
+        html: "<img src='cid:postcardImage'/>",
         attachments: [{
-            filename: "image.png",
-            path: "./image.png",
+            filename: filename,
+            path: postcardPath,
             cid: "postcardImage"
         }]
     }
@@ -55,11 +59,13 @@ app.post('/send',function(req,res){
         if(error)
         {
             console.log(error);
-		    res.end("error");
+            res.end("error");
 	    } else {
             console.log("Mail is sent: " + response.message);
-		    res.end("sent");
-    	 }
+            res.end("sent");
+         }
+        fs.unlinkSync(postcardPath);
+        fs.rmdirSync(directory);
     });
 });
 
