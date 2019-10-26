@@ -4,7 +4,6 @@ require('dotenv').config();
 var express=require('express');
 var nodemailer = require("nodemailer");
 var app = express();
-var PORT = process.env.PORT
 
 //use smtp server 
 var smtpTransport = nodemailer.createTransport({
@@ -47,7 +46,7 @@ app.get('/send',function(req,res){
     });
 });
 
-//run port 8080
-app.listen(PORT, () => {
-    console.log('server start, ', 8080);
+//Run on the port defined in the .env file.
+app.listen(env.PORT, () => {
+    console.log('server start, ', env.PORT);
 });
