@@ -35,9 +35,69 @@ function imageDragStarted(ev) {
 }
 
 /*
-Handles the ondrag event of a postcard element by repositioning the element.
+Methods for showing the "move" cursor only when hovering over the containing div, not the 
+actual element (otherwise it is confused with entering text, etc.)
 */
-function onDrag(ev) {
-    console.log(ev.target.offsetParent);
-    let element = ev.target;
+function dragHover(e){
+    e.target.style.cursor = "move";
+}
+
+//Event for onmouseout for inner element
+function enableDragHover(e){
+    e.target.parentElement.addEventListener("mouseover", dragHover);
+}
+
+//Event for onmouseover for inner element
+function disableDragHover(e){
+    e.target.parentElement.removeEventListener("mouseover", dragHover);
+    e.target.style.cursor = "default";
+}
+
+function textHover(e){
+    e.target.style.cursor = "text";
+}
+
+//Sets cursor for each corner resize
+function resizeHover(e){
+    let resizeClass = e.target.classList[1];
+    if (resizeClass.includes("ne") || resizeClass.includes("sw")){
+        e.target.style.cursor = "ne-resize";
+    }
+    else{
+        e.target.style.cursor = "se-resize";
+    }
+    
+}
+
+function selectParent(e){
+    e.stopPropagation();
+    setSelected(e.target.parentElement);
+}
+
+//Lightly outlines unselected elements when moused over
+function setHoverStyling(event) {
+    event.stopPropagation();
+    if (event.target != selectedElement){
+        event.target.style.outlineColor = "grey";
+    }
+}
+
+//Remove outline on mouse out
+function exitHoverStyling(event){
+    event.stopPropagation();
+    if (event.target != selectedElement){
+        event.target.style.outlineColor = "transparent";
+    }
+}
+
+function setParentHoverStyling(event){
+    if (event.target.parentElement != selectedElement){
+        event.target.parentElement.style.outlineColor = "grey";
+    }
+}
+
+function exitParentHoverStyling(event){
+    if (event.target.parentElement != selectedElement){
+        event.target.parentElement.style.outlineColor = "transparent";
+    }
 }
