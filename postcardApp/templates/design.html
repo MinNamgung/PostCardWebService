@@ -57,7 +57,7 @@
           </select>
           <button onclick="setSelectedElementGradientBackground()">Apply</button>
         </div>
-        <a href="#" class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" 
+        <a class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" 
         onclick="sidebarClickTextBoxWithoutDrag(event)" data-type="input">Add Textbox</a>
         <div class="list-group-item list-group-item-action bg-light">
           Font:
@@ -110,6 +110,11 @@
         <a href="#" class="list-group-item list-group-item-action bg-light">Save As</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">View Templates</a>
         <a href="#" class="list-group-item list-group-item-action bg-light" onclick="on()" >Share</a>
+          <input id="filePicker" type="file" accept="image/*" multiple class="list-group-item list-group-item-action bg-light" draggable="true"
+           ondragstart="imageDragStarted(event)" data-type="image">
+        <a class="list-group-item list-group-item-action bg-light">View Templates</a>
+        <a class="list-group-item list-group-item-action bg-light" onclick="on()" >Share</a>
+        <a id="exportLink" class="list-group-item list-group-item-action bg-light">Download</a>
       </div>
     </div>
     <!-- /#sidebar-wrapper -->

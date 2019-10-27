@@ -156,30 +156,37 @@ app.post('/send',function(req,res){
     fs.writeFileSync(postcardPath, buf);
     let recipients = Array.from(body.to);
     let recipientList = recipients.join(",");
+    let subject = "Postcard From " + body.from;
+    let html = "<div>" + body.message + "</div>" + "<img src='cid:postcardImage'/>";
 	var mailOptions={
-		to: recipientList,
-		subject: body.subject,
-        text: body.text,
-        html: "<img src='cid:postcardImage'/>",
+        from: body.from,
+        to: recipientList,
+        subject: subject,
+        html: html,
         attachments: [{
             filename: filename,
             path: postcardPath,
             cid: "postcardImage"
         }]
     }
-	smtpTransport.sendMail(mailOptions, function(error, response){
-        if(error)
-        {
+	smtpTransport.sendMail(mailOptions, function(error, response) {
+        fs.unlink(postcardPath, (error) => { 
+            if (error) { console.log(error); }
+            fs.rmdir(directory, (error) => { if (error) {console.log(error); }});
+        });
+        if(error) {
             console.log(error);
-            res.end("error");
-	    } else {
-            console.log("Mail is sent: " + response.message);
-            res.end("sent");
-         }
-        fs.unlinkSync(postcardPath);
-        fs.rmdirSync(directory);
+            res.end(error);
+        } else {
+            console.log("Mail is sent. Response: " + response);
+            res.end(response);
+        }
     });
 });
+
+app.get('/404', (req,res) => {
+    res.sendFile(path.join(__dirname+"/templates/404.html"))
+})
 
 app.get('/:file',(req,res) => {
 
@@ -207,8 +214,20 @@ app.get('/:file',(req,res) => {
     }
 
     let ext = path.extname(req.params.file).slice(1)
-    let file = __dirname + type[ext].dir+"\\"+req.params.file;
-    res.sendFile(file, {headers: {'Content-Type':type[ext].type}})
+    if(typeof(type[ext]) !== 'undefined'){        
+        let file = __dirname + type[ext].dir+"\\"+req.params.file;
+        if(fs.existsSync(file)){
+            res.sendFile(file, {headers: {'Content-Type':type[ext].type}})
+        }else{
+            if(ext === 'html'){
+                res.redirect('/404')
+            }else{
+                res.sendStatus(404).end()
+            }            
+        }        
+    }else{
+        res.sendStatus(404).end()
+    }
 })
 //Run on the port defined in the .env file.
 app.listen(process.env.PORT, () => {
