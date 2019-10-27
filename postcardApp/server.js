@@ -184,6 +184,10 @@ app.post('/send',function(req,res){
     });
 });
 
+app.get('/404', (req,res) => {
+    res.sendFile(path.join(__dirname+"/templates/404.html"))
+})
+
 app.get('/:file',(req,res) => {
 
     var type = {
@@ -210,8 +214,20 @@ app.get('/:file',(req,res) => {
     }
 
     let ext = path.extname(req.params.file).slice(1)
-    let file = __dirname + type[ext].dir+"\\"+req.params.file;
-    res.sendFile(file, {headers: {'Content-Type':type[ext].type}})
+    if(typeof(type[ext]) !== 'undefined'){        
+        let file = __dirname + type[ext].dir+"\\"+req.params.file;
+        if(fs.existsSync(file)){
+            res.sendFile(file, {headers: {'Content-Type':type[ext].type}})
+        }else{
+            if(ext === 'html'){
+                res.redirect('/404')
+            }else{
+                res.sendStatus(404).end()
+            }            
+        }        
+    }else{
+        res.sendStatus(404).end()
+    }
 })
 //Run on the port defined in the .env file.
 app.listen(process.env.PORT, () => {
