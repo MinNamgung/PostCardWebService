@@ -26,11 +26,9 @@ function dragStarted(ev) {
     
     //Drag is centered on the mouse
     ev.dataTransfer.setDragImage(dragImage, dragImage.clientWidth / 2, dragImage.clientHeight / 2);
-    console.log("dragStarted");
 }
 
 function imageDragStarted(ev) {
-    console.log(ev.dataTransfer);
     ev.dataTransfer.setData("text/plain", "chosenFile");
 }
 

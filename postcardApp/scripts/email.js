@@ -47,26 +47,23 @@ function validateInput(name, message){
 }
 
 $(document).ready(function(){
-
-  var subject,message;
   var address = "http://localhost:8080/send";
-
   $("#btnContactUs").click(function(){		
+    let from = $("#name").val().trim();
     let emails =$("#email").val().trim();
     emails = emails.split(",").map(email => email.trim());
-    subject = $("#name").val().trim();
-    message = $("#message").val().trim();
-    if(validateInput(subject, message) && validateEmails(emails)){
+    let message = $("#message").val().trim();
+    if(validateInput(from, message) && validateEmails(emails)){
       let postcard = document.getElementById("postcardContainer");
       elementToCanvas(postcard, (canvas) => {
         let dataURL = canvas.toDataURL();
         let data = {
-          to: emails,
-          subject: subject, 
-          text: message,
+          from: from,
+          to: emails, 
+          message: message,
           postcard: dataURL
         };
-        $.post( address, data, (data) => console.log(data));
+        $.post( address, data, (data) => {});
       });
     }
   });

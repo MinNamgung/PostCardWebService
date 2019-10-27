@@ -156,28 +156,31 @@ app.post('/send',function(req,res){
     fs.writeFileSync(postcardPath, buf);
     let recipients = Array.from(body.to);
     let recipientList = recipients.join(",");
+    let subject = "Postcard From " + body.from;
+    let html = "<div>" + body.message + "</div>" + "<img src='cid:postcardImage'/>";
 	var mailOptions={
-		to: recipientList,
-		subject: body.subject,
-        text: body.text,
-        html: "<img src='cid:postcardImage'/>",
+        from: body.from,
+        to: recipientList,
+        subject: subject,
+        html: html,
         attachments: [{
             filename: filename,
             path: postcardPath,
             cid: "postcardImage"
         }]
     }
-	smtpTransport.sendMail(mailOptions, function(error, response){
-        if(error)
-        {
+	smtpTransport.sendMail(mailOptions, function(error, response) {
+        fs.unlink(postcardPath, (error) => { 
+            if (error) { console.log(error); }
+            fs.rmdir(directory, (error) => { if (error) {console.log(error); }});
+        });
+        if(error) {
             console.log(error);
-            res.end("error");
-	    } else {
-            console.log("Mail is sent: " + response.message);
-            res.end("sent");
-         }
-        fs.unlinkSync(postcardPath);
-        fs.rmdirSync(directory);
+            res.end(error);
+        } else {
+            console.log("Mail is sent. Response: " + response);
+            res.end(response);
+        }
     });
 });
 

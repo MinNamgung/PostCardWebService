@@ -63,9 +63,6 @@ function drop(e) {
             textBox.style.top = postcardHeight - (boxHeight + outlineWidth) + "px";
         }
     }
-    else {
-        console.log(elementType + " dropped onto postcard!");
-    }
 }
 
 //Can probably be refactored to handle all element types
@@ -160,26 +157,27 @@ $(document).ready(function() {
     selectedElement = $("#postcardContainer")[0];
     setSelectedStyling();
     $("#postcardContainer").on("click", onSelect);
-    $("#exportLink").on("click", downloadPostcard);
+    $("#exportLink").on("click", () => downloadPostcard("postcard"));
     $("#colorPicker").on("change", colorPickerChanged);
     $(document).keydown(function(e) {
         let keyCodes = 
         {
             Backspace: 8,
             Delete: 46,
+            q: 81,
             y: 89,
             z: 90,
         }
-        if (e.keyCode === keyCodes.Backspace || e.keyCode === keyCodes.Delete) {
+        if (e.keyCode === keyCodes.Delete || (e.ctrlKey && e.keyCode === keyCodes.q)) {
             deleteElement(selectedElement);
         }
-        else if (e.keyCode === keyCodes.z && e.ctrlKey) {
+        else if (e.ctrlKey && e.keyCode === keyCodes.z) {
             let undoCallback = undo.pop();
             if (undoCallback) {
                 undoCallback();
             }
         }
-        else if (e.keyCode === keyCodes.y && e.ctrlKey) {
+        else if (e.ctrlKey && e.keyCode === keyCodes.y) {
             let redoCallback = redo.pop();
             if (redoCallback) {
                 redoCallback();
