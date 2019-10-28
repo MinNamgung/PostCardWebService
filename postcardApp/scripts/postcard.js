@@ -148,7 +148,7 @@ function appendImageFile(file, appendTo) {
                 appendTo[0].style.backgroundSize = "100% 100%";
                 //setup undo/redo callbacks
                 undo.push(() => {
-                    img.remove();
+                    appendTo[0].style.background = "white";
                     redo.push(() => appendImageFile(file, appendTo));
                 })
             }
