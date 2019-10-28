@@ -184,20 +184,14 @@ $(document).ready(function() {
             deleteElement(selectedElement);
         }
         else if (e.ctrlKey && e.keyCode === keyCodes.z) {
-            console.log("Undo");
-
             let undoCallback = undo.pop();
             if (undoCallback) {
-                console.log("Undo");
                 undoCallback();
             }
         }
         else if (e.ctrlKey && e.keyCode === keyCodes.y) {
-            console.log("Redo");
-
             let redoCallback = redo.pop();
             if (redoCallback) {
-                console.log("Redo");
                 redoCallback();
             }
         }
