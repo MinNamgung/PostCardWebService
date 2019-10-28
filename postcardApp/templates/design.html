@@ -59,6 +59,57 @@
         </div>
         <a class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" 
         onclick="sidebarClickTextBoxWithoutDrag(event)" data-type="input">Add Textbox</a>
+        <div class="list-group-item list-group-item-action bg-light">
+          Font:
+          <select id="fontFamilySelector">
+            <option>Arial</option>
+            <option>Arial Black</option>
+            <option>Bookman</option>
+            <option>Candara</option>
+            <option>Comic Sans MS</option>
+            <option>Courier</option>
+            <option>Courier New</option>
+            <option>Garamond</option>
+            <option>Georgia</option>
+            <option>Impact</option>
+            <option>Palatino</option>
+            <option>Roboto</option>
+            <option>Sans Serif</option>
+            <option>Times New Roman</option>
+            <option>Times</option>
+            <option>Verdana</option>
+          </select>  
+          <br>
+          Font Size:
+          <select id="fontSizeSelector">
+            <option>8</option>
+            <option>10</option>
+            <option selected>12</option>
+            <option>14</option>
+            <option>16</option>
+            <option>18</option>
+            <option>20</option>
+            <option>24</option>
+            <option>28</option>
+            <option>32</option>
+            <option>38</option>
+            <option>44</option>
+            <option>52</option>
+            <option>60</option>
+            <option>68</option>
+          </select>
+          <br>
+          Font Color:
+          <input id="fontColorPicker" type="color">
+        </div>
+        <input id="filePicker" type="file" accept="image/*" multiple class="list-group-item list-group-item-action bg-light" draggable="true"
+           ondragstart="imageDragStarted(event)" data-type="image"> 
+        <a href="#" class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" data-type="image">Add Image</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">Import</a>
+        <a id="exportLink" href="#" class="list-group-item list-group-item-action bg-light">Export</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">Save As</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light">View Templates</a>
+        <a href="#" class="list-group-item list-group-item-action bg-light" onclick="on()" >Share</a>
           <input id="filePicker" type="file" accept="image/*" multiple class="list-group-item list-group-item-action bg-light" draggable="true"
            ondragstart="imageDragStarted(event)" data-type="image">
         <a class="list-group-item list-group-item-action bg-light">View Templates</a>
@@ -96,7 +147,7 @@
         </nav>
 
       <div id="content-container" class="container-fluid">
-        <div id="postcardContainer" class="container-fluid no-remove" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <div id="postcardContainer" class="container-fluid no-remove" type="postcard" ondrop="drop(event)" ondragover="allowDrop(event)">
       </div>
     </div>
     <!-- /#page-content-wrapper -->

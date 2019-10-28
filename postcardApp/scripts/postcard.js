@@ -123,6 +123,13 @@ function createTextBox(e) {
     $(".ui-resizable-handle").on("mouseover", setParentHoverStyling);
     $(".ui-resizable-handle").on("mouseout", exitParentHoverStyling);
     
+    //Set focus on the textbox textarea
+    $(textArea).focus();
+
+    //Manually update font family, size, and color
+    $("#fontFamilySelector").trigger("change");
+    $("#fontSizeSelector").trigger("change");
+    $("#fontColorPicker").trigger("change");
 
     return textBox;
 }
@@ -159,6 +166,11 @@ $(document).ready(function() {
     $("#postcardContainer").on("click", onSelect);
     $("#exportLink").on("click", () => downloadPostcard("postcard"));
     $("#colorPicker").on("change", colorPickerChanged);
+
+    $("#fontFamilySelector").on("change", fontFamilyChanged);
+    $("#fontSizeSelector").on("change", fontSizeChanged);
+    $("#fontColorPicker").on("change", fontColorChanged);
+
     $(document).keydown(function(e) {
         let keyCodes = 
         {
@@ -213,6 +225,36 @@ function deleteElement(element) {
 function colorPickerChanged(event) {
     let color = event.target.value;
     setSelectedBackground(color);
+}
+
+function fontFamilyChanged(event){
+    let element = event.target;
+    let fontFamily = element.value;
+    if (selectedElement.classList[0] === "postcard-textbox"){
+        selectedElement.style.fontFamily = fontFamily;        
+    }
+}
+
+function fontSizeChanged(event){
+    let element = event.target;
+    let fontSize = element.value;
+    if (selectedElement.classList[0] === "postcard-textbox"){
+        selectedElement.style.fontSize = getFontSizeEM(fontSize);
+    }
+}
+
+//Change font on first child because clicking the color picker makes the outter div the selected element
+function fontColorChanged(event){
+    let element = event.target;
+    let fontColor = element.value;
+    if (selectedElement.classList[0] === "postcard-textbox"){
+        selectedElement.children[0].style.color = fontColor;
+    }
+}
+
+//Scale font size by 12 to use reasonable em units
+function getFontSizeEM(selectedFontSize){
+    return selectedFontSize / 12 + "em";
 }
 
 /*
