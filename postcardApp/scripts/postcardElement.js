@@ -26,11 +26,9 @@ function dragStarted(ev) {
     
     //Drag is centered on the mouse
     ev.dataTransfer.setDragImage(dragImage, dragImage.clientWidth / 2, dragImage.clientHeight / 2);
-    console.log("dragStarted");
 }
 
 function imageDragStarted(ev) {
-    console.log(ev.dataTransfer);
     ev.dataTransfer.setData("text/plain", "chosenFile");
 }
 
@@ -77,7 +75,8 @@ function selectParent(e){
 //Lightly outlines unselected elements when moused over
 function setHoverStyling(event) {
     event.stopPropagation();
-    if (event.target != selectedElement){
+    // Avoid highlighting textareas
+    if (event.target != selectedElement && event.target.tagName != "TEXTAREA"){
         event.target.style.outlineColor = "grey";
     }
 }
@@ -85,7 +84,8 @@ function setHoverStyling(event) {
 //Remove outline on mouse out
 function exitHoverStyling(event){
     event.stopPropagation();
-    if (event.target != selectedElement){
+    // Avoid highlighting textareas
+    if (event.target != selectedElement && event.target.tagName != "TEXTAREA"){
         event.target.style.outlineColor = "transparent";
     }
 }

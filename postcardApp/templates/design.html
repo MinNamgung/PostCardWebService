@@ -8,7 +8,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>Postcard Designer</title>
+  <title>{POST} Design</title>
 
   <!-- Bootstrap core CSS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -20,12 +20,14 @@
   <link href="css/email.css" rel="stylesheet">
   <link href="css/resize-handles.css" rel="stylesheet">
 
-  <!-- Scripts-->
+  <!-- Scripts-->  
   <script type="text/JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script type="text/JavaScript" src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+  <script type="text/JavaScript" src="scripts/auth.js"></script>
   <script type="text/JavaScript" src="scripts/postcardElement.js"></script>
   <script type="text/JavaScript" src="scripts/postcard.js"></script>
   <script type="text/JavaScript" src="scripts/email.js"></script>
+  <script type="text/JavaScript" src="scripts/html2canvas.js"></script>
 </head>
 
 <body>
@@ -35,7 +37,7 @@
 
     <!-- Sidebar -->
     <div class="bg-light border-right" id="sidebar-wrapper">
-      <div class="sidebar-heading">Postcard Designer </div>
+        <div class="sidebar-heading"><a href="/"><img src="logo-black.svg"></a></div>
       <div class="list-group list-group-flush">
         <a href="#" class="list-group-item list-group-item-action bg-light">Colors: <input id="colorPicker" type="color"></a>
         <div class="list-group-item list-group-item-action bg-light">
@@ -55,16 +57,64 @@
           </select>
           <button onclick="setSelectedElementGradientBackground()">Apply</button>
         </div>
-        <a href="#" class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" 
+        <a class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" 
         onclick="sidebarClickTextBoxWithoutDrag(event)" data-type="input">Add Textbox</a>
-          <input id="filePicker" type="file" accept="image/*" multiple class="list-group-item list-group-item-action bg-light" draggable="true"
+        <div class="list-group-item list-group-item-action bg-light">
+          Font:
+          <select id="fontFamilySelector">
+            <option>Arial</option>
+            <option>Arial Black</option>
+            <option>Bookman</option>
+            <option>Candara</option>
+            <option>Comic Sans MS</option>
+            <option>Courier</option>
+            <option>Courier New</option>
+            <option>Garamond</option>
+            <option>Georgia</option>
+            <option>Impact</option>
+            <option>Palatino</option>
+            <option>Roboto</option>
+            <option>Sans Serif</option>
+            <option>Times New Roman</option>
+            <option>Times</option>
+            <option>Verdana</option>
+          </select>  
+          <br>
+          Font Size:
+          <select id="fontSizeSelector">
+            <option>8</option>
+            <option>10</option>
+            <option selected>12</option>
+            <option>14</option>
+            <option>16</option>
+            <option>18</option>
+            <option>20</option>
+            <option>24</option>
+            <option>28</option>
+            <option>32</option>
+            <option>38</option>
+            <option>44</option>
+            <option>52</option>
+            <option>60</option>
+            <option>68</option>
+          </select>
+          <br>
+          Font Color:
+          <input id="fontColorPicker" type="color">
+        </div>
+        <input id="filePicker" type="file" accept="image/*" multiple class="list-group-item list-group-item-action bg-light" draggable="true"
            ondragstart="imageDragStarted(event)" data-type="image"> 
         <a href="#" class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" data-type="image">Add Image</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">Import</a>
-        <a href="#" class="list-group-item list-group-item-action bg-light">Export</a>
+        <a id="exportLink" href="#" class="list-group-item list-group-item-action bg-light">Export</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">Save As</a>
         <a href="#" class="list-group-item list-group-item-action bg-light">View Templates</a>
         <a href="#" class="list-group-item list-group-item-action bg-light" onclick="on()" >Share</a>
+          <input id="filePicker" type="file" accept="image/*" multiple class="list-group-item list-group-item-action bg-light" draggable="true"
+           ondragstart="imageDragStarted(event)" data-type="image">
+        <a class="list-group-item list-group-item-action bg-light">View Templates</a>
+        <a class="list-group-item list-group-item-action bg-light" onclick="on()" >Share</a>
+        <a id="exportLink" class="list-group-item list-group-item-action bg-light">Download</a>
       </div>
     </div>
     <!-- /#sidebar-wrapper -->
@@ -72,38 +122,32 @@
     <!-- Page Content -->
     <div id="page-content-wrapper">
 
-      <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-        <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+          <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
 
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
-            <li class="nav-item active">
-              <a class="nav-link" href="#">Login <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Logout</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                ...
-              </a>
-              <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                <a class="dropdown-item" href="#">Action</a>
-                <a class="dropdown-item" href="#">Another action</a>
-                <div class="dropdown-divider"></div>
-                <a class="dropdown-item" href="#">Something else here</a>
+          <div class="navbar-collapse" id="navbarSupportedContent">            
+            <a class="ml-auto nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Login
+            </a>
+            <a href="/logout?from=design">Logout</a>
+            <div id="login" class="dropdown dropdown-menu-right hidden">
+              <div id="loginform" class="m-3">
+                  <form>
+                      <div class="form-group">
+                          <label for="username">Username</label><input class="form-control" type="text" name="uname">
+                          <label for="password">Password</label><input class="form-control" type="password" name="pword">
+                      </div>
+                      <input type="button" class="btn btn-primary" value="Login" onclick="auth(this.form)"><p id="login-error"></p>
+                  </form>
+                  <p>
+                      Don't have an account? <a href="/register" class>Register here</a>
+                  </p>
               </div>
-            </li>
-          </ul>
-        </div>
-      </nav>
+          </div>
+        </nav>
 
       <div id="content-container" class="container-fluid">
-        <div id="postcardContainer" class="container-fluid no-remove" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <div id="postcardContainer" class="container-fluid no-remove" type="postcard" ondrop="drop(event)" ondragover="allowDrop(event)">
       </div>
     </div>
     <!-- /#page-content-wrapper -->
@@ -125,7 +169,7 @@
                 </div>
                 <div class="form-group">
                     <label for="email">Email: </label>
-                    <input type="email" class="form-control" id="email" name="email" required maxlength="50" placeholder="Email">
+                    <input type="email" class="form-control" id="email" name="email" required maxlength="256" placeholder="Email">
                 </div>
                 <div class="form-group">
                     <label for="name">Message: </label>
@@ -137,45 +181,23 @@
             </div>
           </div>
         </div>
-      </div>
-
-
-          
+      </div> 
     <!-- /#Email Modal -->
-
   </div>
   <!-- /#wrapper -->
-
   <!-- Menu Toggle Script -->
+
+
   <script>
     $("#menu-toggle").click(function(e) {
       e.preventDefault();
       $("#wrapper").toggleClass("toggled");
     });
 
-
-
-    $(document).ready(function(){
-
-    var from,to,subject,text;
-    var address = "http://localhost:8080/send";
-
-	  $("#btnContactUs").click(function(){		
-		  to=$("#email").val().trim();
-		  subject=$("#name").val().trim();
-      text=$("#message").val().trim();
-      if(validateInput(to)){
-        $.get(address,{to:to,subject:subject,text:text},function(data){
-		      if(data=="sent"){
-            alert("email is sent! ")
-		      }
-        });
-      }
-	  });
-  });
-
+    $("#loginDropdown").click(e => {
+      e.preventDefault()
+      $("#login").toggleClass('hidden')
+    })
   </script>
-
 </body>
-
 </html>
