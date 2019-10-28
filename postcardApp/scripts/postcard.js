@@ -148,7 +148,7 @@ function appendImageFile(file, appendTo) {
                 appendTo[0].style.backgroundSize = "100% 100%";
                 //setup undo/redo callbacks
                 undo.push(() => {
-                    img.remove();
+                    appendTo[0].style.background = "white";
                     redo.push(() => appendImageFile(file, appendTo));
                 })
             }
@@ -184,14 +184,20 @@ $(document).ready(function() {
             deleteElement(selectedElement);
         }
         else if (e.ctrlKey && e.keyCode === keyCodes.z) {
+            console.log("Undo");
+
             let undoCallback = undo.pop();
             if (undoCallback) {
+                console.log("Undo");
                 undoCallback();
             }
         }
         else if (e.ctrlKey && e.keyCode === keyCodes.y) {
+            console.log("Redo");
+
             let redoCallback = redo.pop();
             if (redoCallback) {
+                console.log("Redo");
                 redoCallback();
             }
         }
