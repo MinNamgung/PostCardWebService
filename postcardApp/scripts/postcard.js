@@ -79,11 +79,64 @@ function createTextBox(e) {
     let textBox = document.createElement("div");
     textBox.id = Date.now();
     textBox.className = "postcard-textbox";
-    textBox.addEventListener("mouseover", dragHover);
+    setTextboxEventHandlers(textBox);
+    setTextboxDraggable(textBox);
+    setTextboxResizable(textBox);
 
     let textArea = document.createElement("textarea");
     textArea.className = "postcard-textarea";
+    textArea.spellcheck = false;
+    setTextAreaEventHandlers(textArea);
 
+    textBox.append(textArea);
+
+    setSelected(textBox);
+
+    $("#postcardContainer").append(textBox);
+
+    //Set focus on the textbox textarea
+    $(textArea).focus();
+
+    //Manually update font family, size, and color
+    $("#fontFamilySelector").trigger("change");
+    $("#fontSizeSelector").trigger("change");
+    $("#fontColorPicker").trigger("change");
+
+    return textBox;
+}
+
+/*
+Sets event handlers for a postcard's textbox.
+*/
+function setTextboxEventHandlers(textBox) {
+    textBox.addEventListener("mouseover", dragHover);
+    //Hover events
+    textBox.addEventListener("mouseover", setHoverStyling);
+    textBox.addEventListener("mouseout", exitHoverStyling);
+}
+
+/*
+Makes the textbox resizable and attaches event handlers to the resize handles.
+*/
+function setTextboxResizable(textBox) {
+    $(textBox).resizable({
+        containment: "#postcardContainer",
+        handles: "ne, nw, se, sw"
+   });
+   setTextboxResizeHandlesEventHandlers(textBox);
+}
+
+/*
+Makes the textbox draggable.
+*/
+function setTextboxDraggable(textBox) {
+    $(textBox).draggable({ containment: "#postcardContainer", scroll: false});
+}
+
+/*
+Sets event handlers for a textboxes' textarea element.
+*/
+function setTextAreaEventHandlers(textArea) {
     //Mouse indicator events
     textArea.addEventListener("mouseover", disableDragHover);
     textArea.addEventListener("mouseout", enableDragHover);
@@ -97,42 +150,27 @@ function createTextBox(e) {
 
     //Select parent on click
     textArea.addEventListener("click", selectParent);
+}
 
-    textBox.append(textArea);
+/*
+Sets the event handlers for a textboxes' resize handles.
+*/
+function setTextboxResizeHandlesEventHandlers(textbox) {
+   //Add event listeners to all the corner resize handles
+   let resizeHandles = Array.from(textbox.getElementsByClassName("ui-resizable-handle"));
+   resizeHandles.forEach(handle => setResizeHandleEventHandlers(handle));
+}
 
-    //Hover events
-    textBox.addEventListener("mouseover", setHoverStyling);
-    textBox.addEventListener("mouseout", exitHoverStyling);
-
-    setSelected(textBox);
-
-    $("#postcardContainer").append(textBox);
-
-    //Make textbox draggable and resizable
-    $(textBox).draggable({ containment: "#postcardContainer", scroll: false});
-        
-    $(textBox).resizable({
-         containment: "#postcardContainer",
-         handles: "ne, nw, se, sw"
-         
-    });
-    //Add event listeners to all the corner resize handles
-    $(".ui-resizable-handle").on("mouseover", disableDragHover);
-    $(".ui-resizable-handle").on("mouseout", enableDragHover);
-    $(".ui-resizable-handle").on("mouseover", resizeHover);
-    $(".ui-resizable-handle").on("click", selectParent);
-    $(".ui-resizable-handle").on("mouseover", setParentHoverStyling);
-    $(".ui-resizable-handle").on("mouseout", exitParentHoverStyling);
-    
-    //Set focus on the textbox textarea
-    $(textArea).focus();
-
-    //Manually update font family, size, and color
-    $("#fontFamilySelector").trigger("change");
-    $("#fontSizeSelector").trigger("change");
-    $("#fontColorPicker").trigger("change");
-
-    return textBox;
+/*
+Sets the event handlers for a resize handle element.
+*/
+function setResizeHandleEventHandlers(resizeHandle) {
+    $(resizeHandle).on("mouseover", disableDragHover);
+    $(resizeHandle).on("mouseout", enableDragHover);
+    $(resizeHandle).on("mouseover", resizeHover);
+    $(resizeHandle).on("click", selectParent);
+    $(resizeHandle).on("mouseover", setParentHoverStyling);
+    $(resizeHandle).on("mouseout", exitParentHoverStyling);
 }
 
 /*
@@ -165,7 +203,7 @@ $(document).ready(function() {
     selectedElement = $("#postcardContainer")[0];
     setSelectedStyling();
     $("#postcardContainer").on("click", onSelect);
-    $("#exportLink").on("click", () => downloadPostcard("postcard"));
+    $("#exportLink").on("click", () => downloadPostcard("postcard.gif"));
     $("#colorPicker").on("change", colorPickerChanged);
 
     $("#fontFamilySelector").on("change", fontFamilyChanged);
@@ -197,12 +235,13 @@ $(document).ready(function() {
             }
         }
     })
-    $("#serializeBtn").on("click", () => {
+    $("#saveBtn").on("click", () => {
         let json = serializePostcard();
-        console.log(json);
-    })
-    $("#deserializeBtn").on("click", () => {
-        deserializePostcard(serializePostcard())
+        let contentContainer = $("#content-container")[0];
+        $("#postcardContainer")[0].remove();
+        setTimeout(() => {
+            let postcardElement = deserializePostcard(json, contentContainer);
+        }, 500);
     });
 })
 
@@ -256,7 +295,7 @@ function fontColorChanged(event){
     let element = event.target;
     let fontColor = element.value;
     if (selectedElement.classList[0] === "postcard-textbox"){
-        selectedElement.children[0].style.color = fontColor;
+        selectedElement.getElementsByClassName("postcard-textarea")[0].style.color = fontColor;
     }
 }
 
@@ -351,7 +390,7 @@ Downloads the image element with the given name.
 function downloadImage(image, name) {
     let downloadLink = document.createElement("a");
     downloadLink.href = image.src;
-    downloadLink.download = name + ".png";
+    downloadLink.download = name;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -403,20 +442,38 @@ function serializePostcard() {
 Transforms the JSON string representing a postcard to HTML content.
 See the serializePostcard function for the contents of the json parameter.
 */
-function deserializePostcard(json) {
+function deserializePostcard(json, parent) {
     let postcard = JSON.parse(json);
     let postcardElement = document.createElement("div");
-    let contentContainer = $("#content-container")[0];
-    $("#postcardContainer")[0].remove();
-    contentContainer.appendChild(postcardElement);
+    parent.appendChild(postcardElement);
     postcardElement.outerHTML = postcard.outerHTML;
-    let textboxes = Array.from(postcard.textboxes).map(textbox => JSON.parse(textbox));
-    textboxes.forEach(textbox => {
-        let textarea = document.getElementById(textbox.id).getElementsByClassName("postcard-textarea")[0];
-        textarea.value = textbox.value;
-    })
+    deserializePostcardTextboxes(postcard);
     selectedElement = $("#postcardContainer")[0];
     setSelectedStyling();
     $("#postcardContainer").on("click", onSelect);
     return postcardElement;
+}
+
+/*
+Deserializes the postcard's textboxes from the json object.
+Adds event handlers and recreates the resize handles.
+*/
+function deserializePostcardTextboxes(postcard) {
+    let textboxes = Array.from(postcard.textboxes).map(textbox => JSON.parse(textbox));
+    textboxes.forEach(textbox => {
+        let textboxElement = document.getElementById(textbox.id);
+        /*Adding the event handlers to the resize handles 
+        doesn't work, so recreating them acts as a workaround.*/
+        Array.from(textboxElement.children).forEach(child => {
+            if (child.classList.contains("ui-resizable-handle")) {
+                textboxElement.removeChild(child);
+            }
+        })
+        setTextboxEventHandlers(textboxElement);
+        setTextboxDraggable(textboxElement);
+        setTextboxResizable(textboxElement);
+        let textarea = textboxElement.getElementsByClassName("postcard-textarea")[0];
+        setTextAreaEventHandlers(textarea);
+        textarea.value = textbox.value;
+    })
 }
