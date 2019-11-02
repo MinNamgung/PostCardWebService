@@ -77,6 +77,7 @@ function sidebarClickTextBoxWithoutDrag(e){
 //Creates a div with a textbox in it to allow dragging and resizing
 function createTextBox(e) {
     let textBox = document.createElement("div");
+    textBox.id = Date.now();
     textBox.className = "postcard-textbox";
     textBox.addEventListener("mouseover", dragHover);
 
@@ -196,6 +197,13 @@ $(document).ready(function() {
             }
         }
     })
+    $("#serializeBtn").on("click", () => {
+        let json = serializePostcard();
+        console.log(json);
+    })
+    $("#deserializeBtn").on("click", () => {
+        deserializePostcard(serializePostcard())
+    });
 })
 
 /*
@@ -358,4 +366,57 @@ function downloadPostcard(name) {
         let image = canvasToImage(canvas);
         downloadImage(image, name);
     });
+}
+
+/*
+Transforms the HTML representation of a postcard to a JSON string.
+JSON object for a postcard is as follows: 
+{
+    id: "",
+    outerHTML: "",
+    textboxes: [
+        0: {id: "", value: ""}
+    ]
+}
+*/
+function serializePostcard() {
+    let postcardElement = $("#postcardContainer")[0];
+    let textboxes = postcardElement.getElementsByClassName("postcard-textarea");
+    let postcardTextboxes = new Array();
+    Array.from(textboxes).forEach(textbox => {
+        let postcardTextbox = textbox.parentElement;
+        let postcardValue = { id: postcardTextbox.id, value: textbox.value };
+        let json = JSON.stringify(postcardValue);
+        postcardTextboxes.push(json);
+    })
+    let html = postcardElement.outerHTML;
+    let postcard = {
+        id: Date.now(),
+        outerHTML: html,
+        textboxes: postcardTextboxes
+    }
+    let json = JSON.stringify(postcard);
+    return json;
+}
+
+/*
+Transforms the JSON string representing a postcard to HTML content.
+See the serializePostcard function for the contents of the json parameter.
+*/
+function deserializePostcard(json) {
+    let postcard = JSON.parse(json);
+    let postcardElement = document.createElement("div");
+    let contentContainer = $("#content-container")[0];
+    $("#postcardContainer")[0].remove();
+    contentContainer.appendChild(postcardElement);
+    postcardElement.outerHTML = postcard.outerHTML;
+    let textboxes = Array.from(postcard.textboxes).map(textbox => JSON.parse(textbox));
+    textboxes.forEach(textbox => {
+        let textarea = document.getElementById(textbox.id).getElementsByClassName("postcard-textarea")[0];
+        textarea.value = textbox.value;
+    })
+    selectedElement = $("#postcardContainer")[0];
+    setSelectedStyling();
+    $("#postcardContainer").on("click", onSelect);
+    return postcardElement;
 }
