@@ -204,18 +204,18 @@ app.get('/:file',(req,res) => {
             type:'text/css'
         },
         svg: {
-            dir: '/resources\\SVG',
+            dir: '/resources/SVG',
             type: 'image/svg+xml'
         },
         otf:{
-            dir: '/resources\\fonts',
+            dir: '/resources/fonts',
             type: 'application/x-font-opentype'
         }
     }
 
     let ext = path.extname(req.params.file).slice(1)
     if(typeof(type[ext]) !== 'undefined'){        
-        let file = __dirname + type[ext].dir+"\\"+req.params.file;
+        let file = __dirname + type[ext].dir+"/"+req.params.file;
         if(fs.existsSync(file)){
             res.sendFile(file, {headers: {'Content-Type':type[ext].type}})
         }else{
