@@ -79,6 +79,8 @@ function createTextBox(e) {
     let textBox = document.createElement("div");
     textBox.id = Date.now();
     textBox.className = "postcard-textbox";
+    $("#postcardContainer").append(textBox);
+
     setTextboxEventHandlers(textBox);
     setTextboxDraggable(textBox);
     setTextboxResizable(textBox);
@@ -91,8 +93,6 @@ function createTextBox(e) {
     textBox.append(textArea);
 
     setSelected(textBox);
-
-    $("#postcardContainer").append(textBox);
 
     //Set focus on the textbox textarea
     $(textArea).focus();
