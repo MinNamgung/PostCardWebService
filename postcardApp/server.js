@@ -26,7 +26,6 @@ mongoose.connect(process.env.DB_URL)
     .catch((err) => console.error(err));
 mongoose.promise = global.Promise
 
-
 //use smtp server 
 var smtpTransport = nodemailer.createTransport({
     service: 'gmail',
@@ -183,6 +182,20 @@ app.post('/send',function(req,res){
         }
     });
 });
+
+app.post("/postcards", (req, res) => {
+    let postcard = JSON.parse(req.body.postcard);
+    let postcardId = postcard.id;
+    let userId = req.body.userId;
+    if (postcard && !isNaN(postcardId) && !isNaN(userId)) {
+        //save the postcard to database
+        res.send("Postcard successfully saved.");
+    }
+    else {
+        res.status(400);
+        res.send("Missing required attributes in body of the request.");
+    }
+})
 
 app.get('/404', (req,res) => {
     res.sendFile(path.join(__dirname+"/templates/404.html"))

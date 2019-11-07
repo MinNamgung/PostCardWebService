@@ -236,12 +236,7 @@ $(document).ready(function() {
         }
     })
     $("#saveBtn").on("click", () => {
-        let json = serializePostcard();
-        let contentContainer = $("#content-container")[0];
-        $("#postcardContainer")[0].remove();
-        setTimeout(() => {
-            let postcardElement = deserializePostcard(json, contentContainer);
-        }, 500);
+        savePostcard();
     });
 })
 
@@ -476,4 +471,24 @@ function deserializePostcardTextboxes(postcard) {
         setTextAreaEventHandlers(textarea);
         textarea.value = textbox.value;
     })
+}
+
+/*
+Sends the postcard to the server to be saved.
+*/
+function savePostcard() {
+    let postcard = serializePostcard();
+    let data = {};
+    data.postcard = postcard;
+    data.userId = getUserId();
+    $.post("/postcards", data).done(data => {
+        alert(data);
+    })
+}
+
+/*
+Gets the userId of the current user.
+*/
+function getUserId() {
+    return Date.now();
 }
