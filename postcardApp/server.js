@@ -88,6 +88,10 @@ function register(data, request, response){
             auth:{
                 salt: salt, 
                 password: hash.update(data.password + salt,'utf8').digest('hex') 
+            }, 
+            postcards: {
+                public: [],
+                private: []
             }
         }
         userController.create(user, response)
