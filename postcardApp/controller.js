@@ -51,4 +51,41 @@ userController.get = (data, req, res, callback) => {
     })
 }
 
+userController.addPostcard = (req, res) => {
+    let postcard = req.body.postcard;
+    if (req.session && req.session.passport && req.session.passport.user) {
+        let username = req.session.passport.user;
+        User.findOne({_id: username}, (err, user) => {
+            if (err) {
+                res.send({success: false, message: err.message});
+            }
+            else {
+                if (req.body.isPublic) {
+                    user.postcards.public.push(postcard);
+                }
+                else {
+                    user.postcards.private.push(postcard);
+                }
+                user.save((err) => {
+                    if (err) {
+                        res.writeHead(200,{'Content-Type':'application/json'});
+                        res.write(JSON.stringify({'success':false,'message':"Failed to save postcard.", 'user': user}))
+                        res.end()
+                    }
+                    else {
+                        res.writeHead(200,{'Content-Type':'application/json'});
+                        res.write(JSON.stringify({'success':true,'message':"Successfully saved postcard.", 'user': user}))
+                        res.end()
+                    }
+                });
+            }
+        })
+    }
+    else {
+        res.writeHead(200,{'Content-Type':'application/json'});
+        res.write(JSON.stringify({'success':false,'message':"You must be logged in to save a postcard.", 'user': null}))
+        res.end()
+    }
+}
+
 module.exports = userController
