@@ -405,10 +405,10 @@ function elementToCanvas(element, onConversion) {
 /*
 Creates an image element containing a canvas.
 */
-function canvasToImage(canvas, onImageLoad) {
+function canvasToImage(canvas) {
     let image = document.createElement("img");
     image.crossOrigin = "Anonymous";
-    image.src = canvas.toDataURL();
+    image.src = canvas.toDataURL("image/jpeg");
     return image;
 }
 
@@ -451,10 +451,9 @@ function serializePostcard() {
     let textboxes = postcardElement.getElementsByClassName("postcard-textarea");
     let postcardTextboxes = new Array();
     Array.from(textboxes).forEach(textbox => {
-        let postcardTextbox = textbox.parentElement;
-        let postcardValue = { id: postcardTextbox.id, value: textbox.value };
-        let json = JSON.stringify(postcardValue);
-        postcardTextboxes.push(json);
+        let textboxElement = textbox.parentElement;
+        let postcardTextbox = { id: textboxElement.id, value: textbox.value };
+        postcardTextboxes.push(postcardTextbox);
     })
     let html = postcardElement.outerHTML;
     let postcard = {
@@ -462,8 +461,7 @@ function serializePostcard() {
         outerHTML: html,
         textboxes: postcardTextboxes
     }
-    let json = JSON.stringify(postcard);
-    return json;
+    return postcard;
 }
 
 /*
@@ -487,8 +485,7 @@ Deserializes the postcard's textboxes from the json object.
 Adds event handlers and recreates the resize handles.
 */
 function deserializePostcardTextboxes(postcard) {
-    let textboxes = Array.from(postcard.textboxes).map(textbox => JSON.parse(textbox));
-    textboxes.forEach(textbox => {
+    Array.from(postcard.textboxes).forEach(textbox => {
         let textboxElement = document.getElementById(textbox.id);
         /*Adding the event handlers to the resize handles 
         doesn't work, so recreating them acts as a workaround.*/
@@ -514,7 +511,12 @@ function savePostcard() {
     let data = {};
     data.postcard = postcard;
     data.isPublic = true;
-    $.post("/postcards", data).done(data => {
-        alert(data.message);
-    })
+    let postcardElement = document.getElementById("postcardContainer");
+    html2canvas(postcardElement).then((canvas) => {
+        let image = canvasToImage(canvas);
+        data.postcard.image = image.src;
+        $.post("/postcards", data).done(data => {
+            alert(data.message);
+        })
+    });
 }
