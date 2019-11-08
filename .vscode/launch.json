@@ -9,7 +9,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}\\postcardApp\\server.js"
+            "program": "${workspaceFolder}/postcardApp/server.js"
         }
     ]
 }

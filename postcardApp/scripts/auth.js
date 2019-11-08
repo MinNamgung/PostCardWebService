@@ -78,13 +78,10 @@ function auth(form){
         }
 
         $.post("/login",data).done(data => {  
-            if(data.success){
-                console.log($(location).attr('href'))
-                if($(location).attr('pathname') !== "/design"){
-                    $(location).attr('href',"/")
-                }
-            }else{
-                $("#login-error").html(data.message);  
+            if(!data.success){
+                $("#login-error").html(data.message);
+            }else if($(location).attr('pathname') !== "/design"){
+                $(location).attr('href',"/")
             }                 
         })
     }   
