@@ -480,15 +480,8 @@ function savePostcard() {
     let postcard = serializePostcard();
     let data = {};
     data.postcard = postcard;
-    data.userId = getUserId();
+    data.isPublic = true;
     $.post("/postcards", data).done(data => {
-        alert(data);
+        alert(data.message);
     })
-}
-
-/*
-Gets the userId of the current user.
-*/
-function getUserId() {
-    return Date.now();
 }

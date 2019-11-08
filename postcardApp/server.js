@@ -259,6 +259,11 @@ app.get('/:file',(req,res) => {
         res.sendStatus(404).end()
     }
 })
+
+app.post("/postcards", (req, res) => {
+    userController.addPostcard(req, res);
+})
+
 //Run on the port defined in the .env file.
 app.listen(process.env.PORT, () => {
     console.log('server start, ', process.env.PORT);
