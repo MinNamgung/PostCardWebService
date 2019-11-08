@@ -403,16 +403,6 @@ function elementToCanvas(element, onConversion) {
 }
 
 /*
-Creates an image element containing a canvas.
-*/
-function canvasToImage(canvas, onImageLoad) {
-    let image = document.createElement("img");
-    image.crossOrigin = "Anonymous";
-    image.src = canvas.toDataURL();
-    return image;
-}
-
-/*
 Downloads the image element with the given name.
 */
 function downloadImage(image, name) {
@@ -430,8 +420,13 @@ Downloads the postcard as an image.
 function downloadPostcard(name) {
     let postcard = document.getElementById("postcardContainer");
     html2canvas(postcard).then((canvas) => {
-        let image = canvasToImage(canvas);
-        downloadImage(image, name);
+        canvas.toBlob((blob) => {
+            let url = URL.createObjectURL(blob);
+            let image = document.createElement("img");
+            image.src = url;
+            image.onload = () => URL.revokeObjectURL(url);
+            downloadImage(image, name);
+        }, "image/png", 1);
     });
 }
 
