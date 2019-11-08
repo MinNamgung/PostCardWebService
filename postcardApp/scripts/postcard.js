@@ -14,10 +14,29 @@ Allows the target to receive dropped elements.
 Must be attached to the ondragover event for an element that receives
 dropped elements.
 */
-function allowDrop(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
+function allowDrop(event) {
+    event = event.originalEvent;
+    event.stopPropagation();
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+}
+
+/*
+Handles the drop event for an image being dropped onto an element.
+*/
+function imageDrop(event) {
+    event = event.originalEvent;
+    event.stopPropagation();
+    event.preventDefault();
+    let elementType = event.dataTransfer.getData("text");
+    if (elementType === "chosenFile") {
+        let files = document.getElementById("filePicker").files;
+        Array.from(files).forEach(file => appendImageFile(file, event.currentTarget));
+    }
+    else if (event.dataTransfer.files) {
+        Array.from(event.dataTransfer.files)
+            .forEach(file => appendImageFile(file, event.currentTarget));
+    }
 }
 
 /*
@@ -27,18 +46,11 @@ dataTransfer's text data, and adds this element to the target
 of the drop event.
 */
 function drop(e) {
+    e = e.originalEvent;
     e.stopPropagation();
     e.preventDefault();
-    let postcard = $("#postcardContainer");
     let elementType = e.dataTransfer.getData("text");
-    let files = e.dataTransfer.files;
-    Array.from(files).forEach(file => appendImageFile(file, postcard));
-    if (elementType === "chosenFile") {
-        let files = document.getElementById("filePicker").files;
-        Array.from(files).forEach(file => appendImageFile(file, postcard));
-    }
-    else if (elementType === "input"){
-        
+    if (elementType === "input"){
         let textBox = createTextBox();
         let postcardWidth = textBox.parentElement.offsetWidth;
         let postcardHeight = textBox.parentElement.offsetHeight;
@@ -113,6 +125,21 @@ function setTextboxEventHandlers(textBox) {
     //Hover events
     textBox.addEventListener("mouseover", setHoverStyling);
     textBox.addEventListener("mouseout", exitHoverStyling);
+    /* Because of the structure of a textbox's elements, it requires its own
+    image drop handler and the dropImage handler cannot be reused. 
+    If you try to use the dropImage handler, then the image can be place on the 
+    textbox element, the resize handles, and the textarea.
+    This handler only places the image on the background of the textarea.   */
+    $(textBox).on("drop", (event) => {
+        event = event.originalEvent;
+        event.stopPropagation();
+        event.preventDefault();
+        let files = event.dataTransfer.files;
+        if (event.dataTransfer.getData("text") === "chosenFile") {
+            files = document.getElementById("filePicker").files;
+        }
+        Array.from(files).forEach(file => appendImageFile(file, textBox));
+    });
 }
 
 /*
@@ -182,12 +209,13 @@ function appendImageFile(file, appendTo) {
             let reader = new FileReader();
             reader.onload = function(e) {
                 let img = document.createElement('img');
-                img.src= e.target.result;
-                appendTo[0].style.background = "url(" + img.src + ")";
-                appendTo[0].style.backgroundSize = "100% 100%";
+                img.src = e.target.result;
+                let previousBackground = appendTo.style.background;
+                appendTo.style.background = "url(" + img.src + ")";
+                appendTo.style.backgroundSize = "100% 100%";
                 //setup undo/redo callbacks
                 undo.push(() => {
-                    appendTo[0].style.background = "white";
+                    appendTo.style.background = previousBackground;
                     redo.push(() => appendImageFile(file, appendTo));
                 })
             }
@@ -200,12 +228,15 @@ function appendImageFile(file, appendTo) {
 Set default values and attach event handlers.
 */
 $(document).ready(function() {
-    selectedElement = $("#postcardContainer")[0];
+    let postcardContainer = $("#postcardContainer")[0];
+    selectedElement = postcardContainer;
     setSelectedStyling();
     $("#postcardContainer").on("click", onSelect);
+    $("#postcardContainer").on("drop", imageDrop);
+    $("#postcardContainer").on("drop", drop);
+    $("#postcardContainer").on("dragover", allowDrop);
     $("#exportLink").on("click", () => downloadPostcard("postcard.gif"));
     $("#colorPicker").on("change", colorPickerChanged);
-
     $("#fontFamilySelector").on("change", fontFamilyChanged);
     $("#fontSizeSelector").on("change", fontSizeChanged);
     $("#fontColorPicker").on("change", fontColorChanged);
@@ -223,12 +254,14 @@ $(document).ready(function() {
             deleteElement(selectedElement);
         }
         else if (e.ctrlKey && e.keyCode === keyCodes.z) {
+            e.stopPropagation();
             let undoCallback = undo.pop();
             if (undoCallback) {
                 undoCallback();
             }
         }
         else if (e.ctrlKey && e.keyCode === keyCodes.y) {
+            e.stopPropagation();
             let redoCallback = redo.pop();
             if (redoCallback) {
                 redoCallback();
