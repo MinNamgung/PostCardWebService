@@ -65,25 +65,25 @@ function drop(e) {
         if (Number(textBox.style.left.replace("px", "")) < 0) {
             textBox.style.left = "0px";
         }
-        else if (Number(textBox.style.left.replace("px", "")) > postcardWidth - (boxWidth + outlineWidth)){
+        else if (Number(textBox.style.left.replace("px", "")) > postcardWidth - (boxWidth + outlineWidth)) {
             textBox.style.left = postcardWidth - (boxWidth + outlineWidth) + "px";
         }
         if (Number(textBox.style.top.replace("px", "")) < 0) {
             textBox.style.top = "0px";
         }
-        else if (Number(textBox.style.top.replace("px", "")) > postcardHeight - (boxHeight + outlineWidth)){
+        else if (Number(textBox.style.top.replace("px", "")) > postcardHeight - (boxHeight + outlineWidth)) {
             textBox.style.top = postcardHeight - (boxHeight + outlineWidth) + "px";
         }
     }
 }
 
 //Can probably be refactored to handle all element types
-function sidebarClickTextBoxWithoutDrag(e){
+function sidebarClickTextBoxWithoutDrag(e) {
     let textBox = createTextBox();
 
     //Place box in middle of the postcard
     textBox.style.left = textBox.parentElement.clientWidth / 2 - textBox.offsetWidth / 2 + "px";
-    textBox.style.top = textBox.parentElement.clientHeight / 2 -  textBox.offsetHeight / 2 + "px";
+    textBox.style.top = textBox.parentElement.clientHeight / 2 - textBox.offsetHeight / 2 + "px";
 }
 
 //Creates a div with a textbox in it to allow dragging and resizing
@@ -105,6 +105,7 @@ function createTextBox(e) {
     textBox.append(textArea);
 
     setSelected(textBox);
+    sendToFront();
 
     //Set focus on the textbox textarea
     $(textArea).focus();
@@ -149,15 +150,15 @@ function setTextboxResizable(textBox) {
     $(textBox).resizable({
         containment: "#postcardContainer",
         handles: "ne, nw, se, sw"
-   });
-   setTextboxResizeHandlesEventHandlers(textBox);
+    });
+    setTextboxResizeHandlesEventHandlers(textBox);
 }
 
 /*
 Makes the textbox draggable.
 */
 function setTextboxDraggable(textBox) {
-    $(textBox).draggable({ containment: "#postcardContainer", scroll: false});
+    $(textBox).draggable({ containment: "#postcardContainer", scroll: false });
 }
 
 /*
@@ -183,9 +184,9 @@ function setTextAreaEventHandlers(textArea) {
 Sets the event handlers for a textboxes' resize handles.
 */
 function setTextboxResizeHandlesEventHandlers(textbox) {
-   //Add event listeners to all the corner resize handles
-   let resizeHandles = Array.from(textbox.getElementsByClassName("ui-resizable-handle"));
-   resizeHandles.forEach(handle => setResizeHandleEventHandlers(handle));
+    //Add event listeners to all the corner resize handles
+    let resizeHandles = Array.from(textbox.getElementsByClassName("ui-resizable-handle"));
+    resizeHandles.forEach(handle => setResizeHandleEventHandlers(handle));
 }
 
 /*
@@ -201,13 +202,126 @@ function setResizeHandleEventHandlers(resizeHandle) {
 }
 
 /*
+Move the selected element in front of all other elements
+*/
+function sendToFront() {
+    selectedElement.style.zIndex = getFrontZ() + 1;
+}
+
+/*
+Gets the frontmost element's z-index. Returns 0 if there are no textboxes yet
+*/
+function getFrontZ() {
+    let elements = zSortedElements();
+    //Largest z is now the first element
+    if (elements){
+        return Number(elements[0].style.zIndex);
+    }
+}
+
+//Move the selected element in front of the element immediately in front of it
+function sendForwards() {
+    let nextZ = getNextFrontZ();
+    selectedElement.style.zIndex = nextZ + 1;
+}
+
+/*
+Finds the z-index of the closests element in front of the selected element
+*/
+function getNextFrontZ() {
+    let currentZ = Number(selectedElement.style.zIndex);
+    let elements = zSortedElements();
+
+    //Sequential search backwards until a closer or even element is found
+    for (let i = elements.length - 1; i >= 0; i--) {
+        if (elements[i] != selectedElement){
+            let tempZ = Number(elements[i].style.zIndex);
+            if (tempZ == currentZ){
+                return tempZ + 1;
+            }
+            else if (tempZ > currentZ) {
+                return tempZ;
+            }
+        }
+    }
+}
+
+/*
+Places the selected element behind all others
+*/
+function sendToBack(){
+    selectedElement.style.zIndex = getBackZ() - 1;
+}
+
+/*
+Gets the backmost element's z-index
+*/
+function getBackZ(){
+    let elements = zSortedElements();
+    //Now lowest z-index is the first element
+    if (elements){
+        return Number(elements[elements.length - 1].style.zIndex);
+    }
+}
+
+/*
+Places the element behind the closest back element
+*/
+function sendBackwards(){
+    let nextZ = getNextBackZ();
+    selectedElement.style.zIndex = nextZ - 1;
+}
+
+/*
+Finds the z-index of the closests element behind the selected element
+*/
+function getNextBackZ(){
+    let currentZ = Number(selectedElement.style.zIndex);
+    let elements = zSortedElements();
+
+    for (let i = 0; i < elements.length; i++) {
+        if (elements[i] != selectedElement){
+            let tempZ = Number(elements[i].style.zIndex);
+            if (tempZ == currentZ){
+                return tempZ - 1;
+            }
+            else if (tempZ < currentZ) {
+                return tempZ;
+            }
+        }
+    }
+
+}
+
+/*
+Sort the postcard elements by z index descending (frontmost elements are first)
+*/
+function zSortedElements() {
+    let elements = $("#postcardContainer").children();
+    if (elements.length === 0) {
+        return null;
+    }
+    elements.sort((a,b) => {
+        if (Number(a.style.zIndex) >= Number(b.style.zIndex)){
+            return -1;
+        }
+        else{
+            return 1;
+        }
+    });
+
+    //elements are now sorted
+    return elements;
+}
+
+/*
 Append each file in files that is an image to the postcard.
 */
 function appendImageFile(file, appendTo) {
     if (file) {
         if (file.type.match(/image.*/)) {
             let reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 let img = document.createElement('img');
                 img.src = e.target.result;
                 let previousBackground = appendTo.style.background;
@@ -241,8 +355,8 @@ $(document).ready(function() {
     $("#fontSizeSelector").on("change", fontSizeChanged);
     $("#fontColorPicker").on("change", fontColorChanged);
 
-    $(document).keydown(function(e) {
-        let keyCodes = 
+    $(document).keydown(function (e) {
+        let keyCodes =
         {
             Backspace: 8,
             Delete: 46,
@@ -302,33 +416,33 @@ function colorPickerChanged(event) {
     setSelectedBackground(color);
 }
 
-function fontFamilyChanged(event){
+function fontFamilyChanged(event) {
     let element = event.target;
     let fontFamily = element.value;
-    if (selectedElement.classList[0] === "postcard-textbox"){
-        selectedElement.style.fontFamily = fontFamily;        
+    if (selectedElement.classList[0] === "postcard-textbox") {
+        selectedElement.style.fontFamily = fontFamily;
     }
 }
 
-function fontSizeChanged(event){
+function fontSizeChanged(event) {
     let element = event.target;
     let fontSize = element.value;
-    if (selectedElement.classList[0] === "postcard-textbox"){
+    if (selectedElement.classList[0] === "postcard-textbox") {
         selectedElement.style.fontSize = getFontSizeEM(fontSize);
     }
 }
 
 //Change font on first child because clicking the color picker makes the outter div the selected element
-function fontColorChanged(event){
+function fontColorChanged(event) {
     let element = event.target;
     let fontColor = element.value;
-    if (selectedElement.classList[0] === "postcard-textbox"){
+    if (selectedElement.classList[0] === "postcard-textbox") {
         selectedElement.getElementsByClassName("postcard-textarea")[0].style.color = fontColor;
     }
 }
 
 //Scale font size by 12 to use reasonable em units
-function getFontSizeEM(selectedFontSize){
+function getFontSizeEM(selectedFontSize) {
     return selectedFontSize / 12 + "em";
 }
 
@@ -349,7 +463,7 @@ function setSelectedElementGradientBackground() {
     let firstColor = $("#gradientColor1").val();
     let secondColor = $("#gradientColor2").val();
     let orientation = $("#gradientOrientationSelector").val();
-    let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " +  secondColor + " 100%)";
+    let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " + secondColor + " 100%)";
     selectedElement.style.background = backgroundStyle;
 }
 

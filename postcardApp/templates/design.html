@@ -101,6 +101,11 @@
           <br>
           Font Color:
           <input id="fontColorPicker" type="color">
+          <br>
+          <input class="orderButton" id="sendBackwards" type="button" value="Send Backwards" onclick="sendBackwards()">
+          <input class="orderButton" id="sendToBack" type="button" value="Send To Back" onclick="sendToBack()">
+          <input class="orderButton" id="sendForwards" type="button" value="Send Forwards" onclick="sendForwards()">
+          <input class="orderButton" id="sendToFront" type="button" value="Send To Front" onclick="sendToFront()">
         </div>
         <input id="filePicker" type="file" accept="image/*" class="list-group-item list-group-item-action bg-light" draggable="true"
            ondragstart="imageDragStarted(event)" data-type="image"> 
