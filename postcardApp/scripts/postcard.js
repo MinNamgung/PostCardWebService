@@ -31,11 +31,11 @@ function imageDrop(event) {
     let elementType = event.dataTransfer.getData("text");
     if (elementType === "chosenFile") {
         let files = document.getElementById("filePicker").files;
-        Array.from(files).forEach(file => appendImageFile(file, event.currentTarget));
+        Array.from(files).forEach(file => setBackgroundImage(file, event.currentTarget));
     }
     else if (event.dataTransfer.files) {
         Array.from(event.dataTransfer.files)
-            .forEach(file => appendImageFile(file, event.currentTarget));
+            .forEach(file => setBackgroundImage(file, event.currentTarget));
     }
 }
 
@@ -138,7 +138,7 @@ function setTextboxEventHandlers(textBox) {
         if (event.dataTransfer.getData("text") === "chosenFile") {
             files = document.getElementById("filePicker").files;
         }
-        Array.from(files).forEach(file => appendImageFile(file, textBox));
+        Array.from(files).forEach(file => setBackgroundImage(file, textBox));
     });
 }
 
@@ -198,30 +198,6 @@ function setResizeHandleEventHandlers(resizeHandle) {
     $(resizeHandle).on("click", selectParent);
     $(resizeHandle).on("mouseover", setParentHoverStyling);
     $(resizeHandle).on("mouseout", exitParentHoverStyling);
-}
-
-/*
-Append each file in files that is an image to the postcard.
-*/
-function appendImageFile(file, appendTo) {
-    if (file) {
-        if (file.type.match(/image.*/)) {
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                let img = document.createElement('img');
-                img.src = e.target.result;
-                let previousBackground = appendTo.style.background;
-                appendTo.style.background = "url(" + img.src + ")";
-                appendTo.style.backgroundSize = "100% 100%";
-                //setup undo/redo callbacks
-                undo.push(() => {
-                    appendTo.style.background = previousBackground;
-                    redo.push(() => appendImageFile(file, appendTo));
-                })
-            }
-            reader.readAsDataURL(file);
-        }
-    }
 }
 
 /*
@@ -299,7 +275,7 @@ function deleteElement(element) {
 
 function colorPickerChanged(event) {
     let color = event.target.value;
-    setSelectedBackground(color);
+    setBackground(selectedElement, color);
 }
 
 function fontFamilyChanged(event){
@@ -333,16 +309,37 @@ function getFontSizeEM(selectedFontSize){
 }
 
 /*
-Eventhandler for the input event of #colorPicker.
-Sets the background style to the value of #colorPicker.
+Append each file in files that is an image to the postcard.
 */
-function setSelectedBackground(color) {
-    let currentColor = selectedElement.style.background;
+function setBackgroundImage(file, appendTo) {
+    if (file && file.type.match(/image.*/)) {
+        let reader = new FileReader();
+            reader.onload = function(event) {
+                let img = document.createElement('img');
+                img.src = event.target.result;
+                let previousBackground = appendTo.style.background;
+                appendTo.style.background = "url(" + img.src + ")";
+                appendTo.style.backgroundSize = "100% 100%";
+                //setup undo/redo callbacks
+                undo.push(() => {
+                    appendTo.style.background = previousBackground;
+                    redo.push(() => setBackgroundImage(file, appendTo));
+                })
+            }
+        reader.readAsDataURL(file);
+    }
+}
+
+/*
+Sets the background style of element to the color.
+*/
+function setBackground(element, backgroundStyle) {
+    const currentColor = element.style.background;
+    element.style.background = backgroundStyle;
     undo.push(() => {
-        selectedElement.style.background = currentColor;
-        redo.push(() => setSelectedBackground(color));
+        element.style.background = currentColor;
+        redo.push(() => setBackground(element, backgroundStyle));
     });
-    selectedElement.style.background = color;
 }
 
 function setSelectedElementGradientBackground() {
@@ -350,7 +347,7 @@ function setSelectedElementGradientBackground() {
     let secondColor = $("#gradientColor2").val();
     let orientation = $("#gradientOrientationSelector").val();
     let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " +  secondColor + " 100%)";
-    selectedElement.style.background = backgroundStyle;
+    setBackground(selectedElement, backgroundStyle);
 }
 
 /*
@@ -403,7 +400,6 @@ function elementToCanvas(element, onConversion) {
 }
 
 /*
-<<<<<<< HEAD
 Creates an image element containing a canvas.
 */
 function canvasToImage(canvas) {
@@ -414,8 +410,6 @@ function canvasToImage(canvas) {
 }
 
 /*
-=======
->>>>>>> a2c438c9ea89ddb1337d6df2116c3f1e52cb7087
 Downloads the image element with the given name.
 */
 function downloadImage(image, name) {
