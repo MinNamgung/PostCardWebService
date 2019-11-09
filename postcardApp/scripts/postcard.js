@@ -403,6 +403,7 @@ function elementToCanvas(element, onConversion) {
 }
 
 /*
+<<<<<<< HEAD
 Creates an image element containing a canvas.
 */
 function canvasToImage(canvas) {
@@ -413,6 +414,8 @@ function canvasToImage(canvas) {
 }
 
 /*
+=======
+>>>>>>> a2c438c9ea89ddb1337d6df2116c3f1e52cb7087
 Downloads the image element with the given name.
 */
 function downloadImage(image, name) {
