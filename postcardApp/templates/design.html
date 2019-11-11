@@ -8,6 +8,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
+
   <title>{POST} Design</title>
 
   <!-- Bootstrap core CSS -->
@@ -19,6 +20,7 @@
   <link href="css/postcard-textbox.css" rel="stylesheet">
   <link href="css/email.css" rel="stylesheet">
   <link href="css/resize-handles.css" rel="stylesheet">
+  <link href="http://netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.css" rel="stylesheet">
 
   <!-- Scripts-->  
   <script type="text/JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
@@ -28,6 +30,7 @@
   <script type="text/JavaScript" src="scripts/postcard.js"></script>
   <script type="text/JavaScript" src="scripts/email.js"></script>
   <script type="text/JavaScript" src="scripts/html2canvas.js"></script>
+
 </head>
 
 <body>
@@ -145,33 +148,75 @@
       </div>
     </div>
     <!-- /#page-content-wrapper -->
-
+    
     <!-- Email Modal -->
     <div id="overlay">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">New message</h5>
+              <h5 class="modal-title" id="exampleModalLabel">Share</h5>
               <button type="button" class="close" onclick="off()">
                 <span aria-hidden="true">&times;</span>
               </button>
+              
             </div>
             <div class="modal-body">
-                <div class="form-group">
-                    <label for="name">Name: </label>
-                    <input type="text" class="form-control" id="name" name="name" required maxlength="50" placeholder="Name">
+                <div class="tab">
+                    <button class="tablinks" id="emailTab" onclick="tabOpen(event, 'emailTabContent')" >Email</button>
+                    <button class="tablinks" id="textTab" onclick="tabOpen(event, 'textTabContent')">SMS Text</button>  
+                    <button class="tablinks" id="whatsApp" onclick="tabOpen(event, 'whatsAppTabContent')">WhatsApp</button>                  
+                </div>
+                <!--Content of email modal tab-->
+                <div class="tabcontent" id="emailTabContent">
+                    <div class="form-group">
+                        <label for="name">Name: </label>
+                        <input type="text" class="form-control" id="name" name="name" required maxlength="50" placeholder="Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email: </label>
+                        <input type="email" class="form-control" id="email" name="email" required maxlength="256" placeholder="Email">
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Message: </label>
+                        <textarea class="form-control" type="textarea" name="message" id="message" placeholder="Your Message Here" maxlength="6000" rows="5"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-lg btn-success btn-block" id="btnContactUs" onclick="">Send →</button> <br/>
+                </div>
+                <!--Content of text modal tab-->
+                <div class="tabcontent" id="textTabContent">
+                    <div class="form-group">
+                        <label for="number">Send To: </label>
+                        <input type="text" class="form-control" id="number" name="number" required maxlength="50" placeholder="Number">
+                    </div>
+                    <div class="form-group">
+                        <label for="txtMessage">Text Message: </label>
+                        <textarea class="form-control" type="textarea" name="txtMessage" id="txtMessage" placeholder="Your Message Here" maxlength="6000" rows="5"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-lg btn-success btn-block" id="sendTextMessage" onclick="">Send →</button> <br/>
+                </div>
+                <!--Content of whatsapp messanger modal tab-->
+                <div class="tabcontent" id="whatsAppTabContent">
+                  <div class="form-group">
+                    <label for="whatsapNumeber">Send To: </label>
+                    <input type="text" class="form-control" id="whatsapNumeber" name="whatsapNumeber" required maxlength="50" placeholder="Whatsapp Number">
                 </div>
                 <div class="form-group">
-                    <label for="email">Email: </label>
-                    <input type="email" class="form-control" id="email" name="email" required maxlength="256" placeholder="Email">
+                    <label for="whatsappMessage">Message: </label>
+                    <textarea class="form-control" type="textarea" name="whatsappMessage" id="whatsappMessage" placeholder="Your Message Here" maxlength="6000" rows="5"></textarea>
                 </div>
-                <div class="form-group">
-                    <label for="name">Message: </label>
-                    <textarea class="form-control" type="textarea" name="message" id="message" placeholder="Your Message Here" maxlength="6000" rows="7"></textarea>
+                <button type="submit" class="btn btn-lg btn-success btn-block" id="sendWhatsAppMessage" onclick="">Send →</button> <br/>
                 </div>
-                <button type="submit" class="btn btn-lg btn-success btn-block" id="btnContactUs" onclick="">Send →</button>
             </div>
-            <div class="modal-footer">
+                <!--Facebook-->
+                <div class="modal-footer">
+                <a class="btn share-btn facebook" id="FacebookBtn">
+                <i class="fa fa-facebook"></i>
+                </a>
+
+                <!-- Twitter -->
+                <a href="http://twitter.com/share?url=<URL>&text=<TEXT>&via=<VIA>" target="_blank" class="btn share-btn twitter">
+                <i class="fa fa-twitter"></i>
+                </a>
             </div>
           </div>
         </div>
@@ -191,7 +236,7 @@
     $("#loginDropdown").click(e => {
       e.preventDefault()
       $("#login").toggleClass('hidden')
-    })
+    });
   </script>
 </body>
 </html>
