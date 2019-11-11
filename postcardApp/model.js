@@ -8,6 +8,10 @@ let UserSchema = new mongoose.Schema({
     auth:{
         salt: String,
         password: String
+    },
+    postcards:{
+        private: [{}],
+        public: [{}]
     }
 }, { collection: 'User'})
 

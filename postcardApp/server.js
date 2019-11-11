@@ -31,7 +31,13 @@ const nexmo = new Nexmo({
     apiSecret: process.env.nexmo_APISecret,
 }, {debug: true})
 
+const flash = require("connect-flash");
+
 const userController = require("./controller")
+
+const passport = require('passport')
+const LocalStrategy = require('passport-local').Strategy
+
 
 app.use(bodyParser.json({limit: "50mb"}));
 app.use(bodyParser.urlencoded({
@@ -66,8 +72,7 @@ app.use(cookie())
 let ttl = 2629746  // 1 month
 
 app.use(session({
-    key: "id",
-    secret: uuid(),
+    secret: process.env.SESSION_SECRET,
     resave: false, 
     saveUninitialized: false,
     cookie: {
@@ -75,84 +80,112 @@ app.use(session({
     }
 }))
 
-app.use((req, res, next) => {
-    if(req.cookies.id && !req.session.user){
-        res.clearCookie('id')
-    }
-    next()
+app.use(passport.initialize())
+app.use(passport.session())
+passport.use(new LocalStrategy((username, password, done) => {
+    userController.auth({username: username, password: password}, done)
+}))
+
+passport.serializeUser((user, done) => {
+    done(null, user._id)
 })
 
-let sessionChecker = (req, res, next) => {
-    if(req.session.user && req.cookies.id){
-        res.redirect('/profile');
-    }else{
-        next()
-    }
-}
-
-function register(data, request, response){
-
-    if(typeof(data.firstname) === 'undefined' || typeof(data.lastname) === 'undefined' || typeof(data.email) === 'undefined' || typeof(data.username) === 'undefined' || typeof(data.password) === 'undefined'){
-        response.writeHeader(400)
-        response.end() 
-    }else{
-        let salt = uuid()
-        let hash = crypto.createHash('sha256')
-
-        let user = {
-            _id: data.username,
-            firstname: data.firstname,
-            lastname: data.lastname,
-            email: data.email,
-            auth:{
-                salt: salt, 
-                password: hash.update(data.password + salt,'utf8').digest('hex') 
-            }
+passport.deserializeUser((username, done) => {
+    userController.get({_id: username}, null, null, (err, user, req, res) => {
+        if(err){
+            return done(err)
         }
-        userController.create(user, response)
-    }
-}
+        if(!user){
+            return done(null, false, {message: "Username or Password is incorrect"})
+        }else{
+            return done(null, user)
+        }
+    })
+})
 
-function login(data, request, response){
+app.use(flash())
 
-    if(typeof(data.username) === 'undefined' || typeof(data.password) === 'undefined'){
-        response.writeHeader(400)
-        response.end() 
-    }else{  
-        userController.auth(data, request, response)
-    }
-} 
-
-app.get('/', sessionChecker, (req,res) => {
-    res.sendFile(path.join(__dirname+"/templates/index.html"))
+app.get('/', (req,res) => {
+    if(req.user){
+        res.redirect('/profile')
+    }else{
+        res.sendFile(path.join(__dirname+"/templates/index.html"))
+    }    
 })
 
 app.route('/register')
-    .get(sessionChecker, (req,res) => {
+    .get((req,res) => {
         res.sendFile(path.join(__dirname+"/templates/register.html"))
     })
     .post((req,res)=>{
-        register(req.body,req,res)
+
+        let data = req.body
+
+        if(typeof(data.firstname) === 'undefined' || typeof(data.lastname) === 'undefined' || typeof(data.email) === 'undefined' || typeof(data.username) === 'undefined' || typeof(data.password) === 'undefined'){
+            response.writeHeader(400)
+            response.end() 
+        }else{
+            let salt = uuid()
+            let hash = crypto.createHash('sha256')
+    
+            let user = {
+                _id: data.username,
+                firstname: data.firstname,
+                lastname: data.lastname,
+                email: data.email,
+                auth:{
+                    salt: salt, 
+                    password: hash.update(data.password + salt,'utf8').digest('hex') 
+                },
+                postcards: {
+                    public: [],
+                    private: []
+                }
+            }
+            userController.create(user, res)
+        }
     })
 
-app.post("/login", (req,res)=>{
-    login(req.body,req,res)
+app.post("/login", (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if(err){
+            return next(err)
+        }
+        if(!user){
+            return ((res) => {
+                res.writeHead('200',{'Content-Type':'application/json'})
+                res.write(JSON.stringify({'success': false, 'message':'Username or Password is incorrect'}))
+                res.send()
+            })(res)
+        }else{
+            req.login(user, err => {
+                if(err){
+                    return next(err)
+                }
+                return ((res) => {
+                    res.writeHead('200',{'Content-Type':'application/json'})
+                    res.write(JSON.stringify({'success': true, 'message':'Login Successful'}))
+                    res.send()  
+                })(res)
+            })
+        }
+    })(req, res, next)
 })
 
 app.get('/profile',(req,res) => {
-    if(req.session.user && req.cookies.id) {
+    if(req.user){
         res.sendFile(path.join(__dirname+"/templates/profile.html"))
     }else{
         res.redirect('/')
-    }
+    }   
 })
 
 app.get('/logout', (req, res) => {
-    if(typeof(req.query.from) !== 'undefined' && req.query.from === "design"){
-        res.clearCookie('id')
-    }else if(req.session.user && req.cookies.id){
-        res.clearCookie('id')
-        res.redirect('/')
+    if(req.user){
+        req.logout()
+        if(typeof(req.query.from) === 'undefined' || req.query.from === "design"){
+            res.redirect('/')
+        }
     }else{
         res.redirect('/')
     }
@@ -194,11 +227,13 @@ app.post('/send',function(req,res){
         });
         if(error) {
             console.log(error);
-            res.end(error);
-        } else {
-            console.log("Mail is sent. Response: " + response);
-            res.end(response);
-        }
+            res.end("error");
+	    } else {
+            console.log("Mail is sent: " + response.message);
+            res.end("sent");
+         }
+        fs.unlinkSync(postcardPath);
+        fs.rmdirSync(directory);
     });
 });
 
@@ -284,18 +319,18 @@ app.get('/:file',(req,res) => {
             type:'text/css'
         },
         svg: {
-            dir: '/resources/SVG',
+            dir: '/resources\\SVG',
             type: 'image/svg+xml'
         },
         otf:{
-            dir: '/resources/fonts',
+            dir: '/resources\\fonts',
             type: 'application/x-font-opentype'
         }
     }
 
     let ext = path.extname(req.params.file).slice(1)
     if(typeof(type[ext]) !== 'undefined'){        
-        let file = __dirname + type[ext].dir+"/"+req.params.file;
+        let file = __dirname + type[ext].dir+"\\"+req.params.file;
         if(fs.existsSync(file)){
             res.sendFile(file, {headers: {'Content-Type':type[ext].type}})
         }else{
@@ -303,11 +338,15 @@ app.get('/:file',(req,res) => {
                 res.redirect('/404')
             }else{
                 res.sendStatus(404).end()
-            }            
+            }        
         }        
     }else{
         res.sendStatus(404).end()
     }
+})
+
+app.post("/postcards", (req, res) => {
+    userController.addPostcard(req, res);
 })
 
 //Run on the port defined in the .env file.

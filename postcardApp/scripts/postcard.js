@@ -14,10 +14,29 @@ Allows the target to receive dropped elements.
 Must be attached to the ondragover event for an element that receives
 dropped elements.
 */
-function allowDrop(e) {
-    e.stopPropagation();
-    e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
+function allowDrop(event) {
+    event = event.originalEvent;
+    event.stopPropagation();
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "copy";
+}
+
+/*
+Handles the drop event for an image being dropped onto an element.
+*/
+function imageDrop(event) {
+    event = event.originalEvent;
+    event.stopPropagation();
+    event.preventDefault();
+    let elementType = event.dataTransfer.getData("text");
+    if (elementType === "chosenFile") {
+        let files = document.getElementById("filePicker").files;
+        Array.from(files).forEach(file => appendImageFile(file, event.currentTarget));
+    }
+    else if (event.dataTransfer.files) {
+        Array.from(event.dataTransfer.files)
+            .forEach(file => appendImageFile(file, event.currentTarget));
+    }
 }
 
 /*
@@ -27,18 +46,11 @@ dataTransfer's text data, and adds this element to the target
 of the drop event.
 */
 function drop(e) {
+    e = e.originalEvent;
     e.stopPropagation();
     e.preventDefault();
-    let postcard = $("#postcardContainer");
     let elementType = e.dataTransfer.getData("text");
-    let files = e.dataTransfer.files;
-    Array.from(files).forEach(file => appendImageFile(file, postcard));
-    if (elementType === "chosenFile") {
-        let files = document.getElementById("filePicker").files;
-        Array.from(files).forEach(file => appendImageFile(file, postcard));
-    }
-    else if (elementType === "input"){
-        
+    if (elementType === "input"){
         let textBox = createTextBox();
         let postcardWidth = textBox.parentElement.offsetWidth;
         let postcardHeight = textBox.parentElement.offsetHeight;
@@ -53,36 +65,106 @@ function drop(e) {
         if (Number(textBox.style.left.replace("px", "")) < 0) {
             textBox.style.left = "0px";
         }
-        else if (Number(textBox.style.left.replace("px", "")) > postcardWidth - (boxWidth + outlineWidth)){
+        else if (Number(textBox.style.left.replace("px", "")) > postcardWidth - (boxWidth + outlineWidth)) {
             textBox.style.left = postcardWidth - (boxWidth + outlineWidth) + "px";
         }
         if (Number(textBox.style.top.replace("px", "")) < 0) {
             textBox.style.top = "0px";
         }
-        else if (Number(textBox.style.top.replace("px", "")) > postcardHeight - (boxHeight + outlineWidth)){
+        else if (Number(textBox.style.top.replace("px", "")) > postcardHeight - (boxHeight + outlineWidth)) {
             textBox.style.top = postcardHeight - (boxHeight + outlineWidth) + "px";
         }
     }
 }
 
 //Can probably be refactored to handle all element types
-function sidebarClickTextBoxWithoutDrag(e){
+function sidebarClickTextBoxWithoutDrag(e) {
     let textBox = createTextBox();
 
     //Place box in middle of the postcard
     textBox.style.left = textBox.parentElement.clientWidth / 2 - textBox.offsetWidth / 2 + "px";
-    textBox.style.top = textBox.parentElement.clientHeight / 2 -  textBox.offsetHeight / 2 + "px";
+    textBox.style.top = textBox.parentElement.clientHeight / 2 - textBox.offsetHeight / 2 + "px";
 }
 
 //Creates a div with a textbox in it to allow dragging and resizing
 function createTextBox(e) {
     let textBox = document.createElement("div");
+    textBox.id = Date.now();
     textBox.className = "postcard-textbox";
-    textBox.addEventListener("mouseover", dragHover);
+    $("#postcardContainer").append(textBox);
+
+    setTextboxEventHandlers(textBox);
+    setTextboxDraggable(textBox);
+    setTextboxResizable(textBox);
 
     let textArea = document.createElement("textarea");
     textArea.className = "postcard-textarea";
+    textArea.spellcheck = false;
+    setTextAreaEventHandlers(textArea);
 
+    textBox.append(textArea);
+
+    setSelected(textBox);
+    sendToFront();
+
+    //Set focus on the textbox textarea
+    $(textArea).focus();
+
+    //Manually update font family, size, and color
+    $("#fontFamilySelector").trigger("change");
+    $("#fontSizeSelector").trigger("change");
+    $("#fontColorPicker").trigger("change");
+
+    return textBox;
+}
+
+/*
+Sets event handlers for a postcard's textbox.
+*/
+function setTextboxEventHandlers(textBox) {
+    textBox.addEventListener("mouseover", dragHover);
+    //Hover events
+    textBox.addEventListener("mouseover", setHoverStyling);
+    textBox.addEventListener("mouseout", exitHoverStyling);
+    /* Because of the structure of a textbox's elements, it requires its own
+    image drop handler and the dropImage handler cannot be reused. 
+    If you try to use the dropImage handler, then the image can be place on the 
+    textbox element, the resize handles, and the textarea.
+    This handler only places the image on the background of the textarea.   */
+    $(textBox).on("drop", (event) => {
+        event = event.originalEvent;
+        event.stopPropagation();
+        event.preventDefault();
+        let files = event.dataTransfer.files;
+        if (event.dataTransfer.getData("text") === "chosenFile") {
+            files = document.getElementById("filePicker").files;
+        }
+        Array.from(files).forEach(file => appendImageFile(file, textBox));
+    });
+}
+
+/*
+Makes the textbox resizable and attaches event handlers to the resize handles.
+*/
+function setTextboxResizable(textBox) {
+    $(textBox).resizable({
+        containment: "#postcardContainer",
+        handles: "ne, nw, se, sw"
+    });
+    setTextboxResizeHandlesEventHandlers(textBox);
+}
+
+/*
+Makes the textbox draggable.
+*/
+function setTextboxDraggable(textBox) {
+    $(textBox).draggable({ containment: "#postcardContainer", scroll: false });
+}
+
+/*
+Sets event handlers for a textboxes' textarea element.
+*/
+function setTextAreaEventHandlers(textArea) {
     //Mouse indicator events
     textArea.addEventListener("mouseover", disableDragHover);
     textArea.addEventListener("mouseout", enableDragHover);
@@ -96,42 +178,140 @@ function createTextBox(e) {
 
     //Select parent on click
     textArea.addEventListener("click", selectParent);
+}
 
-    textBox.append(textArea);
-
-    //Hover events
-    textBox.addEventListener("mouseover", setHoverStyling);
-    textBox.addEventListener("mouseout", exitHoverStyling);
-
-    setSelected(textBox);
-
-    $("#postcardContainer").append(textBox);
-
-    //Make textbox draggable and resizable
-    $(textBox).draggable({ containment: "#postcardContainer", scroll: false});
-        
-    $(textBox).resizable({
-         containment: "#postcardContainer",
-         handles: "ne, nw, se, sw"
-         
-    });
+/*
+Sets the event handlers for a textboxes' resize handles.
+*/
+function setTextboxResizeHandlesEventHandlers(textbox) {
     //Add event listeners to all the corner resize handles
-    $(".ui-resizable-handle").on("mouseover", disableDragHover);
-    $(".ui-resizable-handle").on("mouseout", enableDragHover);
-    $(".ui-resizable-handle").on("mouseover", resizeHover);
-    $(".ui-resizable-handle").on("click", selectParent);
-    $(".ui-resizable-handle").on("mouseover", setParentHoverStyling);
-    $(".ui-resizable-handle").on("mouseout", exitParentHoverStyling);
-    
-    //Set focus on the textbox textarea
-    $(textArea).focus();
+    let resizeHandles = Array.from(textbox.getElementsByClassName("ui-resizable-handle"));
+    resizeHandles.forEach(handle => setResizeHandleEventHandlers(handle));
+}
 
-    //Manually update font family, size, and color
-    $("#fontFamilySelector").trigger("change");
-    $("#fontSizeSelector").trigger("change");
-    $("#fontColorPicker").trigger("change");
+/*
+Sets the event handlers for a resize handle element.
+*/
+function setResizeHandleEventHandlers(resizeHandle) {
+    $(resizeHandle).on("mouseover", disableDragHover);
+    $(resizeHandle).on("mouseout", enableDragHover);
+    $(resizeHandle).on("mouseover", resizeHover);
+    $(resizeHandle).on("click", selectParent);
+    $(resizeHandle).on("mouseover", setParentHoverStyling);
+    $(resizeHandle).on("mouseout", exitParentHoverStyling);
+}
 
-    return textBox;
+/*
+Move the selected element in front of all other elements
+*/
+function sendToFront() {
+    selectedElement.style.zIndex = getFrontZ() + 1;
+}
+
+/*
+Gets the frontmost element's z-index. Returns 0 if there are no textboxes yet
+*/
+function getFrontZ() {
+    let elements = zSortedElements();
+    //Largest z is now the first element
+    if (elements){
+        return Number(elements[0].style.zIndex);
+    }
+}
+
+//Move the selected element in front of the element immediately in front of it
+function sendForwards() {
+    let nextZ = getNextFrontZ();
+    selectedElement.style.zIndex = nextZ + 1;
+}
+
+/*
+Finds the z-index of the closests element in front of the selected element
+*/
+function getNextFrontZ() {
+    let currentZ = Number(selectedElement.style.zIndex);
+    let elements = zSortedElements();
+
+    //Sequential search backwards until a closer or even element is found
+    for (let i = elements.length - 1; i >= 0; i--) {
+        if (elements[i] != selectedElement){
+            let tempZ = Number(elements[i].style.zIndex);
+            if (tempZ == currentZ){
+                return tempZ + 1;
+            }
+            else if (tempZ > currentZ) {
+                return tempZ;
+            }
+        }
+    }
+}
+
+/*
+Places the selected element behind all others
+*/
+function sendToBack(){
+    selectedElement.style.zIndex = getBackZ() - 1;
+}
+
+/*
+Gets the backmost element's z-index
+*/
+function getBackZ(){
+    let elements = zSortedElements();
+    //Now lowest z-index is the first element
+    if (elements){
+        return Number(elements[elements.length - 1].style.zIndex);
+    }
+}
+
+/*
+Places the element behind the closest back element
+*/
+function sendBackwards(){
+    let nextZ = getNextBackZ();
+    selectedElement.style.zIndex = nextZ - 1;
+}
+
+/*
+Finds the z-index of the closests element behind the selected element
+*/
+function getNextBackZ(){
+    let currentZ = Number(selectedElement.style.zIndex);
+    let elements = zSortedElements();
+
+    for (let i = 0; i < elements.length; i++) {
+        if (elements[i] != selectedElement){
+            let tempZ = Number(elements[i].style.zIndex);
+            if (tempZ == currentZ){
+                return tempZ - 1;
+            }
+            else if (tempZ < currentZ) {
+                return tempZ;
+            }
+        }
+    }
+
+}
+
+/*
+Sort the postcard elements by z index descending (frontmost elements are first)
+*/
+function zSortedElements() {
+    let elements = $("#postcardContainer").children();
+    if (elements.length === 0) {
+        return null;
+    }
+    elements.sort((a,b) => {
+        if (Number(a.style.zIndex) >= Number(b.style.zIndex)){
+            return -1;
+        }
+        else{
+            return 1;
+        }
+    });
+
+    //elements are now sorted
+    return elements;
 }
 
 /*
@@ -141,14 +321,15 @@ function appendImageFile(file, appendTo) {
     if (file) {
         if (file.type.match(/image.*/)) {
             let reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 let img = document.createElement('img');
-                img.src= e.target.result;
-                appendTo[0].style.background = "url(" + img.src + ")";
-                appendTo[0].style.backgroundSize = "100% 100%";
+                img.src = e.target.result;
+                let previousBackground = appendTo.style.background;
+                appendTo.style.background = "url(" + img.src + ")";
+                appendTo.style.backgroundSize = "100% 100%";
                 //setup undo/redo callbacks
                 undo.push(() => {
-                    appendTo[0].style.background = "white";
+                    appendTo.style.background = previousBackground;
                     redo.push(() => appendImageFile(file, appendTo));
                 })
             }
@@ -161,18 +342,21 @@ function appendImageFile(file, appendTo) {
 Set default values and attach event handlers.
 */
 $(document).ready(function() {
-    selectedElement = $("#postcardContainer")[0];
+    let postcardContainer = $("#postcardContainer")[0];
+    selectedElement = postcardContainer;
     setSelectedStyling();
     $("#postcardContainer").on("click", onSelect);
-    $("#exportLink").on("click", () => downloadPostcard("postcard"));
+    $("#postcardContainer").on("drop", imageDrop);
+    $("#postcardContainer").on("drop", drop);
+    $("#postcardContainer").on("dragover", allowDrop);
+    $("#exportLink").on("click", () => downloadPostcard("postcard.gif"));
     $("#colorPicker").on("change", colorPickerChanged);
-
     $("#fontFamilySelector").on("change", fontFamilyChanged);
     $("#fontSizeSelector").on("change", fontSizeChanged);
     $("#fontColorPicker").on("change", fontColorChanged);
 
-    $(document).keydown(function(e) {
-        let keyCodes = 
+    $(document).keydown(function (e) {
+        let keyCodes =
         {
             Backspace: 8,
             Delete: 46,
@@ -184,18 +368,23 @@ $(document).ready(function() {
             deleteElement(selectedElement);
         }
         else if (e.ctrlKey && e.keyCode === keyCodes.z) {
+            e.stopPropagation();
             let undoCallback = undo.pop();
             if (undoCallback) {
                 undoCallback();
             }
         }
         else if (e.ctrlKey && e.keyCode === keyCodes.y) {
+            e.stopPropagation();
             let redoCallback = redo.pop();
             if (redoCallback) {
                 redoCallback();
             }
         }
     })
+    $("#saveBtn").on("click", () => {
+        savePostcard();
+    });
 })
 
 /*
@@ -227,33 +416,33 @@ function colorPickerChanged(event) {
     setSelectedBackground(color);
 }
 
-function fontFamilyChanged(event){
+function fontFamilyChanged(event) {
     let element = event.target;
     let fontFamily = element.value;
-    if (selectedElement.classList[0] === "postcard-textbox"){
-        selectedElement.style.fontFamily = fontFamily;        
+    if (selectedElement.classList[0] === "postcard-textbox") {
+        selectedElement.style.fontFamily = fontFamily;
     }
 }
 
-function fontSizeChanged(event){
+function fontSizeChanged(event) {
     let element = event.target;
     let fontSize = element.value;
-    if (selectedElement.classList[0] === "postcard-textbox"){
+    if (selectedElement.classList[0] === "postcard-textbox") {
         selectedElement.style.fontSize = getFontSizeEM(fontSize);
     }
 }
 
 //Change font on first child because clicking the color picker makes the outter div the selected element
-function fontColorChanged(event){
+function fontColorChanged(event) {
     let element = event.target;
     let fontColor = element.value;
-    if (selectedElement.classList[0] === "postcard-textbox"){
-        selectedElement.children[0].style.color = fontColor;
+    if (selectedElement.classList[0] === "postcard-textbox") {
+        selectedElement.getElementsByClassName("postcard-textarea")[0].style.color = fontColor;
     }
 }
 
 //Scale font size by 12 to use reasonable em units
-function getFontSizeEM(selectedFontSize){
+function getFontSizeEM(selectedFontSize) {
     return selectedFontSize / 12 + "em";
 }
 
@@ -274,7 +463,7 @@ function setSelectedElementGradientBackground() {
     let firstColor = $("#gradientColor1").val();
     let secondColor = $("#gradientColor2").val();
     let orientation = $("#gradientOrientationSelector").val();
-    let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " +  secondColor + " 100%)";
+    let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " + secondColor + " 100%)";
     selectedElement.style.background = backgroundStyle;
 }
 
@@ -328,22 +517,25 @@ function elementToCanvas(element, onConversion) {
 }
 
 /*
+<<<<<<< HEAD
 Creates an image element containing a canvas.
 */
-function canvasToImage(canvas, onImageLoad) {
+function canvasToImage(canvas) {
     let image = document.createElement("img");
     image.crossOrigin = "Anonymous";
-    image.src = canvas.toDataURL();
+    image.src = canvas.toDataURL("image/jpeg");
     return image;
 }
 
 /*
+=======
+>>>>>>> a2c438c9ea89ddb1337d6df2116c3f1e52cb7087
 Downloads the image element with the given name.
 */
 function downloadImage(image, name) {
     let downloadLink = document.createElement("a");
     downloadLink.href = image.src;
-    downloadLink.download = name + ".png";
+    downloadLink.download = name;
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
@@ -355,7 +547,98 @@ Downloads the postcard as an image.
 function downloadPostcard(name) {
     let postcard = document.getElementById("postcardContainer");
     html2canvas(postcard).then((canvas) => {
+        canvas.toBlob((blob) => {
+            let url = URL.createObjectURL(blob);
+            let image = document.createElement("img");
+            image.src = url;
+            image.onload = () => URL.revokeObjectURL(url);
+            downloadImage(image, name);
+        }, "image/png", 1);
+    });
+}
+
+/*
+Transforms the HTML representation of a postcard to a JSON string.
+JSON object for a postcard is as follows: 
+{
+    id: "",
+    outerHTML: "",
+    textboxes: [
+        0: {id: "", value: ""}
+    ]
+}
+*/
+function serializePostcard() {
+    let postcardElement = $("#postcardContainer")[0];
+    let textboxes = postcardElement.getElementsByClassName("postcard-textarea");
+    let postcardTextboxes = new Array();
+    Array.from(textboxes).forEach(textbox => {
+        let textboxElement = textbox.parentElement;
+        let postcardTextbox = { id: textboxElement.id, value: textbox.value };
+        postcardTextboxes.push(postcardTextbox);
+    })
+    let html = postcardElement.outerHTML;
+    let postcard = {
+        id: Date.now(),
+        outerHTML: html,
+        textboxes: postcardTextboxes
+    }
+    return postcard;
+}
+
+/*
+Transforms the JSON string representing a postcard to HTML content.
+See the serializePostcard function for the contents of the json parameter.
+*/
+function deserializePostcard(json, parent) {
+    let postcard = JSON.parse(json);
+    let postcardElement = document.createElement("div");
+    parent.appendChild(postcardElement);
+    postcardElement.outerHTML = postcard.outerHTML;
+    deserializePostcardTextboxes(postcard);
+    selectedElement = $("#postcardContainer")[0];
+    setSelectedStyling();
+    $("#postcardContainer").on("click", onSelect);
+    return postcardElement;
+}
+
+/*
+Deserializes the postcard's textboxes from the json object.
+Adds event handlers and recreates the resize handles.
+*/
+function deserializePostcardTextboxes(postcard) {
+    Array.from(postcard.textboxes).forEach(textbox => {
+        let textboxElement = document.getElementById(textbox.id);
+        /*Adding the event handlers to the resize handles 
+        doesn't work, so recreating them acts as a workaround.*/
+        Array.from(textboxElement.children).forEach(child => {
+            if (child.classList.contains("ui-resizable-handle")) {
+                textboxElement.removeChild(child);
+            }
+        })
+        setTextboxEventHandlers(textboxElement);
+        setTextboxDraggable(textboxElement);
+        setTextboxResizable(textboxElement);
+        let textarea = textboxElement.getElementsByClassName("postcard-textarea")[0];
+        setTextAreaEventHandlers(textarea);
+        textarea.value = textbox.value;
+    })
+}
+
+/*
+Sends the postcard to the server to be saved.
+*/
+function savePostcard() {
+    let postcard = serializePostcard();
+    let data = {};
+    data.postcard = postcard;
+    data.isPublic = true;
+    let postcardElement = document.getElementById("postcardContainer");
+    html2canvas(postcardElement).then((canvas) => {
         let image = canvasToImage(canvas);
-        downloadImage(image, name);
+        data.postcard.image = image.src;
+        $.post("/postcards", data).done(data => {
+            alert(data.message);
+        })
     });
 }
