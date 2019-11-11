@@ -12,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cloudinary": "^1.16.0",
     "connect-flash": "0.1.1",
     "cookie-parser": "1.4.4",
     "dotenv": "^8.2.0",
@@ -21,11 +22,16 @@
     "mocha": "6.2.2",
     "mongodb": "3.3.2",
     "mongoose": "5.7.7",
+    "nexmo": "^2.6.0-beta-1",
+    "ngrok": "^3.2.5",
     "nodemailer": "^6.3.1",
+    "openurl": "^1.1.1",
     "passport": "0.4.0",
     "passport-local": "1.0.0",
     "require_optional": "^1.0.1",
+    "socket.io": "^2.3.0",
     "supertest": "4.0.2",
+    "twilio": "^3.37.0",
     "uuid": "3.3.3"
   }
 }
