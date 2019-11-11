@@ -73,13 +73,6 @@ function validatesmsInput(number, txtMessage){
   }
 }
 
-function canvasToImage(canvas, onImageLoad) {
-  let image = document.createElement("img");
-  image.crossOrigin = "Anonymous";
-  image.src = canvas.toDataURL();
-  return image;
-}
-
 $(document).ready(function(){
   var address = "http://localhost:8080/facebookSend";
   $("#FacebookBtn").click(function(){
