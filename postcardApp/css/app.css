@@ -1,0 +1,41 @@
+.postcard img{
+    width: 20vw;
+    height: auto;
+    border-radius: 10px;
+}
+
+.postcards{
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.postcard{
+    margin: 10px;
+}
+
+#search{
+    width: 40%;
+    margin-left: 20px;
+}
+
+#search .form-control{
+    width: 60%;
+}
+
+#search form .btn{
+    display: inline;
+}
+
+#results{
+    position: absolute;
+    width: 35%;
+    max-height: 50vh;
+    overflow-y: auto;
+}
+
+.result{
+    width: 100%;
+    height: 4vh;
+    margin: 1px;
+}
+    

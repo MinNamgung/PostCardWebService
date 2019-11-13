@@ -91,7 +91,7 @@ passport.serializeUser((user, done) => {
 })
 
 passport.deserializeUser((username, done) => {
-    userController.get({_id: username}, null, null, (err, user, req, res) => {
+    userController.get({_id: username}, null, null, null, (err, user, req, res) => {
         if(err){
             return done(err)
         }
@@ -174,10 +174,14 @@ app.post("/login", (req, res, next) => {
 
 app.get('/profile',(req,res) => {
     if(req.user){
-        res.sendFile(path.join(__dirname+"/templates/profile.html"))
+        res.redirect('/profile/'+req.user[0]._id)
     }else{
         res.redirect('/')
     }   
+})
+
+app.get('/profile/:id',(req, res) => {
+    res.sendFile(path.join(__dirname+"/templates/profile.html"))
 })
 
 app.get('/logout', (req, res) => {
@@ -298,6 +302,61 @@ app.get('/404', (req,res) => {
     res.sendFile(path.join(__dirname+"/templates/404.html"))
 })
 
+//Retrun data from db
+app.get('/user/:id',(req,res) => {
+    
+    let data= {
+        _id: req.params.id
+    }
+
+    userController.get(data, "_id firstname lastname postcards  ", req, res, (err, data, req, res) => {
+        if(err){
+            console.log(err)
+        }else{
+            if(data.length > 0){
+                let user = data[0]['_doc']
+
+                if(req.user){
+                    if(req.user[0]._id !== user._id){
+                        delete user.postcards.private
+                    }
+                }else{
+                    delete user.postcards.private
+                }
+                res.send(user)
+            }else{
+                res.writeHeader(400)
+                res.end()
+            }
+        }
+    })
+})
+
+app.get('/search', (req, res) => {
+
+    let q = req.query.query
+    if(q === ""){
+        res.send([])
+    }else{
+        let regex = new RegExp(".*"+q+".*", "i")
+
+        let data = {$or: [
+            {'_id': regex},
+            {'firstname': regex},
+            {'lastname': regex}
+        ]}
+    
+        userController.get(data, "_id firstname lastname", req, res, (err, users, req, res) => {
+            if(err){
+                res.writeHeader(404)
+                res.end()
+            }else{
+                res.send(users)
+            }
+        })
+    }
+})
+
 app.get('/:file',(req,res) => {
 
     var type = {
@@ -316,6 +375,10 @@ app.get('/:file',(req,res) => {
         svg: {
             dir: '/resources\\SVG',
             type: 'image/svg+xml'
+        },
+        jpg: {
+            dir: '/resources',
+            type: 'image/jpeg'
         },
         otf:{
             dir: '/resources\\fonts',

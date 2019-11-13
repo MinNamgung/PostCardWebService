@@ -26,7 +26,7 @@ userController.auth = (data, done) => {
         if(err){
             return done(err)
         }else{
-            if(user === null){
+            if(!user){
                 return done(null, false, {message: "Username or Password is incorrect"})
             }else{
                 let hashedpass = hash.update(data.password + user.auth.salt,'utf8').digest('hex')
@@ -40,8 +40,7 @@ userController.auth = (data, done) => {
         }
     })
 }
-
-userController.get = (data, req, res, callback) => {
+userController.get = (data,req,res,callback) => {
     User.find(data, (err, users) =>{
         if(err){
             callback(err)
@@ -49,6 +48,29 @@ userController.get = (data, req, res, callback) => {
             callback(null, users, req, res)
         }
     })
+}
+
+userController.get = (data, select, req, res, callback) => {
+
+    if(!select){
+        User.find(data, (err, users) =>{
+            if(err){
+                callback(err)
+            }else{
+                callback(null, users, req, res)
+            }
+        })
+    }else{
+        User.find(data, select, (err, users) =>{
+            if(err){
+                callback(err)
+            }else{
+                callback(null, users, req, res)
+            }
+        })
+    }
+
+    
 }
 
 userController.savePostcard = (req, res) => {
