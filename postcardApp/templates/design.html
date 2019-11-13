@@ -11,9 +11,6 @@
 
   <title>{POST} Design</title>
 
-  <!-- Bootstrap core CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
   <!-- Custom styles for this template -->
   <link href="css/simple-sidebar.css" rel="stylesheet">
   <link href="css/postcard.css" rel="stylesheet">
@@ -21,10 +18,12 @@
   <link href="css/email.css" rel="stylesheet">
   <link href="css/resize-handles.css" rel="stylesheet">
   <link href="http://netdna.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.css" rel="stylesheet">
-
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
   <!-- Scripts-->  
-  <script type="text/JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script type="text/JavaScript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script type="text/JavaScript" src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+  <script type="text/JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script type="text/JavaScript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
   <script type="text/JavaScript" src="scripts/auth.js"></script>
   <script type="text/JavaScript" src="scripts/postcardElement.js"></script>
   <script type="text/JavaScript" src="scripts/postcard.js"></script>
@@ -114,7 +113,10 @@
            ondragstart="imageDragStarted(event)" data-type="image"> 
         <a class="list-group-item list-group-item-action bg-light">Import</a>
         <a id="exportLink" href="#" class="list-group-item list-group-item-action bg-light">Export</a>
-        <a id="saveBtn" class="list-group-item list-group-item-action bg-light">Save</a>
+        <div class="list-group-item list-group-item-action bg-light">
+          <input id="saveBtn" type="button" value="Save">
+          <input id="isPrivateCheckbox" type="checkbox" isChecked="true"> Private
+        </div>
         <a class="list-group-item list-group-item-action bg-light">View Templates</a>
         <a class="list-group-item list-group-item-action bg-light" onclick="on()" >Share</a>
       </div>
@@ -123,10 +125,10 @@
 
     <!-- Page Content -->
     <div id="page-content-wrapper">
-
+        
         <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
           <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
-
+          
           <div class="navbar-collapse" id="navbarSupportedContent">            
             <a class="ml-auto nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
               Login
@@ -149,7 +151,7 @@
         </nav>
 
       <div id="content-container" class="container-fluid">
-        <div id="postcardContainer" class="container-fluid no-remove" type="postcard">
+        <div id="postcardContainer" data-postcard-id class="container-fluid no-remove" type="postcard">
       </div>
     </div>
     <!-- /#page-content-wrapper -->
@@ -229,6 +231,16 @@
     <!-- /#Email Modal -->
   </div>
   <!-- /#wrapper -->
+
+  <div id="toaster" class="toast">
+      <div id="toastHeader" class="toast-header">
+        Toast Header
+      </div>
+      <div id="toastBody" class="toast-body">
+        Some text inside the toast body
+      </div>
+  </div>
+
   <!-- Menu Toggle Script -->
 
 

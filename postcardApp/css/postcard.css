@@ -10,3 +10,17 @@
     position: relative;
     outline: solid 1px transparent;
 }
+
+#isPrivateCheckbox {
+    margin-left: 30px;
+}
+
+#login {
+    position: absolute;
+}
+
+#toaster {
+    position: absolute;
+    top: 10px; 
+    right: 10px;
+}

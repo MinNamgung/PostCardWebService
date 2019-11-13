@@ -51,20 +51,32 @@ userController.get = (data, req, res, callback) => {
     })
 }
 
-userController.addPostcard = (req, res) => {
+userController.savePostcard = (req, res) => {
     let postcard = req.body.postcard;
-    if (req.session && req.session.passport && req.session.passport.user) {
-        let username = req.session.passport.user;
-        User.findOne({_id: username}, (err, user) => {
+    if (req.user && req.user[0]) {
+        let userId = req.user[0]._id;
+        User.findOne({_id: userId}, (err, user) => {
             if (err) {
                 res.send({success: false, message: err.message});
             }
             else {
-                if (req.body.isPublic) {
-                    user.postcards.public.push(postcard);
+                if (JSON.parse(req.body.isPrivate)) {
+                    if (postcard._id) {
+                        user.postcard.private[postcard._id] = postcard;
+                    }
+                    else {
+                        postcard._id = user.postcards.private.length;
+                        user.postcards.private.push(postcard);
+                    }
                 }
                 else {
-                    user.postcards.private.push(postcard);
+                    if (postcard._id) {
+                        user.postcard.public[postcard_id] = postcard;
+                    }
+                    else {
+                        postcard._id = user.postcards.public.length;
+                        user.postcards.public.push(postcard);
+                    }
                 }
                 user.save((err) => {
                     if (err) {

@@ -341,7 +341,7 @@ app.get('/:file',(req,res) => {
 })
 
 app.post("/postcards", (req, res) => {
-    userController.addPostcard(req, res);
+    userController.savePostcard(req, res);
 })
 
 //Run on the port defined in the .env file.

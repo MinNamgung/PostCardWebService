@@ -524,6 +524,16 @@ function canvasToImage(canvas) {
 }
 
 /*
+Transforms a postcard to an image.
+*/
+function postcardToImage(postcard, onImageLoad) {
+    elementToCanvas(postcard, (canvas) => {
+        let image = canvasToImage(canvas);
+        onImageLoad(image);
+    })
+}
+
+/*
 Downloads the image element with the given name.
 */
 function downloadImage(image, name) {
@@ -572,8 +582,12 @@ function serializePostcard() {
         postcardTextboxes.push(postcardTextbox);
     })
     let html = postcardElement.outerHTML;
+    let id = null;
+    if (postcardElement.dataset.postcardId) {
+        id = postcardElement.dataset.postcardId
+    }
     let postcard = {
-        id: Date.now(),
+        _id: id,
         outerHTML: html,
         textboxes: postcardTextboxes
     }
@@ -587,6 +601,7 @@ See the serializePostcard function for the contents of the json parameter.
 function deserializePostcard(json, parent) {
     let postcard = JSON.parse(json);
     let postcardElement = document.createElement("div");
+    postcardElement.data["_id"] = postcard._id;
     parent.appendChild(postcardElement);
     postcardElement.outerHTML = postcard.outerHTML;
     deserializePostcardTextboxes(postcard);
@@ -626,13 +641,22 @@ function savePostcard() {
     let postcard = serializePostcard();
     let data = {};
     data.postcard = postcard;
-    data.isPublic = true;
+    data.isPrivate = $("#isPrivateCheckbox")[0].checked;
     let postcardElement = document.getElementById("postcardContainer");
-    html2canvas(postcardElement).then((canvas) => {
-        let image = canvasToImage(canvas);
-        data.postcard.image = image.src;
+    elementToCanvas(postcardElement, (canvas) => {
+        data.postcard.image = canvas.toDataURL("image/png");
         $.post("/postcards", data).done(data => {
-            alert(data.message);
+            displayToast("Saving Postcard", data.message);
         })
     });
+}
+
+/*
+Displays a toast with the given header and body message
+*/
+function displayToast(header, message) {
+    $("#toastHeader").text(header);
+    $("#toastBody").text(message);
+    $("#toaster").toast({delay: 3000});
+    $("#toaster").toast("show");
 }
