@@ -112,10 +112,9 @@
         </div>
         <input id="filePicker" type="file" accept="image/*" class="list-group-item list-group-item-action bg-light" draggable="true"
            ondragstart="imageDragStarted(event)" data-type="image"> 
-        <a class="list-group-item list-group-item-action bg-light">Import</a>
-        <a id="exportLink" href="#" class="list-group-item list-group-item-action bg-light">Export</a>
-        <div class="list-group-item list-group-item-action bg-light" id="save">
-          <input id="saveBtn" type="button" value="Save">
+        <button id="downloadBtn" class="list-group-item list-group-item-action bg-light">Download</button>
+        <div class="list-group-item list-group-item-action bg-light">
+          <button id="saveBtn" class="list-group-item list-group-item-action bg-light" type="button">Save</button>
           <input id="isPrivateCheckbox" type="checkbox" isChecked="true"> Private
         </div>
         <a class="list-group-item list-group-item-action bg-light">View Templates</a>
@@ -154,8 +153,9 @@
   
 
       <div id="content-container" class="container-fluid">
-        <div id="postcardContainer" data-postcard-id class="container-fluid no-remove" type="postcard">
+        <div id="postcardContainer" data-postcard-id class="container-fluid no-remove" type="postcard"></div>
       </div>
+      <canvas id="canvas"></canvas>
     </div>
     <!-- /#page-content-wrapper -->
     
