@@ -199,6 +199,22 @@ app.get('/design', (req, res)=> {
     res.sendFile(path.join(__dirname+"/templates/design.html"))
 })
 
+app.get('/design/:username/:visibility/:id', (req, res) => {
+    if(req.params.visibility === 'private'){
+        if(!req.user){
+            res.redirect('/design')
+        }else{
+            if(req.user[0]._id !== req.params.username){
+                res.redirect('/design')
+            }else{
+                res.sendFile(path.join(__dirname+"/templates/design.html"))
+            }
+        }
+    }else{
+        res.sendFile(path.join(__dirname+"/templates/design.html"))
+    }
+})
+
 //get data from our client index page 
 app.post('/send',function(req,res){
     let body = req.body;
@@ -373,7 +389,7 @@ app.get('/:file',(req,res) => {
             type:'text/css'
         },
         svg: {
-            dir: '/resources\\SVG',
+            dir: '/resources/SVG',
             type: 'image/svg+xml'
         },
         jpg: {
@@ -381,14 +397,14 @@ app.get('/:file',(req,res) => {
             type: 'image/jpeg'
         },
         otf:{
-            dir: '/resources\\fonts',
+            dir: '/resources/fonts',
             type: 'application/x-font-opentype'
         }
     }
 
     let ext = path.extname(req.params.file).slice(1)
     if(typeof(type[ext]) !== 'undefined'){        
-        let file = __dirname + type[ext].dir+"\\"+req.params.file;
+        let file = __dirname + type[ext].dir+"/"+req.params.file;
         if(fs.existsSync(file)){
             res.sendFile(file, {headers: {'Content-Type':type[ext].type}})
         }else{
@@ -405,6 +421,28 @@ app.get('/:file',(req,res) => {
 
 app.post("/postcards", (req, res) => {
     userController.savePostcard(req, res);
+})
+
+//Get a postcard to load into the design page
+app.get('/postcard/:username/:visibility/:id', (req, res) => {
+
+    data = {_id: req.params.username}
+    
+    userController.get(data, null, res, req, (err, users, res, req) => {
+        if(err){
+            res.end(400)
+        }else{
+            if(users.length > 0){
+                let user = users[0]
+                let postcard = user.postcards[req.params.visibility][req.params.id]
+                if(postcard){
+                    res.json(JSON.stringify(postcard));
+                }else{
+                    res.writeHeader(400).end()
+                }                
+            }
+        }
+    })
 })
 
 //Run on the port defined in the .env file.

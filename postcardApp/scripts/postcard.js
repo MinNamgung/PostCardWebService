@@ -50,7 +50,7 @@ function drop(e) {
     e.stopPropagation();
     e.preventDefault();
     let elementType = e.dataTransfer.getData("text");
-    if (elementType === "input"){
+    if (elementType === "input") {
         let textBox = createTextBox();
         let postcardWidth = textBox.parentElement.offsetWidth;
         let postcardHeight = textBox.parentElement.offsetHeight;
@@ -214,7 +214,7 @@ Gets the frontmost element's z-index. Returns 0 if there are no textboxes yet
 function getFrontZ() {
     let elements = zSortedElements();
     //Largest z is now the first element
-    if (elements){
+    if (elements) {
         return Number(elements[0].style.zIndex);
     }
 }
@@ -234,9 +234,9 @@ function getNextFrontZ() {
 
     //Sequential search backwards until a closer or even element is found
     for (let i = elements.length - 1; i >= 0; i--) {
-        if (elements[i] != selectedElement){
+        if (elements[i] != selectedElement) {
             let tempZ = Number(elements[i].style.zIndex);
-            if (tempZ == currentZ){
+            if (tempZ == currentZ) {
                 return tempZ + 1;
             }
             else if (tempZ > currentZ) {
@@ -249,17 +249,17 @@ function getNextFrontZ() {
 /*
 Places the selected element behind all others
 */
-function sendToBack(){
+function sendToBack() {
     selectedElement.style.zIndex = getBackZ() - 1;
 }
 
 /*
 Gets the backmost element's z-index
 */
-function getBackZ(){
+function getBackZ() {
     let elements = zSortedElements();
     //Now lowest z-index is the first element
-    if (elements){
+    if (elements) {
         return Number(elements[elements.length - 1].style.zIndex);
     }
 }
@@ -267,7 +267,7 @@ function getBackZ(){
 /*
 Places the element behind the closest back element
 */
-function sendBackwards(){
+function sendBackwards() {
     let nextZ = getNextBackZ();
     selectedElement.style.zIndex = nextZ - 1;
 }
@@ -275,14 +275,14 @@ function sendBackwards(){
 /*
 Finds the z-index of the closests element behind the selected element
 */
-function getNextBackZ(){
+function getNextBackZ() {
     let currentZ = Number(selectedElement.style.zIndex);
     let elements = zSortedElements();
 
     for (let i = 0; i < elements.length; i++) {
-        if (elements[i] != selectedElement){
+        if (elements[i] != selectedElement) {
             let tempZ = Number(elements[i].style.zIndex);
-            if (tempZ == currentZ){
+            if (tempZ == currentZ) {
                 return tempZ - 1;
             }
             else if (tempZ < currentZ) {
@@ -301,11 +301,11 @@ function zSortedElements() {
     if (elements.length === 0) {
         return null;
     }
-    elements.sort((a,b) => {
-        if (Number(a.style.zIndex) >= Number(b.style.zIndex)){
+    elements.sort((a, b) => {
+        if (Number(a.style.zIndex) >= Number(b.style.zIndex)) {
             return -1;
         }
-        else{
+        else {
             return 1;
         }
     });
@@ -317,14 +317,23 @@ function zSortedElements() {
 /*
 Set default values and attach event handlers.
 */
-$(document).ready(function() {
-    let postcardContainer = $("#postcardContainer")[0];
-    selectedElement = postcardContainer;
-    setSelectedStyling();
-    $("#postcardContainer").on("click", onSelect);
-    $("#postcardContainer").on("drop", imageDrop);
-    $("#postcardContainer").on("drop", drop);
-    $("#postcardContainer").on("dragover", allowDrop);
+$(document).ready(function () {
+
+    //Waits on a promise to initialize the postcard as empty or load from db using ajax
+    loadPostcard().then(
+        result => {
+            selectedElement = $("#postcardContainer")[0];
+            setSelectedStyling();
+            $("#postcardContainer").on("click", onSelect);
+            $("#postcardContainer").on("drop", imageDrop);
+            $("#postcardContainer").on("drop", drop);
+            $("#postcardContainer").on("dragover", allowDrop);
+        },
+        error => {
+            alert(error);
+        }
+    );
+
     $("#exportLink").on("click", () => downloadPostcard("postcard.gif"));
     $("#colorPicker").on("change", colorPickerChanged);
     $("#fontFamilySelector").on("change", fontFamilyChanged);
@@ -428,18 +437,18 @@ Append each file in files that is an image to the postcard.
 function setBackgroundImage(file, element) {
     if (file && file.type.match(/image.*/)) {
         let reader = new FileReader();
-            reader.onload = function(event) {
-                let img = document.createElement('img');
-                img.src = event.target.result;
-                let previousBackground = element.style.background;
-                element.style.background = "url(" + img.src + ")";
-                element.style.backgroundSize = "100% 100%";
-                //setup undo/redo callbacks
-                undo.push(() => {
-                    element.style.background = previousBackground;
-                    redo.push(() => setBackgroundImage(file, element));
-                })
-            }
+        reader.onload = function (event) {
+            let img = document.createElement('img');
+            img.src = event.target.result;
+            let previousBackground = element.style.background;
+            element.style.background = "url(" + img.src + ")";
+            element.style.backgroundSize = "100% 100%";
+            //setup undo/redo callbacks
+            undo.push(() => {
+                element.style.background = previousBackground;
+                redo.push(() => setBackgroundImage(file, element));
+            })
+        }
         reader.readAsDataURL(file);
     }
 }
@@ -460,7 +469,7 @@ function setSelectedElementGradientBackground() {
     let firstColor = $("#gradientColor1").val();
     let secondColor = $("#gradientColor2").val();
     let orientation = $("#gradientOrientationSelector").val();
-    let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " +  secondColor + " 100%)";
+    let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " + secondColor + " 100%)";
     setBackground(selectedElement, backgroundStyle);
 }
 
@@ -549,6 +558,7 @@ function downloadImage(image, name) {
 Downloads the postcard as an image.
 */
 function downloadPostcard(name) {
+    clearSelectedStyling();
     let postcard = document.getElementById("postcardContainer");
     html2canvas(postcard).then((canvas) => {
         canvas.toBlob((blob) => {
@@ -601,14 +611,10 @@ See the serializePostcard function for the contents of the json parameter.
 function deserializePostcard(json, parent) {
     let postcard = JSON.parse(json);
     let postcardElement = document.createElement("div");
-    postcardElement.data["_id"] = postcard._id;
+    postcardElement.dataset["_id"] = postcard._id;
     parent.appendChild(postcardElement);
     postcardElement.outerHTML = postcard.outerHTML;
     deserializePostcardTextboxes(postcard);
-    selectedElement = $("#postcardContainer")[0];
-    setSelectedStyling();
-    $("#postcardContainer").on("click", onSelect);
-    return postcardElement;
 }
 
 /*
@@ -638,6 +644,7 @@ function deserializePostcardTextboxes(postcard) {
 Sends the postcard to the server to be saved.
 */
 function savePostcard() {
+    clearSelectedStyling();
     let postcard = serializePostcard();
     let data = {};
     data.postcard = postcard;
@@ -652,11 +659,35 @@ function savePostcard() {
 }
 
 /*
+Load the postcard from the server to be displayed
+*/
+function loadPostcard() {
+    return new Promise((resolve, reject) => {
+        let postcardContainer = $("#postcardContainer")[0];
+
+        //Check if a postcard needs to be loaded
+        let url = document.location.pathname.trim().split("/").splice(1);
+        //If the url has more than length one, we need to load a postcard
+        if (url.length > 1) {
+            url[0] = "/postcard";
+            $.get(url.join("/")).done(data => {
+                $("#content-container").empty();
+                deserializePostcard(data, $("#content-container")[0]);
+                resolve();
+            });
+        }
+        else {
+            resolve();
+        }
+    });
+}
+
+/*
 Displays a toast with the given header and body message
 */
 function displayToast(header, message) {
     $("#toastHeader").text(header);
     $("#toastBody").text(message);
-    $("#toaster").toast({delay: 3000});
+    $("#toaster").toast({ delay: 3000 });
     $("#toaster").toast("show");
 }
