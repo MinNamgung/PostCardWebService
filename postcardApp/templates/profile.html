@@ -18,6 +18,7 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
     <script src="/app.js" type="text/javascript"></script>
+    
 
   </head>
 
@@ -48,14 +49,30 @@
               </div>
             </form>
             <div id="results" ng-if="results.length > 0">
-              <div ng-repeat="result in results" >
+              <div ng-repeat="result in results">
                 <a ng-href="/profile/{{result._id}}"><button class="result btn btn-light">{{result.firstname}} {{result.lastname}} @{{result._id}}</button></a>
               </div>
             </div>
           </div>
-
-          <div class="navbar-collapse" id="navbarSupportedContent">
-              <a href="/logout" class=ml-auto>Logout</a>  
+          <div class="navbar-collapse" id="navbarSupportedContent" ng-controller="AuthController">
+            <a class="ml-auto nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-if="!user" ng-click="showlogin()">
+              Login
+            </a>
+            <p ng-if="user" class="ml-auto nav-link" id="loggedin"><strong>Hey there, {{user.username}}!</strong><br/> <a href="" ng-click="logout()">Logout</a></p>
+            <div id="login" class="dropdown dropdown-menu-right hidden">
+              <div id="loginform" class="m-3">
+                  <form>
+                      <div class="form-group">
+                          <label for="username">Username</label><input class="form-control" type="text" id="uname" name="uname" ng-model="login.username" ng-change="validateLogin()">
+                          <label for="password">Password</label><input class="form-control" type="password" id="pword" name="pword" ng-model="login.password" ng-change="validateLogin()">
+                      </div>
+                      <input type="button" class="btn btn-primary" value="Login" ng-click="authenticate()" id="login-button"><p id="login-error">{{error}}</p>
+                  </form>
+                  <p>
+                      Don't have an account? <a href="/register" class>Register here</a>
+                  </p>
+              </div>
+            </div>
           </div>
         </nav>
 
@@ -63,25 +80,29 @@
           <div id="bg">            
           </div> 
           <div ng-controller="ProfileController">
-            <h1>{{user.firstname}} {{user.lastname}}</h1>
-            <h3>@{{user._id}}</h3>
-            <hr/>
-            <div ng-if="user.postcards.private">
-                <h3>Your Private Postcards</h3>
-                <p  ng-if="!user.postcards || user.postcards.private.length === 0"> Sorry! No postcards to display</p>
-                <div id="private" class="postcards">                  
-                  <div class="postcard" ng-repeat="postcard in user.postcards.private track by $index">
-                    <a ng-href="/design/{{user._id}}/private/{{postcard._id}}"><img ng-src="{{postcard.image}}"/></a>
+            <div ng-if="user">
+              <h1>{{user.firstname}} {{user.lastname}}</h1>
+              <h3>@{{user._id}}</h3>
+              <hr/>
+              <div ng-if="user.postcards.private">
+                  <h3>Your Private Postcards</h3>
+                  <p  ng-if="!user.postcards || user.postcards.private.length === 0"> Sorry! No postcards to display</p>
+                  <div id="private" class="postcards">                  
+                    <div class="postcard" ng-repeat="postcard in user.postcards.private track by $index">
+                      <a ng-href="/design/{{user._id}}/private/{{postcard._id}}"><img ng-src="{{postcard.image}}"/></a>
+                    </div>
+                    <hr>
                   </div>
-                  <hr>
-                </div>
-                <hr/>
-            </div>
-            <p ng-if="!user.postcards || user.postcards.public.length === 0"> Sorry! No postcards to display</p>
-            <div id="public" class="postcards">                  
-                <div class="postcard" ng-repeat="postcard in user.postcards.public track by $index">
-                  <a ng-href="/design/{{user._id}}/public/{{postcard._id}}"><img ng-src="{{postcard.image}}"/></a>
-                </div>
+                  <hr/>
+              </div>
+              <h3 ng-if="!currentUser || currentUser.username !== user._id">{{user._id}}'s Public Postcards</h3>
+              <h3 ng-if="currentUser && currentUser.username === user._id">Your Public Postcards</h3>
+              <p  ng-if="!user.postcards || user.postcards.public.length === 0"> Sorry! No postcards to display</p>
+              <div id="public" class="postcards">                  
+                  <div class="postcard" ng-repeat="postcard in user.postcards.public track by $index">
+                      <a ng-href="/design/{{user._id}}/public/{{postcard._id}}"><img ng-src="{{postcard.image}}"/></a>
+                    </div>
+              </div>
             </div>
           </div>
         </div>
@@ -101,8 +122,13 @@
         e.preventDefault();
         $("#wrapper").toggleClass("toggled");
       });
+  
+      $("#loginDropdown").click(e => {
+        e.preventDefault()
+        $("#login").toggleClass('hidden')
+      });
     </script>
-
+  
   </body>
 
 </html>
