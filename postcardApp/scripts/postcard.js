@@ -205,7 +205,9 @@ function setResizeHandleEventHandlers(resizeHandle) {
 Move the selected element in front of all other elements
 */
 function sendToFront() {
-    selectedElement.style.zIndex = getFrontZ() + 1;
+    if (selectedElement != $("#postcardContainer")[0]) {
+        selectedElement.style.zIndex = getFrontZ() + 1;
+    }
 }
 
 /*
@@ -221,8 +223,10 @@ function getFrontZ() {
 
 //Move the selected element in front of the element immediately in front of it
 function sendForwards() {
-    let nextZ = getNextFrontZ();
-    selectedElement.style.zIndex = nextZ + 1;
+    if (selectedElement != $("#postcardContainer")[0]) {
+        let nextZ = getNextFrontZ();
+        selectedElement.style.zIndex = nextZ + 1;
+    }
 }
 
 /*
@@ -250,7 +254,9 @@ function getNextFrontZ() {
 Places the selected element behind all others
 */
 function sendToBack() {
-    selectedElement.style.zIndex = getBackZ() - 1;
+    if (selectedElement != $("#postcardContainer")[0]) {
+        selectedElement.style.zIndex = getBackZ() - 1;
+    }
 }
 
 /*
@@ -268,8 +274,10 @@ function getBackZ() {
 Places the element behind the closest back element
 */
 function sendBackwards() {
-    let nextZ = getNextBackZ();
-    selectedElement.style.zIndex = nextZ - 1;
+    if (selectedElement != $("#postcardContainer")[0]) {
+        let nextZ = getNextBackZ();
+        selectedElement.style.zIndex = nextZ - 1;
+    }
 }
 
 /*

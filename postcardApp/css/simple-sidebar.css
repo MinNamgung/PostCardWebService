@@ -45,14 +45,14 @@ body {
 #logo{
     position: absolute;
     top: 37.5%;
-    left: auto;
+    margin: auto;
     height: auto;
-    max-width: 50;
+    max-width: 80vw;
     z-index: 2;
 }
 
 .hidden{
-  display: none;
+  display: none !important;
 }
 
 .dropdown{
@@ -106,4 +106,10 @@ body {
 .dragImage {
   position: absolute;
   top: -150px;
+}
+
+#loggedin{
+  line-height: normal;
+  margin: 0 0 0 auto;
+  text-align: right;
 }

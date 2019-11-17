@@ -81,7 +81,7 @@ function auth(form){
             if(!data.success){
                 $("#login-error").html(data.message);
             }else if($(location).attr('pathname') !== "/design"){
-                $(location).attr('href',"/")
+                $(location).attr("href","/profile/"+form.uname.value)
             }                 
         })
     }   

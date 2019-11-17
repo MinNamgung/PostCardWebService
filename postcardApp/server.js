@@ -172,26 +172,33 @@ app.post("/login", (req, res, next) => {
     })(req, res, next)
 })
 
+app.get('/user', (req, res) => {
+    if(req.user){
+        let user = req.user[0]
+        res.send({username: user._id})
+    }else{
+        res.send(null)
+    }
+})
+
 app.get('/profile',(req,res) => {
     if(req.user){
         res.redirect('/profile/'+req.user[0]._id)
     }else{
-        res.redirect('/')
-    }   
+        res.sendFile(path.join(__dirname+"/templates/profile.html"))
+    }    
 })
 
-app.get('/profile/:id',(req, res) => {
+app.get("/profile/:user", (req, res) =>{
     res.sendFile(path.join(__dirname+"/templates/profile.html"))
 })
 
 app.get('/logout', (req, res) => {
     if(req.user){
         req.logout()
-        if(typeof(req.query.from) === 'undefined' || req.query.from === "design"){
-            res.redirect('/')
-        }
+        res.send({success: true})
     }else{
-        res.redirect('/')
+        res.redirect(req.get('referer'));
     }
 })
 
