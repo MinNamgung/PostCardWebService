@@ -1,7 +1,4 @@
-const imageURL = 'https://images.pexels.com/photos/67636/rose-blue-flower-rose-blooms-67636.jpeg?auto=compress&cs=tinysrgb&dpr=3&h=750&w=1260';
 
-
-//Email modal on and off 
 function on() {
   document.getElementById("overlay").style.display = "block";
 }
@@ -23,6 +20,10 @@ function clearsmsInput() {
   document.getElementById("txtMessage").value="";
 }
 
+function clearWhatsapp() {
+  document.getElementById("whatsapNumeber").value="";
+  document.getElementById("whatsappMessage").value="";
+}
 
 /*
 Validates each email against the regex.
@@ -32,6 +33,7 @@ function validateEmails(emails) {
   var mailformat = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
   for (let i = 0; i < emails.length; i++) {
     if (!emails[i].match(mailformat)) {
+      alert("You must enter a valid email address!")
       return false;
     }
   };
@@ -49,12 +51,9 @@ function validateInput(name, message){
     return false;
   }
   else{
-    clearInput()
-    off();
     return true 
   }
 }
-
 
 //txt message validation 
 function validatesmsInput(number, txtMessage){
@@ -68,6 +67,19 @@ function validatesmsInput(number, txtMessage){
   }
   else{
     clearsmsInput()
+    off();
+    return true 
+  }
+}
+
+//txt message validation 
+function validateWhatsappInput(whatsapNumeber){
+  if(whatsapNumeber === "") {
+    alert("You must enter a number!");
+    return false;
+  }
+  else{
+    clearWhatsappInput()
     off();
     return true 
   }
@@ -95,6 +107,8 @@ $(document).ready(function(){
     emails = emails.split(",").map(email => email.trim());
     let message = $("#message").val().trim();
     if(validateInput(from, message) && validateEmails(emails)){
+      clearInput()
+      off();
       let postcard = document.getElementById("postcardContainer");
       elementToCanvas(postcard, (canvas) => {
         let dataURL = canvas.toDataURL();
@@ -116,7 +130,7 @@ $(document).ready(function(){
   $("#sendTextMessage").click(function(){      
     let number = $("#number").val().trim();
     let txtMessage =$("#txtMessage").val().trim();
-    if(number&&txtMessage){
+    if(validatesmsInput(number,txtMessage)){
       let postcard = document.getElementById("postcardContainer");
       elementToCanvas(postcard, (canvas) => {
         let dataURL = canvas.toDataURL();
@@ -138,7 +152,7 @@ $(document).ready(function(){
     let recipient = $("#whatsapNumeber").val().trim();
     let whatsappMessage =$("#whatsappMessage").val().trim();
 
-    if(recipient&&whatsappMessage){
+    if(validateWhatsappInput(recipient) && whatsappMessage){
       let postcard = document.getElementById("postcardContainer");
       elementToCanvas(postcard, (canvas) => {
         let dataURL = canvas.toDataURL();
