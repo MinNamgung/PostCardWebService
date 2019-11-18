@@ -445,7 +445,8 @@ app.get('/postcard/:username/:visibility/:id', (req, res) => {
                 if(postcard){
                     res.json(JSON.stringify(postcard));
                 }else{
-                    res.writeHeader(400).end()
+                    res.writeHeader(400);
+                    res.end()
                 }                
             }
         }
