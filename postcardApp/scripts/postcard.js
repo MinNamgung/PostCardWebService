@@ -534,7 +534,6 @@ function elementToCanvas(element, onConversion) {
     canvas.height = element.offsetHeight;
     let options = { canvas: canvas, scale: 1};
     html2canvas(element, options).then(function(canvas) { 
-        //canvas.style.display = "none";
         onConversion(canvas); 
     });
 }
@@ -575,7 +574,7 @@ function downloadImage(image, name) {
 Downloads the postcard as an image.
 */
 function downloadPostcard(name) {
-    disableCanvasModificationButtons(10000);
+    disableCanvasModificationButtons();
     //remove outline, so it's not included in image
     clearSelectedStyling();
     let postcard = document.getElementById("postcardContainer");
