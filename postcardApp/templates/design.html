@@ -22,7 +22,7 @@
   <!-- Scripts-->  
   <script type="text/JavaScript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
   <script type="text/JavaScript" src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
-  <script type="text/JavaScript" src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  
   <script type="text/JavaScript" src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
   <script type="text/JavaScript" src="/postcardElement.js"></script>
   <script type="text/JavaScript" src="/postcard.js"></script>
@@ -173,8 +173,10 @@
             <div class="modal-body">
                 <div class="tab">
                     <button class="tablinks" id="emailTab" onclick="tabOpen(event, 'emailTabContent')" >Email</button>
-                    <button class="tablinks" id="textTab" onclick="tabOpen(event, 'textTabContent')">SMS Text</button>  
-                    <button class="tablinks" id="whatsApp" onclick="tabOpen(event, 'whatsAppTabContent')">WhatsApp</button>                  
+                    <button class="tablinks" id="textTab" onclick="tabOpen(event, 'textTabContent')">SMS</button>  
+                    <button class="tablinks" id="whatsApp" onclick="tabOpen(event, 'whatsAppTabContent')">WhatsApp</button>   
+                    <button class="tablinks" id="whatsApp" onclick="tabOpen(event, 'facebookTabContent')">Facebook</button>
+                    <button class="tablinks" id="whatsApp" onclick="tabOpen(event, 'twitterTabContent')">Twitter</button>                 
                 </div>
                 <!--Content of email modal tab-->
                 <div class="tabcontent" id="emailTabContent">
@@ -216,17 +218,29 @@
                 </div>
                 <button type="submit" class="btn btn-lg btn-success btn-block" id="sendWhatsAppMessage" onclick="">Send →</button> <br/>
                 </div>
+                <div class="tabcontent" id="facebookTabContent">
+                    <br/>
+                    <label for="Facebookshare">Share to Facebook</label>
+                    <button type="submit" class="btn-primary btn-lg btn-block fa fa-facebook" id="FacebookBtn" onclick=""></button> <br/>
+                </div>
+                <div class="tabcontent" id="twitterTabContent">
+                    <br/>
+                    <label for="Twittershare">Share to Twitter</label>
+                    <button href="http://twitter.com/share?url=<URL>&text=<TEXT>&via=<VIA>" type="submit" class="btn-info btn-lg btn-block fa fa-twitter" id="FacebookBtn" onclick=""></button> <br/>
+                </div>
+                
+                
             </div>
                 <!--Facebook-->
-                <div class="modal-footer">
-                <a class="btn share-btn facebook" id="FacebookBtn">
+            <div class="modal-footer">
+                <!-- <a class="btn share-btn facebook" id="FacebookBtn">
                 <i class="fa fa-facebook"></i>
-                </a>
+                </a> -->
 
                 <!-- Twitter -->
-                <a href="http://twitter.com/share?url=<URL>&text=<TEXT>&via=<VIA>" target="_blank" class="btn share-btn twitter">
+                <!-- <a href="http://twitter.com/share?url=<URL>&text=<TEXT>&via=<VIA>" target="_blank" class="btn share-btn twitter">
                 <i class="fa fa-twitter"></i>
-                </a>
+                </a> -->
             </div>
           </div>
         </div>
