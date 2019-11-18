@@ -79,7 +79,7 @@ function validateWhatsappInput(whatsapNumeber){
     return false;
   }
   else{
-    clearWhatsapp()
+    clearWhatsappInput()
     off();
     return true 
   }
