@@ -326,7 +326,7 @@ function zSortedElements() {
 Set default values and attach event handlers.
 */
 $(document).ready(function () {
-
+    selectedElement = $("#postcardContainer")[0];
     //Waits on a promise to initialize the postcard as empty or load from db using ajax
     loadPostcard().then(
         result => {
@@ -342,7 +342,7 @@ $(document).ready(function () {
         }
     );
 
-    $("#exportLink").on("click", () => downloadPostcard("postcard.gif"));
+    $("#downloadBtn").on("click", () => downloadPostcard("postcard.png"));
     $("#colorPicker").on("change", colorPickerChanged);
     $("#fontFamilySelector").on("change", fontFamilyChanged);
     $("#fontSizeSelector").on("change", fontSizeChanged);
@@ -521,13 +521,21 @@ Undoes the styling caused by setSelectedStyling.
 */
 function clearSelectedStyling() {
     selectedElement.style.outlineColor = "transparent";
+    selectedElement.style.border = "none";
 }
 
 /*
 Convers element to a canvas and calls onConversion when the conversion is completed.
 */
 function elementToCanvas(element, onConversion) {
-    html2canvas(element).then((canvas) => onConversion(canvas));
+    let canvas = $("#canvas")[0];
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = element.offsetWidth;
+    canvas.height = element.offsetHeight;
+    let options = { canvas: canvas, scale: 1};
+    html2canvas(element, options).then(function(canvas) { 
+        onConversion(canvas); 
+    });
 }
 
 /*
@@ -536,7 +544,7 @@ Creates an image element containing a canvas.
 function canvasToImage(canvas) {
     let image = document.createElement("img");
     image.crossOrigin = "Anonymous";
-    image.src = canvas.toDataURL("image/jpeg");
+    image.src = canvas.toDataURL("image/png");
     return image;
 }
 
@@ -566,17 +574,21 @@ function downloadImage(image, name) {
 Downloads the postcard as an image.
 */
 function downloadPostcard(name) {
+    disableCanvasModificationButtons();
+    //remove outline, so it's not included in image
     clearSelectedStyling();
     let postcard = document.getElementById("postcardContainer");
-    html2canvas(postcard).then((canvas) => {
+    elementToCanvas(postcard, (canvas) => {
         canvas.toBlob((blob) => {
             let url = URL.createObjectURL(blob);
             let image = document.createElement("img");
             image.src = url;
             image.onload = () => URL.revokeObjectURL(url);
             downloadImage(image, name);
+            enableCanvasModificationButtons();
         }, "image/png", 1);
     });
+    setSelectedStyling();
 }
 
 /*
@@ -630,28 +642,31 @@ Deserializes the postcard's textboxes from the json object.
 Adds event handlers and recreates the resize handles.
 */
 function deserializePostcardTextboxes(postcard) {
-    Array.from(postcard.textboxes).forEach(textbox => {
-        let textboxElement = document.getElementById(textbox.id);
-        /*Adding the event handlers to the resize handles 
-        doesn't work, so recreating them acts as a workaround.*/
-        Array.from(textboxElement.children).forEach(child => {
-            if (child.classList.contains("ui-resizable-handle")) {
-                textboxElement.removeChild(child);
-            }
+    if (postcard.textboxes) {
+        Array.from(postcard.textboxes).forEach(textbox => {
+            let textboxElement = document.getElementById(textbox.id);
+            /*Adding the event handlers to the resize handles 
+            doesn't work, so recreating them acts as a workaround.*/
+            Array.from(textboxElement.children).forEach(child => {
+                if (child.classList.contains("ui-resizable-handle")) {
+                    textboxElement.removeChild(child);
+                }
+            })
+            setTextboxEventHandlers(textboxElement);
+            setTextboxDraggable(textboxElement);
+            setTextboxResizable(textboxElement);
+            let textarea = textboxElement.getElementsByClassName("postcard-textarea")[0];
+            setTextAreaEventHandlers(textarea);
+            textarea.value = textbox.value;
         })
-        setTextboxEventHandlers(textboxElement);
-        setTextboxDraggable(textboxElement);
-        setTextboxResizable(textboxElement);
-        let textarea = textboxElement.getElementsByClassName("postcard-textarea")[0];
-        setTextAreaEventHandlers(textarea);
-        textarea.value = textbox.value;
-    })
+    }
 }
 
 /*
 Sends the postcard to the server to be saved.
 */
 function savePostcard() {
+    disableCanvasModificationButtons();
     clearSelectedStyling();
     let postcard = serializePostcard();
     let data = {};
@@ -659,11 +674,16 @@ function savePostcard() {
     data.isPrivate = $("#isPrivateCheckbox")[0].checked;
     let postcardElement = document.getElementById("postcardContainer");
     elementToCanvas(postcardElement, (canvas) => {
-        data.postcard.image = canvas.toDataURL("image/png");
+        let url = canvas.toDataURL("image/png");
+        let image = document.createElement("img");
+        image.src = url;
+        data.postcard.image = url;
         $.post("/postcards", data).done(data => {
             displayToast("Saving Postcard", data.message);
-        })
+            enableCanvasModificationButtons();
+        });
     });
+    setSelectedStyling();
 }
 
 /*
@@ -698,4 +718,22 @@ function displayToast(header, message) {
     $("#toastBody").text(message);
     $("#toaster").toast({ delay: 3000 });
     $("#toaster").toast("show");
+}
+
+/*
+Disables the download and save buttons to 
+prevent the canvas from being changed while it is in
+the middle of rendering something.
+*/
+function disableCanvasModificationButtons() {
+    $("#downloadBtn").prop("disabled", true);
+    $("#saveBtn").prop("disabled", true);
+}
+
+/*
+Enables the download and save buttons.
+*/
+function enableCanvasModificationButtons() {
+    $("#downloadBtn").prop("disabled", false);
+    $("#saveBtn").prop("disabled", false);
 }
