@@ -8,8 +8,7 @@
             "type": "node",
             "request": "launch",
             "name": "Launch Program",
-            "program": "${workspaceFolder}/postcardApp/server.js",
-            "runtimeExecutable": "C:/Users/normmj02/Documents/node-v12.13.0-win-x64/node.exe"
+            "program": "${workspaceFolder}/postcardApp/server.js"
         }
     ]
 }
