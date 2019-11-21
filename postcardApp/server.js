@@ -380,52 +380,6 @@ app.get('/search', (req, res) => {
     }
 })
 
-app.get('/:file',(req,res) => {
-
-    var type = {
-        html: {
-            dir: '/templates',
-            type:'text/html'
-        },
-        js: {
-            dir: '/scripts',
-            type:'text/javascript'
-        },
-        css: {
-            dir: '/css',
-            type:'text/css'
-        },
-        svg: {
-            dir: '/resources/SVG',
-            type: 'image/svg+xml'
-        },
-        jpg: {
-            dir: '/resources',
-            type: 'image/jpeg'
-        },
-        otf:{
-            dir: '/resources/fonts',
-            type: 'application/x-font-opentype'
-        }
-    }
-
-    let ext = path.extname(req.params.file).slice(1)
-    if(typeof(type[ext]) !== 'undefined'){        
-        let file = __dirname + type[ext].dir+"/"+req.params.file;
-        if(fs.existsSync(file)){
-            res.sendFile(file, {headers: {'Content-Type':type[ext].type}})
-        }else{
-            if(ext === 'html'){
-                res.redirect('/404')
-            }else{
-                res.sendStatus(404).end()
-            }        
-        }        
-    }else{
-        res.sendStatus(404).end()
-    }
-})
-
 app.post("/postcards", (req, res) => {
     userController.savePostcard(req, res);
 })
