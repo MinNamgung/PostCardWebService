@@ -8,6 +8,8 @@ let selectedElement;
 let undo = new Array();
 //Callback functions for redo commands.
 let redo = new Array();
+//array for storing image files
+let imageFiles = new Array();
 
 /*
 Allows the target to receive dropped elements.
@@ -444,6 +446,13 @@ Append each file in files that is an image to the postcard.
 */
 function setBackgroundImage(file, element) {
     if (file && file.type.match(/image.*/)) {
+        if (!element.id) {
+            element.id = Date.now();
+        }
+        if (!imageFiles[element.id]) {
+            imageFiles[element.id] = new Array();
+        }
+        imageFiles[element.id].push(file);
         let reader = new FileReader();
         reader.onload = function (event) {
             let img = document.createElement('img');
@@ -454,8 +463,9 @@ function setBackgroundImage(file, element) {
             //setup undo/redo callbacks
             undo.push(() => {
                 element.style.background = previousBackground;
+                imageFiles[element.id].pop();
                 redo.push(() => setBackgroundImage(file, element));
-            })
+            });
         }
         reader.readAsDataURL(file);
     }
