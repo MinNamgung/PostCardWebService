@@ -453,6 +453,17 @@ app.get('/postcard/:username/:visibility/:id', (req, res) => {
     })
 })
 
+app.get("/images/:username/:imageName", (req, res) => {
+    let filepath = path.join(__dirname, "resources/", req.url);
+    if (fs.existsSync(filepath)) {
+        res.sendFile(filepath);
+    }
+    else {
+        res.writeHeader(404);
+        res.end();
+    }
+})
+
 //Run on the port defined in the .env file.
 app.listen(process.env.PORT, () => {
     console.log('server start, ', process.env.PORT);
