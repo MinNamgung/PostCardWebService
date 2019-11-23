@@ -747,3 +747,18 @@ function enableCanvasModificationButtons() {
     $("#downloadBtn").prop("disabled", false);
     $("#saveBtn").prop("disabled", false);
 }
+
+/*
+POSTS and image file to the server for saving.
+*/
+function postImage(imageFile) {
+    let reader = new FileReader();
+    let imageBuffer = reader.readAsArrayBuffer(imageFile);
+    let data = {
+        file = imageBuffer,
+        filename: imageFile.name
+    }
+    $.post("images", data).done(result => {
+
+    });
+}
