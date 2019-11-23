@@ -17,6 +17,15 @@ const accountSid = process.env.accountSid;
 const authToken = process.env.authToken;
 const client = require('twilio')(accountSid, authToken);    //whatsapp api
 const cloudinary = require('cloudinary').v2;                //save image to cloud api
+const multer = require("multer");
+const upload = multer({
+    storage: multer.diskStorage({
+      destination: "uploads",
+      filename: (req, file, callback) => {
+        callback(null, file.originalname);
+      }
+    })
+  });
 
 //cloud image saving - credential
 cloudinary.config({
@@ -39,7 +48,7 @@ const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 
 
-app.use(bodyParser.json({limit: "50mb"}));
+//app.use(bodyParser.json({limit: "50mb"}));
 app.use(bodyParser.urlencoded({
     extended: true,
     limit: "50mb"
@@ -462,6 +471,16 @@ app.get("/images/:username/:imageName", (req, res) => {
         res.writeHeader(404);
         res.end();
     }
+})
+
+app.post("/images", 
+    upload.fields([{name: "file", maxCount: 1}, {name: "fileName", maxCount: 1}]), 
+    (req, res) => {
+        let username = "levi";
+        let file = req.files[0];
+        res.writeHead(200,{'Content-Type':'application/json'});
+        res.write(JSON.stringify({'success':true,'message':"Succesfully saved image."}));
+        res.end();
 })
 
 //Run on the port defined in the .env file.
