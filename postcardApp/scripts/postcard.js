@@ -380,6 +380,9 @@ $(document).ready(function () {
     $("#saveBtn").on("click", () => {
         savePostcard();
     });
+    $("#uploadBtn").on("click", () => {
+        console.log("imageFiled");
+    });
 })
 
 /*
@@ -759,6 +762,6 @@ function postImage(imageFile) {
         filename: imageFile.name
     }
     $.post("images", data).done(result => {
-
+        displayToast("Saving Image", result.message);
     });
 }

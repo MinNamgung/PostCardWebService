@@ -20,7 +20,7 @@ const cloudinary = require('cloudinary').v2;                //save image to clou
 const multer = require("multer");
 const upload = multer({
     storage: multer.diskStorage({
-      destination: "uploads",
+      destination: process.env.uploadsPath,
       filename: (req, file, callback) => {
         callback(null, file.originalname);
       }
@@ -463,9 +463,9 @@ app.get('/postcard/:username/:visibility/:id', (req, res) => {
 })
 
 app.get("/images/:username/:imageName", (req, res) => {
-    let filepath = path.join(__dirname, "resources/", req.url);
-    if (fs.existsSync(filepath)) {
-        res.sendFile(filepath);
+    let imagePath = path.join(__dirname, "../", req.url);
+    if (fs.existsSync(imagePath)) {
+        res.sendFile(imagePath);
     }
     else {
         res.writeHeader(404);
@@ -476,11 +476,38 @@ app.get("/images/:username/:imageName", (req, res) => {
 app.post("/images", 
     upload.fields([{name: "file", maxCount: 1}, {name: "fileName", maxCount: 1}]), 
     (req, res) => {
-        let username = "levi";
-        let file = req.files[0];
-        res.writeHead(200,{'Content-Type':'application/json'});
-        res.write(JSON.stringify({'success':true,'message':"Succesfully saved image."}));
-        res.end();
+        let makeNonexistingDir = function (dirPath) {
+            if (!fs.existsSync(dirPath)) {
+                fs.mkdirSync(dirPath);
+            }
+        }
+        if (req.user && req.user[0]) {
+            let userId = req.user[0]._id;
+            let file = req.files.file[0];
+            let imagesDirectory = "images";
+            makeNonexistingDir(imagesDirectory);
+            let userDirectory = path.join(imagesDirectory, username);
+            makeNonexistingDir(userDirectory);
+            let destination = path.join(userDirectory, file.originalname);
+            let source = path.join(process.env.uploadsPath, file.originalname);
+            if (fs.existsSync(source)) {
+                fs.copyFileSync(source, destination);
+                fs.unlink(source, () => {});
+                res.writeHead(200,{'Content-Type':'application/json'});
+                res.write(JSON.stringify({'success':true,'message':"Succesfully saved image."}));
+                res.end();
+            }
+            else {
+                res.writeHead(200,{'Content-Type':'application/json'});
+                res.write(JSON.stringify({'success':false,'message':"Image not found."}));
+                res.end();
+            }
+        }
+        else {
+                res.writeHead(200,{'Content-Type':'application/json'});
+                res.write(JSON.stringify({'success':false,'message':"Unauthorized user."}));
+                res.end();
+        }
 })
 
 //Run on the port defined in the .env file.
