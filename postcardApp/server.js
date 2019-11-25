@@ -48,20 +48,11 @@ const userController = require("./controller")
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 
-<<<<<<< HEAD
 //for parsing application/json
 app.use(bodyParser.json());
 //for parsing application/xwww-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
 //for parsing multipart/form-data
-=======
-
-//app.use(bodyParser.json({limit: "50mb"}));
-app.use(bodyParser.urlencoded({
-    extended: true,
-    limit: "50mb"
-}));
->>>>>>> f9342fb61bf1fef595cc26000c9006e5eac4c26a
 
 mongoose.connect(process.env.DB_URL)
     .then(() =>  console.log('connection succesful'))
@@ -483,7 +474,6 @@ app.get("/images/:username/:imageName", (req, res) => {
     }
 })
 
-<<<<<<< HEAD
 app.post("/images", upload.single("imageFile"), (req, res) => {
     if (req.user && req.user[0]._id) {
         let makeNonexistingDir = function (directoryPath) {
@@ -509,16 +499,6 @@ app.post("/images", upload.single("imageFile"), (req, res) => {
         res.write(JSON.stringify({'success':false,'message':"Unauthorized User"}));
         res.end();
     }
-=======
-app.post("/images", 
-    upload.fields([{name: "file", maxCount: 1}, {name: "fileName", maxCount: 1}]), 
-    (req, res) => {
-        let username = "levi";
-        let file = req.files[0];
-        res.writeHead(200,{'Content-Type':'application/json'});
-        res.write(JSON.stringify({'success':true,'message':"Succesfully saved image."}));
-        res.end();
->>>>>>> f9342fb61bf1fef595cc26000c9006e5eac4c26a
 })
 
 //Run on the port defined in the .env file.
