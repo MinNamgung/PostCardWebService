@@ -20,12 +20,13 @@ const cloudinary = require('cloudinary').v2;                //save image to clou
 const multer = require("multer");
 const upload = multer(
     { 
-    dest: 'uploads/',
-    filename: function(req, file, cb) {
-        let filteredName = file.originalName.replace(" ", "_");
-        cb(null, filteredName);
+        dest: 'uploads/',
+        filename: function(req, file, cb) {
+            let filteredName = file.originalName.replace(" ", "_");
+            cb(null, filteredName);
+        }
     }
- })
+ );
 
 
 //cloud image saving - credential
