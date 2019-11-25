@@ -380,9 +380,6 @@ $(document).ready(function () {
     $("#saveBtn").on("click", () => {
         savePostcard();
     });
-    $("#uploadBtn").on("click", () => {
-        console.log("imageFiled");
-    });
 })
 
 /*
@@ -752,16 +749,26 @@ function enableCanvasModificationButtons() {
 }
 
 /*
-POSTS and image file to the server for saving.
+POSTS an image file to the server for saving.
 */
 function postImage(imageFile) {
-    let reader = new FileReader();
-    let imageBuffer = reader.readAsArrayBuffer(imageFile);
-    let data = {
-        file = imageBuffer,
-        filename: imageFile.name
-    }
-    $.post("images", data).done(result => {
-        displayToast("Saving Image", result.message);
+    let formData = new FormData();
+    formData.append("imageFile", imageFile);
+    formData.append("fileName", imageFile.name);
+    $.ajax({
+        url: "images",
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        method: 'POST',
+        complete: function(data){
+            if (data.success) {
+                displayToast(imageFile.name, "Saved to " + data.src);
+            }
+            else {
+                displayToast("Failed to save " + imageFile.name, data.message);
+            }
+        }
     });
 }
