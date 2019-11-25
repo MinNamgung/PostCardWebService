@@ -8,6 +8,8 @@ let selectedElement;
 let undo = new Array();
 //Callback functions for redo commands.
 let redo = new Array();
+//array for storing image files
+let imageFiles = new Array();
 
 /*
 Allows the target to receive dropped elements.
@@ -444,6 +446,13 @@ Append each file in files that is an image to the postcard.
 */
 function setBackgroundImage(file, element) {
     if (file && file.type.match(/image.*/)) {
+        if (!element.id) {
+            element.id = Date.now();
+        }
+        if (!imageFiles[element.id]) {
+            imageFiles[element.id] = new Array();
+        }
+        imageFiles[element.id].push(file);
         let reader = new FileReader();
         reader.onload = function (event) {
             let img = document.createElement('img');
@@ -454,8 +463,9 @@ function setBackgroundImage(file, element) {
             //setup undo/redo callbacks
             undo.push(() => {
                 element.style.background = previousBackground;
+                imageFiles[element.id].pop();
                 redo.push(() => setBackgroundImage(file, element));
-            })
+            });
         }
         reader.readAsDataURL(file);
     }
@@ -736,4 +746,29 @@ Enables the download and save buttons.
 function enableCanvasModificationButtons() {
     $("#downloadBtn").prop("disabled", false);
     $("#saveBtn").prop("disabled", false);
+}
+
+/*
+POSTS an image file to the server for saving.
+*/
+function postImage(imageFile) {
+    let formData = new FormData();
+    formData.append("imageFile", imageFile);
+    formData.append("fileName", imageFile.name);
+    $.ajax({
+        url: "images",
+        data: formData,
+        cache: false,
+        contentType: false,
+        processData: false,
+        method: 'POST',
+        complete: function(data){
+            if (data.success) {
+                displayToast(imageFile.name, "Saved to " + data.src);
+            }
+            else {
+                displayToast("Failed to save " + imageFile.name, data.message);
+            }
+        }
+    });
 }

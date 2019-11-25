@@ -17,6 +17,17 @@ const accountSid = process.env.accountSid;
 const authToken = process.env.authToken;
 const client = require('twilio')(accountSid, authToken);    //whatsapp api
 const cloudinary = require('cloudinary').v2;                //save image to cloud api
+const multer = require("multer");
+const upload = multer(
+    { 
+        dest: 'uploads/',
+        filename: function(req, file, cb) {
+            let filteredName = file.originalName.replace(" ", "_");
+            cb(null, filteredName);
+        }
+    }
+ );
+
 
 //cloud image saving - credential
 cloudinary.config({
@@ -38,12 +49,11 @@ const userController = require("./controller")
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
 
-
-app.use(bodyParser.json({limit: "50mb"}));
-app.use(bodyParser.urlencoded({
-    extended: true,
-    limit: "50mb"
-}));
+//for parsing application/json
+app.use(bodyParser.json());
+//for parsing application/xwww-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: true }));
+//for parsing multipart/form-data
 
 mongoose.connect(process.env.DB_URL)
     .then(() =>  console.log('connection succesful'))
@@ -408,12 +418,40 @@ app.get('/postcard/:username/:visibility/:id', (req, res) => {
 })
 
 app.get("/images/:username/:imageName", (req, res) => {
-    let filepath = path.join(__dirname, "resources/", req.url);
-    if (fs.existsSync(filepath)) {
-        res.sendFile(filepath);
+    let imagePath = path.join(__dirname, "../", req.url);
+    imagePath = imagePath.replace(new RegExp("%20", "g"), " ");
+    if (fs.existsSync(imagePath)) {
+        res.sendFile(imagePath);
     }
     else {
         res.writeHeader(404);
+        res.end();
+    }
+})
+
+app.post("/images", upload.single("imageFile"), (req, res) => {
+    if (req.user && req.user[0]._id) {
+        let makeNonexistingDir = function (directoryPath) {
+            if (!fs.existsSync(directoryPath)) {
+                fs.mkdirSync(directoryPath);
+            }
+        }
+        let username = req.user[0]._id;
+        let filename = req.body.fileName;
+        let imagesDirectory = "images";
+        makeNonexistingDir(imagesDirectory);
+        let userDirectory = path.join(imagesDirectory, username);
+        makeNonexistingDir(userDirectory);
+        let destination = path.join(userDirectory, filename);
+        fs.copyFileSync(req.file.path, destination);
+        fs.unlinkSync(req.file.path);
+        res.writeHead(200,{'Content-Type':'application/json'});
+        res.write(JSON.stringify({'success':true,'message':"Succesfully saved image.", "src": destination}));
+        res.end();
+    }
+    else {
+        res.writeHead(200,{'Content-Type':'application/json'});
+        res.write(JSON.stringify({'success':false,'message':"Unauthorized User"}));
         res.end();
     }
 })
