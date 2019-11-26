@@ -9,7 +9,7 @@ let undo = new Array();
 //Callback functions for redo commands.
 let redo = new Array();
 //array for storing image files
-let imageFiles = new Array();
+let imageFiles = new Map();
 
 /*
 Allows the target to receive dropped elements.
@@ -449,10 +449,10 @@ function setBackgroundImage(file, element) {
         if (!element.id) {
             element.id = Date.now();
         }
-        if (!imageFiles[element.id]) {
-            imageFiles[element.id] = new Array();
+        if (!imageFiles.has(element.id)) {
+            imageFiles.set(element.id, new Array());
         }
-        imageFiles[element.id].push(file);
+        imageFiles.get(element.id).push(file);
         let reader = new FileReader();
         reader.onload = function (event) {
             let img = document.createElement('img');
@@ -463,7 +463,7 @@ function setBackgroundImage(file, element) {
             //setup undo/redo callbacks
             undo.push(() => {
                 element.style.background = previousBackground;
-                imageFiles[element.id].pop();
+                imageFiles.get(element.id).pop();
                 redo.push(() => setBackgroundImage(file, element));
             });
         }
@@ -678,22 +678,27 @@ Sends the postcard to the server to be saved.
 function savePostcard() {
     disableCanvasModificationButtons();
     clearSelectedStyling();
-    let postcard = serializePostcard();
-    let data = {};
-    data.postcard = postcard;
-    data.isPrivate = $("#isPrivateCheckbox")[0].checked;
-    let postcardElement = document.getElementById("postcardContainer");
-    elementToCanvas(postcardElement, (canvas) => {
-        let url = canvas.toDataURL("image/png");
-        let image = document.createElement("img");
-        image.src = url;
-        data.postcard.image = url;
+    /*save each image on the postcard, and update the element's
+     background property to point to the image on the server.*/
+    imageFiles.forEach((files, elementId, imageFilesMap) => {
+        let element = document.getElementById(elementId);
+        let currentImage = files[files.length - 1];
+        postImage(currentImage, (imageUrl) => {
+            element.style.backgroundImage = decodeURI(imageUrl);
+        });
+    });
+    //Give time for the postImage request to complete and set the background property to the url
+    setTimeout(() => {
+        let postcard = serializePostcard();
+        let data = {};
+        data.postcard = postcard;
+        data.isPrivate = $("#isPrivateCheckbox")[0].checked;
         $.post("/postcards", data).done(data => {
             displayToast("Saving Postcard", data.message);
             enableCanvasModificationButtons();
         });
-    });
     setSelectedStyling();
+    }, 1000);
 }
 
 /*
@@ -751,7 +756,7 @@ function enableCanvasModificationButtons() {
 /*
 POSTS an image file to the server for saving.
 */
-function postImage(imageFile) {
+function postImage(imageFile, successCallback) {
     let formData = new FormData();
     formData.append("imageFile", imageFile);
     formData.append("fileName", imageFile.name);
@@ -763,11 +768,13 @@ function postImage(imageFile) {
         processData: false,
         method: 'POST',
         complete: function(data){
-            if (data.success) {
-                displayToast(imageFile.name, "Saved to " + data.src);
+            let response = data.responseJSON;
+            if (response.success) {
+                displayToast(imageFile.name, "Saved to " + response.src);
+                successCallback(response.src);
             }
             else {
-                displayToast("Failed to save " + imageFile.name, data.message);
+                displayToast("Failed to save " + imageFile.name, "An error occurred on the server.");
             }
         }
     });

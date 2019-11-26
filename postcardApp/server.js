@@ -445,8 +445,9 @@ app.post("/images", upload.single("imageFile"), (req, res) => {
         let destination = path.join(userDirectory, filename);
         fs.copyFileSync(req.file.path, destination);
         fs.unlinkSync(req.file.path);
+        let imageUrl = "url(" + encodeURI(`/${imagesDirectory}/${username}/${filename}`) + ")"
         res.writeHead(200,{'Content-Type':'application/json'});
-        res.write(JSON.stringify({'success':true,'message':"Succesfully saved image.", "src": destination}));
+        res.write(JSON.stringify({'success':true,'message':"Succesfully saved image.", "src": imageUrl}));
         res.end();
     }
     else {
