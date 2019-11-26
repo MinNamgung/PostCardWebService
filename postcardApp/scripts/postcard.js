@@ -678,17 +678,28 @@ Sends the postcard to the server to be saved.
 function savePostcard() {
     disableCanvasModificationButtons();
     clearSelectedStyling();
+    let postImagePromises = new Array();
     /*save each image on the postcard, and update the element's
      background property to point to the image on the server.*/
     imageFiles.forEach((files, elementId, imageFilesMap) => {
         let element = document.getElementById(elementId);
         let currentImage = files[files.length - 1];
-        postImage(currentImage, (imageUrl) => {
-            element.style.backgroundImage = decodeURI(imageUrl);
-        });
+        postImagePromises.push(new Promise(
+            function (resolve, reject) {
+                postImage(currentImage, (imageUrl) => {
+                    if (imageUrl) {
+                        element.style.backgroundImage = decodeURI(imageUrl);
+                        resolve();
+                    }
+                    else {
+                        reject();
+                    }
+                })
+            })
+        );
     });
-    //Give time for the postImage request to complete and set the background property to the url
-    setTimeout(() => {
+    //Only save the postcard after all images have been saved
+    Promise.all(postImagePromises).then(() => {
         let postcard = serializePostcard();
         let data = {};
         data.postcard = postcard;
@@ -697,8 +708,8 @@ function savePostcard() {
             displayToast("Saving Postcard", data.message);
             enableCanvasModificationButtons();
         });
-    setSelectedStyling();
-    }, 1000);
+        setSelectedStyling();
+    });
 }
 
 /*
