@@ -14,14 +14,14 @@
 
   <!-- Custom styles for this template -->
   <link href="/css/simple-sidebar.css" rel="stylesheet">
-
-  <script src="/scripts/auth.js" type="text/javascript"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+  <script src="/scripts/app.js" type="text/javascript"></script>
 
 </head>
 
 <body>
 
-  <div class="d-flex" id="wrapper">
+  <div class="d-flex" id="wrapper" ng-app="PostcardService">
 
     <!-- Sidebar -->
     <div class="bg-light border-right" id="sidebar-wrapper">
@@ -39,45 +39,49 @@
 
       <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
         <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
-
-        <div class="navbar-collapse" id="navbarSupportedContent">
-            <a class="ml-auto nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        
+        <div class="navbar-collapse" id="navbarSupportedContent" ng-controller="AuthController">
+          <a class="ml-auto nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-if="!user" ng-click="showlogin()">
             Login
-            </a>
-            <div id="login" class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+          </a>
+          <p ng-if="user" class="ml-auto nav-link" id="loggedin"><strong>Hey there, {{user.username}}!</strong><br/> <a href="" ng-click="logout()">Logout</a></p>
+          <div id="login" class="dropdown dropdown-menu-right hidden">
             <div id="loginform" class="m-3">
                 <form>
                     <div class="form-group">
-                        <label for="username">Username</label><input class="form-control" type="text" name="uname">
-                        <label for="password">Password</label><input class="form-control" type="password" name="pword">
+                        <label for="username">Username</label><input class="form-control" type="text" id="uname" name="uname" ng-model="login.username" ng-change="validateLogin()">
+                        <label for="password">Password</label><input class="form-control" type="password" id="pword" name="pword" ng-model="login.password" ng-change="validateLogin()">
                     </div>
-                    <input type="button" class="btn btn-primary" value="Login" onclick="auth(this.form)"><p id="login-error"></p>
+                    <input type="button" class="btn btn-primary" value="Login" ng-click="authenticate()"><p id="login-error">{{error}}</p>
                 </form>
                 <p>
                     Don't have an account? <a href="/register" class>Register here</a>
                 </p>
             </div>
+          </div>
         </div>
       </nav>
 
       <div class="container-fluid">  
-        <div id="main">       
-            <h1><strong>Join us at {POST}</strong></h1>
-            <p>Save. Share. Rate.</p>
-            <div id="registration">
-                <form>
-                    <label>First Name</label><input class="form-control" type="text" name="fname"><br/>
-                    <label>Last Name</label><input class="form-control" type="text" name="lname"><br/>
-                    <label>Email</label><input class="form-control" type="email" name="email"><br/>
-                    <label>Username</label><input class="form-control" type="text" name="uname"><br/>
-                    <label>Password</label><input class="form-control" type="password" name="pword"><br/>
-                    <label>Confirm Password</label><input class="form-control" type="password" name="cword"><br/>
-                    <input class="btn btn-primary" type="button" value="Register" onclick="register(this.form)">
-                </form>
-                <div>
-                    <p id="reg-error"></p>
-                </div>
-            </div>     
+        <div id="bg">            
+        </div>
+        <div id="main" ng-controller="RegistrationController">       
+          <h1><strong>Join us at {POST}</strong></h1>
+          <p>Save. Share. Rate.</p>
+          <div id="registration">
+            <form>
+              <label>First Name</label><input class="form-control" type="text" name="fname" ng-model="user.firstname" id="firstname" ng-change="validateRegistration()"><br/>
+              <label>Last Name</label><input class="form-control" type="text" name="lname" ng-model="user.lastname" id="lastname" ng-change="validateRegistration()"><br/>
+              <label>Email</label><input class="form-control" type="email" name="email" ng-model="user.email" id="email" ng-change="validateRegistration()"><br/>
+              <label>Username</label><input class="form-control" type="text" name="uname" ng-model="user.username" id="username" ng-change="validateRegistration()"><br/>
+              <label>Password</label><input class="form-control" type="password" name="pword" ng-model="user.password" id="password" ng-change="validateRegistration()"><br/>
+              <label>Confirm Password</label><input class="form-control" type="password" name="cword" ng-model="user.confirm" id="confirm" ng-change="validateRegistration()"><br/>
+              <input class="btn btn-primary" type="button" value="Register" ng-click="register()" id="reg-btn">
+            </form>
+            <div>
+              <p id="reg-error">{{error}}</p>
+            </div>
+          </div>     
         </div>
       </div>
     </div>

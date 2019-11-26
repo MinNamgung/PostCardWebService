@@ -40,4 +40,29 @@
     margin: 1px;
 }
 
-    
+.group .form-control{
+    width: 70%;
+    display: inline-block;
+}
+
+#delete-account{
+    color: red;
+    cursor: pointer;
+}   
+
+#deletion-confirm{
+    position: fixed;
+    width: 50vw;
+    height: 25vh;
+    top: 20vh;
+    left: 25vw;
+    background: white;
+    padding: 5% 2%;
+    border-radius: 10px;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+
+#deletion-confirm .btn{
+    width: 40%;
+    margin: 0 5%;
+}

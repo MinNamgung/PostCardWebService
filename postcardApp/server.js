@@ -55,7 +55,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 //for parsing multipart/form-data
 
-mongoose.connect(process.env.DB_URL)
+mongoose.connect(process.env.DB_URL,{ useNewUrlParser: true, useUnifiedTopology: true })
     .then(() =>  console.log('connection succesful'))
     .catch((err) => console.error(err));
 mongoose.promise = global.Promise
@@ -123,9 +123,57 @@ app.get('/', (req,res) => {
     }    
 })
 
-app.route('/register')
-    .get((req,res) => {
+app.get('/register', (req,res) => {
+    if(req.user){
+        res.redirect('/')
+    }else{
         res.sendFile(path.join(__dirname+"/templates/register.html"))
+    }   
+}) 
+
+app.post("/login", (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if(err){
+            return next(err)
+        }
+        if(!user){
+            return ((res) => {
+                res.writeHead('200',{'Content-Type':'application/json'})
+                res.write(JSON.stringify({'success': false, 'message':'Username or Password is incorrect'}))
+                res.end()
+            })(res)
+        }else{
+            req.login(user, err => {
+                if(err){
+                    return next(err)
+                }
+                return ((res) => {
+                    res.writeHead('200',{'Content-Type':'application/json'})
+                    res.write(JSON.stringify({'success': true, 'message':'Login Successful'}))
+                    res.end()  
+                })(res)
+            })
+        }
+    })(req, res, next)
+})
+
+app.route('/user')
+    .get((req, res) => {
+        if(req.user){
+            let user = req.user[0]
+            if(req.query.from === "/account"){
+                res.send({
+                    _id: user._id,
+                    firstname: user.firstname,
+                    lastname: user.lastname,
+                    email: user.email
+                })
+            }else{
+                res.send({username: user._id})
+            }        
+        }else{
+            res.send(null)
+        }
     })
     .post((req,res)=>{
 
@@ -155,41 +203,27 @@ app.route('/register')
             userController.create(user, res)
         }
     })
-
-app.post("/login", (req, res, next) => {
-    passport.authenticate('local', (err, user, info) => {
-        if(err){
-            return next(err)
-        }
-        if(!user){
-            return ((res) => {
-                res.writeHead('200',{'Content-Type':'application/json'})
-                res.write(JSON.stringify({'success': false, 'message':'Username or Password is incorrect'}))
-                res.send()
-            })(res)
+    .put((req, res) => {
+        if(req.user){
+            if(req.body.password){
+                let salt = uuid()
+                let hash = crypto.createHash('sha256')
+                let password = hash.update(req.body.password + salt,'utf8').digest('hex')                 
+                userController.update(req.user[0]._id, {auth: {salt: salt, password: password}}, res)
+            }else{
+                userController.update(req.user[0]._id, req.body, res)
+            }            
         }else{
-            req.login(user, err => {
-                if(err){
-                    return next(err)
-                }
-                return ((res) => {
-                    res.writeHead('200',{'Content-Type':'application/json'})
-                    res.write(JSON.stringify({'success': true, 'message':'Login Successful'}))
-                    res.send()  
-                })(res)
-            })
+            res.redirect("/")
         }
-    })(req, res, next)
-})
-
-app.get('/user', (req, res) => {
-    if(req.user){
-        let user = req.user[0]
-        res.send({username: user._id})
-    }else{
-        res.send(null)
-    }
-})
+    })
+    .delete((req,res) => {
+        if(req.user){
+            userController.delete(req.user[0]._id, req, res)
+        }else{
+            res.redirect("/")
+        }
+    })
 
 app.get('/profile',(req,res) => {
     if(req.user){
@@ -363,6 +397,14 @@ app.get('/user/:id',(req,res) => {
             }
         }
     })
+})
+
+app.get('/account', (req, res) => {
+    if(req.user){
+        res.sendFile(path.join(__dirname+"/templates/account.html"))
+    }else{
+        res.redirect("/")
+    }
 })
 
 app.get('/search', (req, res) => {

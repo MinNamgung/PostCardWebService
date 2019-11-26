@@ -40,15 +40,6 @@ userController.auth = (data, done) => {
         }
     })
 }
-userController.get = (data,req,res,callback) => {
-    User.find(data, (err, users) =>{
-        if(err){
-            callback(err)
-        }else{
-            callback(null, users, req, res)
-        }
-    })
-}
 
 userController.get = (data, select, req, res, callback) => {
 
@@ -68,9 +59,38 @@ userController.get = (data, select, req, res, callback) => {
                 callback(null, users, req, res)
             }
         })
-    }
+    }    
+}
 
-    
+userController.update = (username, data, res) => {
+    User.findOne({_id: username},(err, user) => {
+        if(err){
+            res.send({
+                success: false,
+                err: err
+            })
+        }else if(user){
+            for(prop in data){
+                user[prop] = data[prop]
+            }
+
+            user.save()
+            res.send({
+                success: true
+            })
+        }
+    })
+}
+
+userController.delete = (username, req, res) => {
+    User.deleteOne({_id: username}, (err) => {
+        if(err){
+            res.send({success: false, err: err})
+        }else{
+            req.logout()
+            res.send({success: true})
+        }
+    })
 }
 
 userController.savePostcard = (req, res) => {

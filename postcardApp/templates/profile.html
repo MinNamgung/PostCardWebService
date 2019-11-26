@@ -83,6 +83,7 @@
             <div ng-if="user">
               <h1>{{user.firstname}} {{user.lastname}}</h1>
               <h3>@{{user._id}}</h3>
+              <a href="/account" ng-if="user.postcards.private">Manage your account</a>
               <hr/>
               <div ng-if="user.postcards.private">
                   <h3>Your Private Postcards</h3>
