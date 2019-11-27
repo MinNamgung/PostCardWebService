@@ -60,8 +60,8 @@
           </select>
           <button onclick="setSelectedElementGradientBackground()">Apply</button>
         </div>
-        <a class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" 
-        onclick="sidebarClickTextBoxWithoutDrag(event)" data-type="input">Add Textbox</a>
+        <button class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" 
+        onclick="sidebarClickTextBoxWithoutDrag(event)" data-type="input">Add Textbox</button>
         <div class="list-group-item list-group-item-action bg-light">
           Font:
           <select id="fontFamilySelector">
@@ -110,15 +110,13 @@
           <input class="orderButton" id="sendForwards" type="button" value="Send Forwards" onclick="sendForwards()">
           <input class="orderButton" id="sendToFront" type="button" value="Send To Front" onclick="sendToFront()">
         </div>
-        <input id="filePicker" type="file" accept="image/*" class="list-group-item list-group-item-action bg-light" draggable="true"
-           ondragstart="imageDragStarted(event)" data-type="image"> 
+        <label id="filePickerLbl" for="filePicker" class="list-group-item list-group-item-action bg-light"
+          draggable="true" ondragstart="imageDragStarted(event)" data-type="image">
+          Background Image
+          <input id="filePicker" type="file" accept="image/*">
+        </label>
         <button id="downloadBtn" class="list-group-item list-group-item-action bg-light">Download</button>
-        <div id="save" class="list-group-item list-group-item-action bg-light">
-          <button id="saveBtn" class="list-group-item list-group-item-action bg-light" type="button">Save</button>
-          <input id="isPrivateCheckbox" type="checkbox" isChecked="true"> Private
-        </div>
-        <a class="list-group-item list-group-item-action bg-light">View Templates</a>
-        <a class="list-group-item list-group-item-action bg-light" onclick="on()" >Share</a>
+        <button class="list-group-item list-group-item-action bg-light" onclick="on()" >Share</button>
       </div>
     </div>
     <!-- /#sidebar-wrapper -->
@@ -128,7 +126,17 @@
         
         <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
           <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
-          
+        <div id="save" class="dropdown save-dropdown">
+            Save
+            <div class="dropdown-content">
+                <button id="saveBtn" class="list-group-item list-group-item-action bg-light saveButton" type="button">Save</button>
+                <button id="saveAsBtn" class="list-group-item list-group-item-action bg-light saveButton" type="button">Save As</button>
+                <div id="isPrivateContainer">
+                  <input id="isPrivateCheckbox" type="checkbox" isChecked="true"><span>Private</span>
+                </div>
+            </div>
+          </div>
+
           <div class="navbar-collapse" id="navbarSupportedContent" ng-controller="AuthController">
             <a class="ml-auto nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-if="!user" ng-click="showlogin()">
               Login

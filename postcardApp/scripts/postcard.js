@@ -344,6 +344,17 @@ $(document).ready(function () {
         }
     );
 
+    //set the private checkbox selected based on if a public or private postcard is loaded
+    let urlParts = document.location.pathname.trim().split("/");
+    if (urlParts.length === 5) {
+        if (urlParts[3] === "private") {
+            $("#isPrivateCheckbox").attr("checked", true);
+        }
+        else {
+            $("#isPrivateCheckbox").attr("checked", false);
+        }
+    }
+
     $("#downloadBtn").on("click", () => downloadPostcard("postcard.png"));
     $("#colorPicker").on("change", colorPickerChanged);
     $("#fontFamilySelector").on("change", fontFamilyChanged);
