@@ -90,7 +90,7 @@
                   <p  ng-if="!user.postcards || user.postcards.private.length === 0"> Sorry! No postcards to display</p>
                   <div id="private" class="postcards">                  
                     <div class="postcard" ng-repeat="postcard in user.postcards.private track by $index">
-                      <a ng-href="/design/{{user._id}}/private/{{postcard._id}}"><img ng-src="{{postcard.image}}"/></a>
+                      <a ng-href="/design/{{user._id}}/private/{{postcard._id}}">{{postcard.outerHTML}}</a>
                     </div>
                     <hr>
                   </div>
@@ -101,7 +101,7 @@
               <p  ng-if="!user.postcards || user.postcards.public.length === 0"> Sorry! No postcards to display</p>
               <div id="public" class="postcards">                  
                   <div class="postcard" ng-repeat="postcard in user.postcards.public track by $index">
-                      <a ng-href="/design/{{user._id}}/public/{{postcard._id}}"><img ng-src="{{postcard.image}}"/></a>
+                      <a ng-href="/design/{{user._id}}/public/{{postcard._id}}">{{postcard.outerHTML}}</a>
                     </div>
               </div>
             </div>
