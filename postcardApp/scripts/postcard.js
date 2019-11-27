@@ -783,7 +783,7 @@ function postImage(imageFile, successCallback) {
     formData.append("imageFile", imageFile);
     formData.append("fileName", imageFile.name);
     $.ajax({
-        url: "images",
+        url: "/images",
         data: formData,
         cache: false,
         contentType: false,
