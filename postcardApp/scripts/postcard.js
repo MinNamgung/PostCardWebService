@@ -701,8 +701,7 @@ function savePostcard() {
                     if (imageUrl) {
                         element.style.backgroundImage = decodeURI(imageUrl);
                         resolve();
-                    }
-                    else {
+                    }else{
                         reject();
                     }
                 })
@@ -788,7 +787,7 @@ function postImage(imageFile, successCallback) {
         cache: false,
         contentType: false,
         processData: false,
-        method: 'POST',
+        method: 'POST', 
         complete: function(data){
             let response = data.responseJSON;
             if (response.success) {

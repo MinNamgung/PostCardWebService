@@ -1,4 +1,4 @@
-const app = angular.module("PostcardService", [])
+const app = angular.module("PostcardService", ["ngSanitize"])
 
 app.controller("AuthController", ["$scope", "$http", "$rootScope",($scope, $http, $rootScope) => {
 
@@ -40,7 +40,6 @@ app.controller("AuthController", ["$scope", "$http", "$rootScope",($scope, $http
         if($scope.login.isValid){
             $http.post('/login', $scope.login)
             .then(res => {
-                console.log(res.data)
                 if(res.data.success){
                     if(window.location.pathname.includes('/design')){
                         $scope.isAuthenticated()
@@ -48,12 +47,13 @@ app.controller("AuthController", ["$scope", "$http", "$rootScope",($scope, $http
                     }else{
                         location.reload()
                     }
-                }else{
-                    $scope.error = res.data.message
-                    $("#uname").addClass('is-invalid')
-                    $("#pword").addClass('is-invalid')     
-                    $("#login-button").attr('disabled',true)   
-                }
+                }                  
+            })
+            .catch(e => {
+                $scope.error = "Username or Password is invalid"
+                $("#uname").addClass('is-invalid')
+                $("#pword").addClass('is-invalid')     
+                $("#login-button").attr('disabled',true) 
             })
         }
     }
@@ -149,15 +149,20 @@ app.controller("RegistrationController", ['$scope', '$http', ($scope, $http) => 
     }
 }])
 
-app.controller("ProfileController", ['$scope', '$http', ($scope, $http) =>{
+app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $sce) =>{
 
     $scope.query = window.location.pathname.slice(9)
     $scope.currentUser = null
     
+    $scope.trust = html => {
+        return $sce.trustAsHtml(html)
+    }
+
     $http.get('/user/'+$scope.query)
     .then(res => {
         if(res.data.error){
         }else{
+            console.log(res.data)
             $scope.user = res.data
         }
     })    

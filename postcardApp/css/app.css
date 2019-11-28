@@ -1,6 +1,6 @@
-.postcard img{
-    width: 20vw;
-    height: auto;
+.postcard div{
+    width: 20vw !important;
+    height: 25vh !important;
     border-radius: 10px;
 }
 
