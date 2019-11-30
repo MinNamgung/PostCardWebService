@@ -355,6 +355,9 @@ $(document).ready(function () {
         }
     }
 
+    $("#imgPickerIcon").click(() => {
+        $("#filePicker").trigger("click");
+    });
     $("#downloadBtn").on("click", () => downloadPostcard("postcard.png"));
     $("#colorPicker").on("change", colorPickerChanged);
     $("#fontFamilySelector").on("change", fontFamilyChanged);
@@ -420,6 +423,10 @@ function deleteElement(element) {
 function colorPickerChanged(event) {
     let color = event.target.value;
     setBackground(selectedElement, color);
+}
+
+function clearColor() {
+    setBackground(selectedElement, "transparent");
 }
 
 function fontFamilyChanged(event) {
