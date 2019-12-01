@@ -10,6 +10,8 @@ let undo = new Array();
 let redo = new Array();
 //array for storing image files
 let imageFiles = new Map();
+//store original value of private/public
+let isPrivateOnLoad = false;
 
 /*
 Allows the target to receive dropped elements.
@@ -391,9 +393,6 @@ $(document).ready(function () {
             }
         }
     })
-    $("#saveBtn").on("click", () => {
-        savePostcard();
-    });
 })
 
 /*
@@ -641,8 +640,8 @@ function serializePostcard() {
     })
     let html = postcardElement.outerHTML;
     let id = null;
-    if (postcardElement.dataset.postcardId) {
-        id = postcardElement.dataset.postcardId
+    if (postcardElement.dataset["postcardId"]) {
+        id = postcardElement.dataset["postcardId"];
     }
     let postcard = {
         _id: id,
@@ -656,12 +655,11 @@ function serializePostcard() {
 Transforms the JSON string representing a postcard to HTML content.
 See the serializePostcard function for the contents of the json parameter.
 */
-function deserializePostcard(json, parent) {
+function deserializePostcard(json) {
     let postcard = JSON.parse(json);
-    let postcardElement = document.createElement("div");
-    postcardElement.dataset["_id"] = postcard._id;
-    parent.appendChild(postcardElement);
+    let postcardElement = $("#postcardContainer")[0];
     postcardElement.outerHTML = postcard.outerHTML;
+    $("#postcardContainer")[0].dataset["postcardId"] = postcard._id;
     deserializePostcardTextboxes(postcard);
 }
 
@@ -692,8 +690,10 @@ function deserializePostcardTextboxes(postcard) {
 
 /*
 Sends the postcard to the server to be saved.
+isUpdate - boolean indicating if the postcard should be saved
+by updating it, or saved by creating a new postcard.
 */
-function savePostcard() {
+function savePostcard(isUpdate, username) {
     disableCanvasModificationButtons();
     clearSelectedStyling();
     let postImagePromises = new Array();
@@ -720,7 +720,12 @@ function savePostcard() {
         let postcard = serializePostcard();
         let data = {};
         data.postcard = postcard;
-        data.isPrivate = $("#isPrivateCheckbox")[0].checked;
+        let isPrivate = $("#isPrivateCheckbox")[0].checked;
+        //determine if the postcard has been moved from private to public
+        data.isPrivateStateChanged = isPrivateOnLoad != isPrivate;
+        data.isPrivate = isPrivate;
+        data.isUpdate = isUpdate;
+        data.username = username;
         $.post("/postcards", data).done(data => {
             displayToast("Saving Postcard", data.message);
             enableCanvasModificationButtons();
@@ -734,16 +739,13 @@ Load the postcard from the server to be displayed
 */
 function loadPostcard() {
     return new Promise((resolve, reject) => {
-        let postcardContainer = $("#postcardContainer")[0];
-
         //Check if a postcard needs to be loaded
         let url = document.location.pathname.trim().split("/").splice(1);
         //If the url has more than length one, we need to load a postcard
         if (url.length > 1) {
             url[0] = "/postcard";
             $.get(url.join("/")).done(data => {
-                $("#content-container").empty();
-                deserializePostcard(data, $("#content-container")[0]);
+                deserializePostcard(data);
                 resolve();
             });
         }

@@ -94,7 +94,6 @@
                   <p  ng-if="!user.postcards || user.postcards.private.length === 0"> Sorry! No postcards to display</p>
                   <div id="private" class="postcards">                  
                     <div class="postcard" ng-repeat="postcard in user.postcards.private track by $index">
-                      <div class="postcard" ng-repeat="postcard in user.postcards.private track by $index">
                         <a ng-href="/design/{{user._id}}/private/{{postcard._id}}">
                           <div ng-bind-html="trust(postcard.outerHTML)"></div>
                         </a>

@@ -202,11 +202,41 @@ userController.deleteUser = (req, res) => {
         res.redirect("/")
     }
 }
- /**
+
+/*
+ * Adds a postcard to the end of array and sets the _id property of postcard.
+ */
+function addPostcard(array, postcard) {
+    postcard._id = array.length;
+    array.push(postcard);
+}
+
+/*
+ * Removes a postcard from the array and sets the remaining postcards _id property.
+ */
+function removePostcard(array, postcard) {
+    array.splice(postcard._id, 1);
+    setAllPostcardId(array);
+}
+
+/*
+ * Sets the _id property of each postcard to its index in the array.
+ */
+function setAllPostcardId(postcardArray) {
+    postcardArray.forEach((postcard, index) => postcard._id = index);
+}
+
+ /*
   * Saves Postcard to current user
   */
 userController.savePostcard = (req, res) => {
     let postcard = req.body.postcard;
+    //true if the _id property is nonempty and defined
+    let idIsSet = (postcard._id != "") && (typeof postcard._id != "undefined");
+    let isPrivate = JSON.parse(req.body.isPrivate);
+    let isUpdate = JSON.parse(req.body.isUpdate);
+    let privateStateChanged = JSON.parse(req.body.isPrivateStateChanged);
+    let username = req.body.username;
     if (req.user) {
         let userId = req.user._id;
         User.findOne({_id: userId}, (err, user) => {
@@ -214,22 +244,36 @@ userController.savePostcard = (req, res) => {
                 res.send({success: false, message: err.message});
             }
             else {
-                if (JSON.parse(req.body.isPrivate)) {
-                    if (postcard._id) {
-                        user.postcard.private[postcard._id] = postcard;
-                    }
-                    else {
-                        postcard._id = user.postcards.private.length;
-                        user.postcards.private.push(postcard);
-                    }
+                //retrieve the collection to save the postcard to
+                let postcards = user.postcards.public;
+                if (isPrivate) {
+                    postcards = user.postcards.private;
+                }
+                /* If username doesn't match the logged in user, then 
+                the logged in user is trying to save another user's public postcard. */
+                let copyOtherUsersPostcard = username != req.user._id;
+                if (copyOtherUsersPostcard) {
+                    addPostcard(postcards, postcard);
+                }
+                /* 
+                If the postcard has been moved from private <=> public and this is an update, remove 
+                it from its original collection and add to the new collection.
+                */
+                else if (privateStateChanged && isUpdate && idIsSet) {
+                    //remove the postcard from its old collection. (could be public or private)
+                    let newCollection = postcards;
+                    let oldCollection = newCollection === user.postcards.private ? user.postcards.public : user.postcards.private;
+                    removePostcard(oldCollection, postcard);
+                    //add to the new collection (could be public or private)
+                    addPostcard(newCollection, postcard);
                 }
                 else {
-                    if (postcard._id) {
-                        user.postcard.public[postcard_id] = postcard;
+                    //_id field must be defined to be an update, else save it as a new postcard
+                    if (isUpdate && idIsSet) {
+                        postcards.set(postcard._id, postcard);
                     }
                     else {
-                        postcard._id = user.postcards.public.length;
-                        user.postcards.public.push(postcard);
+                        addPostcard(postcards, postcard);
                     }
                 }
                 user.save((err) => {
