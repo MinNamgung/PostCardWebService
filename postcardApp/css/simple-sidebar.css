@@ -14,7 +14,7 @@ body {
 
 #sidebar-wrapper {
   min-height: 100vh;
-  margin-left: -15rem;
+  margin-left: -16rem;
   -webkit-transition: margin .25s ease-out;
   -moz-transition: margin .25s ease-out;
   -o-transition: margin .25s ease-out;
@@ -86,7 +86,7 @@ body {
   }
 
   #wrapper.toggled #sidebar-wrapper {
-    margin-left: -15rem;
+    margin-left: -16rem;
   }
 
   #login{
@@ -112,4 +112,14 @@ body {
   line-height: normal;
   margin: 0 0 0 auto;
   text-align: right;
+}
+
+.design-icon{
+  width: 28px;
+  cursor: pointer;
+}
+
+.finish-icon{
+  width: 40px;
+  margin: 10px;
 }

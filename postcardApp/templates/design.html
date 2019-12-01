@@ -28,8 +28,9 @@
   <script type="text/JavaScript" src="/scripts/postcard.js"></script>
   <script type="text/JavaScript" src="/scripts/email.js"></script>
   <script type="text/JavaScript" src="/scripts/html2canvas.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
-  <script type="text/javascript" src="/scripts/app.js" ></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.7.8/angular-sanitize.js"></script>
+  <script src="/scripts/app.js" type="text/javascript"></script>
 
 </head>
 
@@ -42,26 +43,37 @@
     <div class="bg-light border-right" id="sidebar-wrapper">
         <div class="sidebar-heading"><a href="/"><img src="/resources/SVG/logo-black.svg"></a></div>
       <div class="list-group list-group-flush">
-        <a href="#" class="list-group-item list-group-item-action bg-light">Colors: <input id="colorPicker" type="color"></a>
+        <div class="list-group-item list-group-item-action bg-light">
+            Color: <input id="colorPicker" type="color"><img class="design-icon" src="/resources/icons/clear.png" onclick=clearColor() title="Clear Color">
+        </div>
         <div class="list-group-item list-group-item-action bg-light">
           Gradient:
           <input id="gradientColor1" type=color>
           <input id="gradientColor2" type=color>
-          Orientation:
+          <br>
+          To:
           <select id="gradientOrientationSelector">
-            <option>to bottom</option>
-            <option>to top</option>
-            <option>to right</option>
-            <option>to left</option>
-            <option>to top left</option>
-            <option>to top right</option>
-            <option>to bottom left</option>
-            <option>to bottom right</option>
+            <option>Bottom</option>
+            <option>Top</option>
+            <option>Right</option>
+            <option>Left</option>
+            <option>Top-Left</option>
+            <option>Top-Right</option>
+            <option>Bottom-Left</option>
+            <option>Bottom-Right</option>
           </select>
           <button onclick="setSelectedElementGradientBackground()">Apply</button>
         </div>
-        <a class="list-group-item list-group-item-action bg-light" draggable="true" ondragstart="dragStarted(event)" 
-        onclick="sidebarClickTextBoxWithoutDrag(event)" data-type="input">Add Textbox</a>
+        <div class="list-group-item list-group-item-action bg-light">
+            Box: 
+            <img src="/resources/icons/textbox.png" class="design-icon" draggable="true" ondragstart="dragStarted(event)"
+            onclick="sidebarClickTextBoxWithoutDrag(event)" data-type="input" style="width: 40px;">
+            Set Image: 
+            <img src="/resources/icons/addimage.png" id="imgPickerIcon"
+            draggable="true" ondragstart="imageDragStarted(event)" data-type="image" class="design-icon">
+            <input id="filePicker" type="file" accept="image/*">
+        </label>
+        </div>
         <div class="list-group-item list-group-item-action bg-light">
           Font:
           <select id="fontFamilySelector">
@@ -83,7 +95,7 @@
             <option>Verdana</option>
           </select>  
           <br>
-          Font Size:
+          Size:
           <select id="fontSizeSelector">
             <option>8</option>
             <option>10</option>
@@ -101,24 +113,26 @@
             <option>60</option>
             <option>68</option>
           </select>
-          <br>
-          Font Color:
+          Color:
           <input id="fontColorPicker" type="color">
           <br>
-          <input class="orderButton" id="sendBackwards" type="button" value="Send Backwards" onclick="sendBackwards()">
-          <input class="orderButton" id="sendToBack" type="button" value="Send To Back" onclick="sendToBack()">
-          <input class="orderButton" id="sendForwards" type="button" value="Send Forwards" onclick="sendForwards()">
-          <input class="orderButton" id="sendToFront" type="button" value="Send To Front" onclick="sendToFront()">
         </div>
-        <input id="filePicker" type="file" accept="image/*" class="list-group-item list-group-item-action bg-light" draggable="true"
-           ondragstart="imageDragStarted(event)" data-type="image"> 
-        <button id="downloadBtn" class="list-group-item list-group-item-action bg-light">Download</button>
+        <div class="list-group-item list-group-item-action bg-light">
+          Order:
+          <img class="design-icon" id="sendToBack" src="/resources/icons/sendtoback.png" title="Send To Back" onclick=sendToBack()>
+          <img class="design-icon" id="sendBackwards" src="/resources/icons/sendbackward.png" title="Send Backward" onclick=sendBackwards()>
+          <img class="design-icon" id="sendForwards" src="/resources/icons/bringforward.png" title="Bring Forward" onclick=sendForwards()>
+          <img class="design-icon" id="sendToFront" src="/resources/icons/bringtofront.png" title="Bring To Front" onclick="sendToFront()">
+        </div>
+        <div class="list-group-item list-group-item-action bg-light">
+          <img class="design-icon finish-icon" title="Download" src="/resources/icons/download.png">
+          <img class="design-icon finish-icon" title="Share" src="/resources/icons/share.png" onclick="on()" >
+          <img class="design-icon finish-icon" title="Browse Postcards" src="/resources/icons/browse.png">
+        </div>
         <div id="save" class="list-group-item list-group-item-action bg-light">
           <button id="saveBtn" class="list-group-item list-group-item-action bg-light" type="button">Save</button>
           <input id="isPrivateCheckbox" type="checkbox" isChecked="true"> Private
         </div>
-        <a class="list-group-item list-group-item-action bg-light">View Templates</a>
-        <a class="list-group-item list-group-item-action bg-light" onclick="on()" >Share</a>
       </div>
     </div>
     <!-- /#sidebar-wrapper -->
@@ -127,8 +141,18 @@
     <div id="page-content-wrapper">
         
         <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-          <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
-          
+          <button class="btn btn-primary" id="menu-toggle">Design</button>
+        <div id="save" class="dropdown save-dropdown">
+            Save
+            <div class="dropdown-content">
+                <button id="saveBtn" class="list-group-item list-group-item-action bg-light saveButton" type="button">Save</button>
+                <button id="saveAsBtn" class="list-group-item list-group-item-action bg-light saveButton" type="button">Save As</button>
+                <div id="isPrivateContainer">
+                  <input id="isPrivateCheckbox" type="checkbox" isChecked="true"><span>Private</span>
+                </div>
+            </div>
+          </div>
+
           <div class="navbar-collapse" id="navbarSupportedContent" ng-controller="AuthController">
             <a class="ml-auto nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-if="!user" ng-click="showlogin()">
               Login
