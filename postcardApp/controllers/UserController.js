@@ -1,11 +1,12 @@
 const User = require('../models/user')
 const crypto = require("crypto")
 const uuid = require('uuid/v4')
+const SocialController = require('./SocialController')
 
 const userController = {}
 
 /**
- * Create New User
+ * Create New User & Send verification email
  */
 userController.createUser = (req, res) => {
 
@@ -13,8 +14,13 @@ userController.createUser = (req, res) => {
         res.status(400)
         response.send("Bad Request") 
     }else{
+
         let salt = uuid()
         let hash = crypto.createHash('sha256')
+
+        let email = req.body.email
+        let firstname = req.body.firstname
+        let username = req.body.username
 
         let data = {
             _id: req.body.username,
@@ -40,6 +46,7 @@ userController.createUser = (req, res) => {
             }else{
                 res.writeHead(200,{'Content-Type':'application/json'})
                 res.write(JSON.stringify({'success':true,'message':"Registration successful"}))
+                SocialController.verificationemail(req, res) //sending the verification email
                 res.end()
             }
         })

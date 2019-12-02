@@ -77,6 +77,27 @@ socialController.sendEmail = (req,res) => {
     });
 }
 
+socialController.verificationemail = (req, res) => {
+    let mailOptions = {
+        to: req.body.email,
+        from: "postcardwebservice@gmail.com",
+        subject: "PostCard Web Service Verification Email!",
+        html: "<p> Hello <b>" + req.body.firstname +"</b> Your username is "+ req.body.username + "<br/>" +
+                "If this is not your email, please contact us to <i>postcardwebservice@gmail.com </i>" + "<br/>" + "Thank you for joining our service! <br/>"+
+                "Please sign in http://localhost:8080 </p>"
+    }
+    smtpTransport.sendMail(mailOptions, function(error, response) {
+        if(error) {
+            console.log(error);
+            res.end("error")
+        } else {
+            console.log("verification mail is sent!")
+            res.end("sent")
+        }
+    })
+}
+
+
 /**
  * Sending Text Messages
  */
