@@ -298,6 +298,36 @@ userController.savePostcard = (req, res) => {
     }
 }
 
+userController.deletePostcard = (req, res) => {
+    if (req.user) {
+        let userId = req.user._id;
+        User.findOne({_id: userId}, (err, user) => {
+            if (err) {
+                res.send({success: false, message: err.message});
+            }
+            else {
+                //retrieve the collection to delete the postcard from
+                let postcard = user.postcards[req.params.visibility][req.params.id];
+                
+                removePostcard(user.postcards[req.params.visibility], postcard);
+
+                user.save((err) => {
+                    if (err) {
+                        res.writeHead(200,{'Content-Type':'application/json'});
+                        res.write(JSON.stringify({'success':false,'message':"Failed to save postcard.", 'user': user}))
+                        res.end()
+                    }
+                    else {
+                        res.writeHead(200,{'Content-Type':'application/json'});
+                        res.write(JSON.stringify({'success':true,'message':"Successfully deleted postcard.", 'user': user}))
+                        res.end();
+                    }
+                });
+            }
+        })
+    }
+}
+
 /**
  * Get postcard from any user
  */

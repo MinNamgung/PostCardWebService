@@ -38,6 +38,7 @@ router.get('/user',appController.getUser)
 router.post('/user', userController.createUser)
 router.put('/user', userController.updateUser)
 router.delete('/user', userController.deleteUser)
+router.delete('/postcard/:visibility/:id', userController.deletePostcard)
 
 //General User Routes
 router.get('/user/:id',userController.getUser)

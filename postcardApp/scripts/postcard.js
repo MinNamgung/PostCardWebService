@@ -504,7 +504,18 @@ function setSelectedElementGradientBackground() {
     let firstColor = $("#gradientColor1").val();
     let secondColor = $("#gradientColor2").val();
     let orientation = $("#gradientOrientationSelector").val();
-    let backgroundStyle = "linear-gradient(" + orientation + "," + firstColor + " 0%, " + secondColor + " 100%)";
+
+    let orientations = new Map();
+    orientations["Bottom"] = "to bottom";
+    orientations["Top"] = "to top";
+    orientations["Right"] = "to right";
+    orientations["Left"] = "to left";
+    orientations["Top Right"] = "to top left";
+    orientations["Top Left"] = "to top right";
+    orientations["Bottom Right"] = "to bottom left";
+    orientations["Bottom Left"] = "to bottom right";
+
+    let backgroundStyle = "linear-gradient(" + orientations[orientation] + "," + firstColor + " 0%, " + secondColor + " 100%)";
     setBackground(selectedElement, backgroundStyle);
 }
 

@@ -167,6 +167,16 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
         }
     })    
 
+    $scope.delete = (visibility, id) => {
+        $http.delete(`/postcard/${visibility}/${id}`)
+        .then(res => {
+            if (res.data.success){
+                $scope.user.postcards[visibility].splice(id, 1);
+                console.log($scope.user.postcards[visibility])
+            }
+        })
+    }
+
     $scope.$on('user', (event, data) =>{
         $scope.currentUser = data
     })

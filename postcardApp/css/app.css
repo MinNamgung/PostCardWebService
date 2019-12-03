@@ -10,7 +10,12 @@
 }
 
 .postcard{
-    margin: 10px;
+    margin: 20px 10px 10px 10px;
+}
+
+.profile-icon{
+    width: 30px;
+    cursor: pointer;
 }
 
 #search{

@@ -21,7 +21,7 @@ appController.showRegister = (req,res) => {
         res.redirect('/')
     }else{
         res.sendFile("/templates/register.html", {root: './postcardApp'})
-    }   
+    }
 }
 
 /**
