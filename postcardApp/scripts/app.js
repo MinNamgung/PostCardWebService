@@ -162,7 +162,6 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
     .then(res => {
         if(res.data.error){
         }else{
-            console.log(res.data)
             $scope.user = res.data
         }
     })    
@@ -172,7 +171,6 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
         .then(res => {
             if (res.data.success){
                 $scope.user.postcards[visibility].splice(id, 1);
-                console.log($scope.user.postcards[visibility])
             }
         })
     }
