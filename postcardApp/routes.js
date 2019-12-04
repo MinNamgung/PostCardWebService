@@ -32,7 +32,7 @@ router.get(['/profile', '/profile/:user'], appController.showProfile)
 router.get(['/design', '/design/:username/:visibility/:id'], appController.showDesign)
 router.get('/404', appController.show404)
 router.get('/account', appController.showAccountManagement)
-router.get('/postcard/:username/:visibility/:id', userController.showPostcard)
+router.get('/view/:username/:visibility/:id', userController.showPostcard)
 
 //Current User Routes
 router.get('/user',appController.getUser)

@@ -93,9 +93,11 @@
                   <div id="private" class="postcards">                  
                     <div class="postcard" ng-repeat="postcard in user.postcards.private track by $index">
                       <img ng-click="delete('private', postcard._id)" src="/resources/icons/delete.png" title="Delete Postcard" class="profile-icon">
-                      <a ng-href="/design/{{user._id}}/private/{{postcard._id}}">
-                        <div ng-bind-html="trust(postcard.outerHTML)"></div>
-                      </a>
+                      <div class="postcard-container" ng-bind-html="trust(postcard.outerHTML)"></div>
+                      <div class="controls">
+                        <a ng-href="/design/{{user._id}}/private/{{postcard._id}}" class="btn btn-mini">edit</a>
+                        <a ng-href="/view/{{user._id}}/private/{{postcard._id}}" class="btn btn-mini">view</a>
+                      </div>
                     </div>
                     <hr>
                   </div>
@@ -107,9 +109,11 @@
               <div id="public" class="postcards">                  
                   <div class="postcard" ng-repeat="postcard in user.postcards.public track by $index">
                     <img ng-click="delete('public', postcard._id)" src="/resources/icons/delete.png" title="Delete Postcard" class="profile-icon" ng-if="user.postcards.private">
-                    <a ng-href="/design/{{user._id}}/public/{{postcard._id}}">
-                      <div ng-bind-html="trust(postcard.outerHTML)"></div>
-                    </a>
+                    <div class="postcard-container"  ng-bind-html="trust(postcard.outerHTML)"></div>
+                    <div class="controls">
+                      <a ng-href="/design/{{user._id}}/public/{{postcard._id}}" class="btn btn-mini">edit</a>
+                      <a ng-href="/view/{{user._id}}/public/{{postcard._id}}" class="btn btn-mini">view</a>
+                    </div>
                   </div>
               </div>
             </div>

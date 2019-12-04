@@ -1,4 +1,4 @@
-.postcard div{
+.postcard .postcard-container div{
     width: 20vw !important;
     height: 25vh !important;
     border-radius: 10px;
@@ -11,6 +11,7 @@
 
 .postcard{
     margin: 20px 10px 10px 10px;
+    position: relative;
 }
 
 #postcard{
