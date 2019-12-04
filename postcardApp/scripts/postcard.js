@@ -119,7 +119,46 @@ function createTextBox(e) {
     $("#fontSizeSelector").trigger("change");
     $("#fontColorPicker").trigger("change");
 
+    textboxUndo(textBox);
+
     return textBox;
+}
+
+function textboxUndo(textBox){
+    /*
+    Get the parent element, so that it is captured in the closure below.
+    Once you remove the element, you cannot use element.parentElement in the undo callback
+    b/c it evaluates to null.
+    */
+   let parentElement = textBox.parentElement
+   undo.push(() => {
+       deleteElement(textBox)
+       redo.push(() => {
+           parentElement.appendChild(textBox)
+           setSelected(textBox)
+           textboxUndo(textBox);
+       })
+   })
+}
+
+function textUndo(event){
+    //Get the text area and current/previous text contents for capturing in the closure
+    let textArea = event.target;
+    let previousText = textArea.previousText;
+    let currentText = textArea.value;
+    if (textArea.previousText !== undefined && textArea.previousText !== ""){
+        undo.push(() => {
+            console.log("Undo text: " + previousText);
+            redo.push(() => {
+                console.log("Redo text: " + currentText);
+                textArea.previousText = textArea.value;
+                textArea.value = currentText;
+                textUndo(event);
+            })
+            textArea.value = previousText;
+        })
+    }
+    textArea.previousText = currentText;
 }
 
 /*
@@ -182,6 +221,9 @@ function setTextAreaEventHandlers(textArea) {
 
     //Select parent on click
     textArea.addEventListener("click", selectParent);
+
+    //For text undo/redo
+    textArea.addEventListener("input", textUndo);
 }
 
 /*
@@ -379,6 +421,7 @@ $(document).ready(function () {
             deleteElement(selectedElement);
         }
         else if (e.ctrlKey && e.keyCode === keyCodes.z) {
+            e.preventDefault();
             e.stopPropagation();
             let undoCallback = undo.pop();
             if (undoCallback) {
@@ -386,6 +429,7 @@ $(document).ready(function () {
             }
         }
         else if (e.ctrlKey && e.keyCode === keyCodes.y) {
+            e.preventDefault();
             e.stopPropagation();
             let redoCallback = redo.pop();
             if (redoCallback) {
@@ -406,16 +450,6 @@ function deleteElement(element) {
         //set the postcardContainer as the selectedElement
         $("#postcardContainer").click();
     }
-    /*
-    Get the parent element, so that it is captured in the closure below.
-    Once you remove the element, you cannot use element.parentElement in the undo callback
-    b/c it evaluates to null.
-    */
-    let parentElement = element.parentElement;
-    undo.push(() => {
-        parentElement.appendChild(element)
-        redo.push(() => deleteElement(element));
-    });
     element.remove();
 }
 
@@ -570,9 +604,9 @@ function elementToCanvas(element, onConversion) {
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
     canvas.width = element.offsetWidth;
     canvas.height = element.offsetHeight;
-    let options = { canvas: canvas, scale: 1};
-    html2canvas(element, options).then(function(canvas) { 
-        onConversion(canvas); 
+    let options = { canvas: canvas, scale: 1 };
+    html2canvas(element, options).then(function (canvas) {
+        onConversion(canvas);
     });
 }
 
@@ -719,7 +753,7 @@ function savePostcard(isUpdate, username) {
                     if (imageUrl) {
                         element.style.backgroundImage = decodeURI(imageUrl);
                         resolve();
-                    }else{
+                    } else {
                         reject();
                     }
                 })
@@ -807,8 +841,8 @@ function postImage(imageFile, successCallback) {
         cache: false,
         contentType: false,
         processData: false,
-        method: 'POST', 
-        complete: function(data){
+        method: 'POST',
+        complete: function (data) {
             let response = data.responseJSON;
             if (response.success) {
                 displayToast(imageFile.name, "Saved to " + response.src);
