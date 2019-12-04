@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+
 const appController = {}
 
 /**
@@ -58,7 +59,7 @@ appController.show404 = (req,res) => {
 }
 
 /**
- * Serves Accoutn Management page
+ * Serves Account Management page
  */
 appController.showAccountManagement = (req, res) => {
     if(req.user){

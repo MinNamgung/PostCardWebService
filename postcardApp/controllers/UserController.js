@@ -350,4 +350,26 @@ userController.getPostcard = (req, res) => {
     })
 }
 
+/**
+ * Dislays individual postcard
+ */
+
+userController.showPostcard = (req, res) => {
+    User.findOne({_id: req.params.username}, (err, user) => {
+        if(err){
+            res.end(400)
+        }else{
+            if(user){
+                let postcard = user.postcards[req.params.visibility][req.params.id]
+                if(postcard){
+                    res.render("partials/postcard", {postcard: postcard})
+                }else{
+                    res.writeHeader(400);
+                    res.end()
+                }                
+            }
+        }
+    })
+}
+
 module.exports = userController

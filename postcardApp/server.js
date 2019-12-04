@@ -1,10 +1,12 @@
 require('dotenv').config();
 
 const express = require('express');
+const path = require('path')
 const app = express();
 const session = require('express-session')
 const cookie = require('cookie-parser')
 const bodyParser = require("body-parser");
+expressLayouts = require('express-ejs-layouts')
 
 const mongoose = require('mongoose')
 const passport = require('passport')
@@ -12,7 +14,12 @@ const passport = require('passport')
 const flash = require("connect-flash");
 const userController = require("./controllers/UserController")
 
+
 //Configure Server
+
+app.set('view engine', 'ejs')
+app.set('views', path.join(__dirname, '/templates'));
+app.use(expressLayouts);
 
 mongoose.connect(process.env.DB_URL,{ useNewUrlParser: true, useUnifiedTopology: true })
     .then(() =>  console.log('connection succesful'))
