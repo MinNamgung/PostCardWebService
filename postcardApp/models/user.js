@@ -11,8 +11,9 @@ let UserSchema = new mongoose.Schema({
     },
     postcards:{
         private: [{}],
-        public: [{}]
+        public: [{}],
+        voted_on: {}
     }
-}, { collection: 'User'})
+}, { collection: 'User', minimize: false})
 
 module.exports = mongoose.model("User", UserSchema)

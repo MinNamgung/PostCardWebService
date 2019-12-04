@@ -1,4 +1,4 @@
-.postcard div{
+[id^="public-"] div, [id^="private-"] div{
     width: 20vw !important;
     height: 25vh !important;
     border-radius: 10px;
@@ -70,4 +70,43 @@
 #deletion-confirm .btn{
     width: 40%;
     margin: 0 5%;
+}
+
+.vote-button{
+    height: 20px;
+    cursor: pointer;
+}
+
+#upvote:hover{
+    filter: sepia(100%) hue-rotate(90deg) saturate(700%);
+}
+
+.voted:hover, #upvote.downvoted, #downvote.upvoted{
+    filter: sepia(0%) hue-rotate(0deg) saturate(0%) !important;
+}
+
+#upvote.upvoted{
+    filter: sepia(100%) hue-rotate(90deg) saturate(700%);
+}
+
+#downvote:hover{
+    filter: sepia(50%) hue-rotate(300deg) saturate(2000%);
+}
+
+#downvote.downvoted{
+    filter: sepia(50%) hue-rotate(300deg) saturate(2000%);
+}
+
+#downvote{
+    transform: rotate(180deg);
+}
+
+.votes{
+    position: relative;
+    display: flex;
+    flex-direction: column; 
+    justify-content: center;
+    width: 10%;
+    text-align: center;
+    font-weight: bold;
 }
