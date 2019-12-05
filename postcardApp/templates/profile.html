@@ -15,9 +15,6 @@
     <!-- Custom styles for this template -->
     <link href="/css/simple-sidebar.css" rel="stylesheet">   
     <link href="/css/app.css" rel="stylesheet">   
-    <link href="/css/postcard.css" rel="stylesheet">
-    <link href="/css/postcard-textbox.css" rel="stylesheet">
-    <link href="/css/resize-handles.css" rel="stylesheet">
     
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.7.8/angular-sanitize.js"></script>
@@ -99,7 +96,6 @@
                     </div>
                     <hr>
                   </div>
-                  <hr/>
               </div>
               <h3 ng-if="!currentUser || currentUser.username !== user._id">{{user._id}}'s Public Postcards</h3>
               <h3 ng-if="currentUser && currentUser.username === user._id">Your Public Postcards</h3>
@@ -110,6 +106,11 @@
                     <a ng-href="/design/{{user._id}}/public/{{postcard._id}}">
                       <div ng-bind-html="trust(postcard.outerHTML)"></div>
                     </a>
+                    <div class="votes">
+                      <img src="../resources/SVG/arrow.svg" class="vote-button" id="upvote" ng-click="vote(postcard._id,'up')" ng-class="voted(postcard._id)" ng-hide="user.postcards.private || !currentUser">
+                      {{postcard.rating.score}}
+                      <img src="../resources/SVG/arrow.svg" class="vote-button" id="downvote" ng-click="vote(postcard._id,'down')" ng-class="voted(postcard._id)" ng-hide="user.postcards.private || !currentUser">
+                    </div>
                   </div>
               </div>
             </div>

@@ -166,6 +166,30 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
         }
     })    
 
+    $scope.vote = (id, vote) => {
+        console.log(id, vote)
+        $http.post(`/vote/${$scope.user._id}/${id}`, {vote: vote, voter: $scope.currentUser.username})
+            .then(res => {
+                if(res.data.success){
+                    $scope.user.postcards.public[id] = res.data.postcard
+                    $scope.currentUser.voted_on = res.data.voter
+                }                
+            })
+    }
+
+    $scope.voted = (id) => {
+        if($scope.currentUser.voted_on[$scope.user._id][id]){
+            let p = $scope.currentUser.voted_on[$scope.user._id][id]
+            if(p.vote == 'up'){
+                return "upvoted"
+            }else if(p.vote == "down"){
+                return "downvoted"
+            }else{
+                return "voted"
+            }
+        }
+    }
+    
     $scope.delete = (visibility, id) => {
         $http.delete(`/postcard/${visibility}/${id}`)
         .then(res => {
