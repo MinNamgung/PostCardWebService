@@ -350,4 +350,21 @@ userController.getPostcard = (req, res) => {
     })
 }
 
+/**
+ * Gets postcards sorted by score for the specified page and page size.
+ */
+userController.getPostcardPage = (req, res) => {
+    User.find({},(err, users) => {
+        if (err) {
+            res.send(err);
+        }
+        else {
+            let postcards = users.flatMap(user => user.postcards.public)
+                .sort((p1, p2) => p1.rating.score > p2.rating.score);
+            res.json(JSON.stringify(postcards));
+        }
+    });
+    
+}
+
 module.exports = userController

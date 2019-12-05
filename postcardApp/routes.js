@@ -56,6 +56,7 @@ router.post('/facebookSend', socialController.makeFacebookPost);
 
 //Postcard Routes
 router.post("/postcards", userController.savePostcard)
+router.get("/postcards/:page/:pageSize", userController.getPostcardPage)
 router.get('/postcard/:username/:visibility/:id', userController.getPostcard)
 router.get("/images/:username/:imageName", appController.getImage)
 router.post("/images", upload.single("imageFile"), appController.uploadImage)
