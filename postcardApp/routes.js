@@ -27,7 +27,7 @@ module.exports = router
 
 // main Routes
 router.get('/', appController.showHome)
-router.get('/register', appController.showRegister) 
+router.get('/register', appController.showRegister)
 router.get(['/profile', '/profile/:user'], appController.showProfile)
 router.get(['/design', '/design/:username/:visibility/:id'], appController.showDesign)
 router.get('/404', appController.show404)
