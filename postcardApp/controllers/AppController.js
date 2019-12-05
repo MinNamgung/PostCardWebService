@@ -102,7 +102,7 @@ appController.getUser = (req, res) => {
                 email: user.email
             })
         }else{
-            res.send({username: user._id})
+            res.send({username: user._id, voted_on: user.postcards.voted_on})
         }        
     }else{
         res.send(null)

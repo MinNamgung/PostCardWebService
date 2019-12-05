@@ -27,7 +27,7 @@ module.exports = router
 
 // main Routes
 router.get('/', appController.showHome)
-router.get('/register', appController.showRegister) 
+router.get('/register', appController.showRegister)
 router.get(['/profile', '/profile/:user'], appController.showProfile)
 router.get(['/design', '/design/:username/:visibility/:id'], appController.showDesign)
 router.get('/404', appController.show404)
@@ -59,3 +59,4 @@ router.post("/postcards", userController.savePostcard)
 router.get('/postcard/:username/:visibility/:id', userController.getPostcard)
 router.get("/images/:username/:imageName", appController.getImage)
 router.post("/images", upload.single("imageFile"), appController.uploadImage)
+router.post('/vote/:username/:id', userController.vote)

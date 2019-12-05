@@ -1,11 +1,12 @@
 const User = require('../models/user')
 const crypto = require("crypto")
 const uuid = require('uuid/v4')
+const SocialController = require('./SocialController')
 
 const userController = {}
 
 /**
- * Create New User
+ * Create New User & Send verification email
  */
 userController.createUser = (req, res) => {
 
@@ -13,8 +14,13 @@ userController.createUser = (req, res) => {
         res.status(400)
         response.send("Bad Request") 
     }else{
+
         let salt = uuid()
         let hash = crypto.createHash('sha256')
+
+        let email = req.body.email
+        let firstname = req.body.firstname
+        let username = req.body.username
 
         let data = {
             _id: req.body.username,
@@ -27,7 +33,8 @@ userController.createUser = (req, res) => {
             },
             postcards: {
                 public: [],
-                private: []
+                private: [],
+                voted_on: {}
             }
         }
 
@@ -40,6 +47,7 @@ userController.createUser = (req, res) => {
             }else{
                 res.writeHead(200,{'Content-Type':'application/json'})
                 res.write(JSON.stringify({'success':true,'message':"Registration successful"}))
+                SocialController.verificationemail(req, res) //sending the verification email
                 res.end()
             }
         })
@@ -86,10 +94,12 @@ userController.getUser = (req, res) => {
                 if(req.user){
                     if(req.user._id !== user._id){
                         user.postcards.private = null
+                        user.postcards.voted_on = null
                     }
                     res.send(user)
                 }else{
                     user.postcards.private = null
+                    user.postcards.voted_on = null
                     res.send(user)
                 }
                 
@@ -231,6 +241,11 @@ function setAllPostcardId(postcardArray) {
   */
 userController.savePostcard = (req, res) => {
     let postcard = req.body.postcard;
+    postcard.rating = {
+        up: 0,
+        down: 0,
+        score: 0
+    }
     //true if the _id property is nonempty and defined
     let idIsSet = (postcard._id != "") && (typeof postcard._id != "undefined");
     let isPrivate = JSON.parse(req.body.isPrivate);
@@ -297,7 +312,9 @@ userController.savePostcard = (req, res) => {
         res.end()
     }
 }
-
+/**
+ * Deletes single postcard from logged in user
+ */
 userController.deletePostcard = (req, res) => {
     if (req.user) {
         let userId = req.user._id;
@@ -327,7 +344,6 @@ userController.deletePostcard = (req, res) => {
         })
     }
 }
-
 /**
  * Get postcard from any user
  */
@@ -345,6 +361,79 @@ userController.getPostcard = (req, res) => {
                     res.writeHeader(400);
                     res.end()
                 }                
+            }
+        }
+    })
+}
+
+/**
+ * Modifies Postcard Rating
+ */
+userController.vote = (req, res) => {
+
+    //Determine if user has already voted on postcard
+    User.findOne({_id: req.body.voter}, (err, voter) => {
+        if(err){
+            res.status(400)
+            res.end()
+        }else{
+            if(voter){
+                if(voter.postcards.voted_on[req.params.username] && voter.postcards.voted_on[req.params.username][req.params.id]){
+                    res.send({success: false, message: "Cannot vote on postcard multiple times"})
+                }else{
+                    User.findOne({_id: req.params.username}, (err, user) => {
+                        if(err){
+                            res.status(400)
+                            res.end()
+                        }else{
+                            if(user){
+                                //Find and modify postcard
+                                let postcard = user.postcards.public[req.params.id]
+                                if(postcard){
+                                    if(req.body.vote == 'up'){
+                                        postcard.rating.up += 1
+                                    }else if(req.body.vote == 'down'){
+                                        postcard.rating.down += 1
+                                    }else{
+                                        res.status(400)
+                                        res.end()
+                                    }
+                
+                                    postcard.rating.score = postcard.rating.up - postcard.rating.down
+                                    user.postcards.public.set(postcard._id, postcard)
+                
+                                    user.save((err, user) => {
+                                        if(err){
+                                            res.status(400)
+                                            res.end()
+                                        }else{
+                                            if(!voter.postcards.voted_on[user._id]){
+                                                voter.postcards.voted_on[user._id] = {}                                                
+                                            }
+                                            voter.postcards.voted_on[user._id][postcard._id] = {
+                                                owner: user._id,
+                                                id: postcard._id,
+                                                outerHTML: postcard.outerHTML, 
+                                                vote: req.body.vote
+                                            }
+                                            voter.markModified("postcards")
+                                            voter.save((err, voter) => {
+                                                if(err){
+                                                    throw err
+                                                }else{
+                                                    res.send({success: true, postcard: postcard, voter: voter.postcards.voted_on})  
+                                                }                                                
+                                            })                                                                                         
+                                        }
+                                    })
+                                }
+                            }
+                        }
+                    })
+                }
+            }else{
+                res.status(400)
+                res.end()
             }
         }
     })
