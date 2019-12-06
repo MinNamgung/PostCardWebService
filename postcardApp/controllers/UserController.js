@@ -367,6 +367,28 @@ userController.getPostcard = (req, res) => {
 }
 
 /**
+ * Gets postcards sorted by score for the specified page and page size.
+ */
+userController.getPostcardPage = (req, res) => {
+    let page = req.params.page;
+    let pageSize = req.params.pageSize;
+    User.find({},(err, users) => {
+        if (err) {
+            res.send(err);
+        }
+        else {
+            let postcards = new Array();
+            users.map(user => user.postcards.public)
+                .filter(postcardArray => postcardArray.length > 0)
+                .forEach(postcardArray => postcards = postcards.concat(postcardArray));
+            postcards = postcards.sort((p1, p2) => p2.rating.score - p1.rating.score);
+            let postcardsInPage = postcards.splice(page * pageSize, pageSize);
+            res.json(JSON.stringify(postcardsInPage));
+        }
+    });
+}
+
+/* 
  * Modifies Postcard Rating
  */
 userController.vote = (req, res) => {
