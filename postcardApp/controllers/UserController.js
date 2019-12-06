@@ -377,8 +377,11 @@ userController.getPostcardPage = (req, res) => {
             res.send(err);
         }
         else {
-            let postcards = users.flatMap(user => user.postcards.public)
-                .sort((p1, p2) => p2.rating.score - p1.rating.score);
+            let postcards = new Array();
+            users.map(user => user.postcards.public)
+                .filter(postcardArray => postcardArray.length > 0)
+                .forEach(postcardArray => postcards = postcards.concat(postcardArray));
+            postcards = postcards.sort((p1, p2) => p2.rating.score - p1.rating.score);
             let postcardsInPage = postcards.splice(page * pageSize, pageSize);
             res.json(JSON.stringify(postcardsInPage));
         }
