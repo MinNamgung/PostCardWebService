@@ -239,7 +239,7 @@ function setAllPostcardId(postcardArray) {
  /*
   * Saves Postcard to current user
   */
-userController.savePostcard = (req, res) => {
+ userController.savePostcard = (req, res) => {
     let postcard = req.body.postcard;
     postcard.rating = {
         up: 0,
@@ -253,6 +253,10 @@ userController.savePostcard = (req, res) => {
     let privateStateChanged = JSON.parse(req.body.isPrivateStateChanged);
     let username = req.body.username;
     if (req.user) {
+
+        //setting owner property so that the postcard owners can be referenced in contexts where postcard is retrieved outside of owner's profile
+        postcard.owner = req.user._id
+
         let userId = req.user._id;
         User.findOne({_id: userId}, (err, user) => {
             if (err) {
@@ -263,11 +267,16 @@ userController.savePostcard = (req, res) => {
                 let postcards = user.postcards.public;
                 if (isPrivate) {
                     postcards = user.postcards.private;
+                }else{
+                    //add publisedOn timestamp for sorting by newest
+                    postcard.publishedOn = new Date().getTime()
                 }
+
                 /* If username doesn't match the logged in user, then 
                 the logged in user is trying to save another user's public postcard. */
                 let copyOtherUsersPostcard = username != req.user._id;
                 if (copyOtherUsersPostcard) {
+                    postcard.createdOn = new Date().getTime()
                     addPostcard(postcards, postcard);
                 }
                 /* 
@@ -278,6 +287,7 @@ userController.savePostcard = (req, res) => {
                     //remove the postcard from its old collection. (could be public or private)
                     let newCollection = postcards;
                     let oldCollection = newCollection === user.postcards.private ? user.postcards.public : user.postcards.private;
+
                     removePostcard(oldCollection, postcard);
                     //add to the new collection (could be public or private)
                     addPostcard(newCollection, postcard);
@@ -288,6 +298,7 @@ userController.savePostcard = (req, res) => {
                         postcards.set(postcard._id, postcard);
                     }
                     else {
+                        postcard.createdOn = new Date().getTime()
                         addPostcard(postcards, postcard);
                     }
                 }
