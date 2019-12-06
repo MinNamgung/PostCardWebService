@@ -1,0 +1,13 @@
+[id^="public-"], [id^="private-"]{
+    border-radius: 10px;
+}
+
+.postcardContainer{
+    width: 22.2vw !important;
+    height: 14.75vw !important;
+    border-radius: 10px;
+}
+
+.postcardContainer div{
+    transform: scale(0.9) translate(-50%, -50%);
+}   

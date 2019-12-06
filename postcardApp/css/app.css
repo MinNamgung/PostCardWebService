@@ -1,9 +1,3 @@
-[id^="public-"] div, [id^="private-"] div{
-    width: 20vw !important;
-    height: 25vh !important;
-    border-radius: 10px;
-}
-
 .postcards{
     display: flex;
     flex-wrap: wrap;
