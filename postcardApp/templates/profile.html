@@ -6,7 +6,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-
     <title>{POST} Profile</title>
 
     <!-- Bootstrap core CSS -->
@@ -14,7 +13,11 @@
 
     <!-- Custom styles for this template -->
     <link href="/css/simple-sidebar.css" rel="stylesheet">   
-    <link href="/css/app.css" rel="stylesheet">   
+    <link href="/css/app.css" rel="stylesheet">
+    <link href="/css/postcard.css" rel="stylesheet">   
+    <link href="/css/postcard-textbox.css" rel="stylesheet">
+    <link href="/css/resize-handles.css" rel="stylesheet">
+    <link href="/css/profile.css" rel="stylesheet">   
     
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.7.8/angular-sanitize.js"></script>
@@ -91,7 +94,7 @@
                     <div class="postcard" ng-repeat="postcard in user.postcards.private track by $index">
                       <img ng-click="delete('private', postcard._id)" src="/resources/icons/delete.png" title="Delete Postcard" class="profile-icon">
                       <a ng-href="/design/{{user._id}}/private/{{postcard._id}}">
-                        <div ng-bind-html="trust(postcard.outerHTML)"></div>
+                        <div ng-bind-html="trust(postcard.outerHTML)" ng-attr-id="private-{{postcard._id}}"></div>
                       </a>
                     </div>
                     <hr>
@@ -104,7 +107,7 @@
                   <div class="postcard" ng-repeat="postcard in user.postcards.public track by $index">
                     <img ng-click="delete('public', postcard._id)" src="/resources/icons/delete.png" title="Delete Postcard" class="profile-icon" ng-if="user.postcards.private">
                     <a ng-href="/design/{{user._id}}/public/{{postcard._id}}">
-                      <div ng-bind-html="trust(postcard.outerHTML)"></div>
+                      <div ng-bind-html="trust(postcard.outerHTML)" ng-attr-id="public-{{postcard._id}}"></div>
                     </a>
                     <div class="votes">
                       <img src="../resources/SVG/arrow.svg" class="vote-button" id="upvote" ng-click="vote(postcard._id,'up')" ng-class="voted(postcard._id)" ng-hide="user.postcards.private || !currentUser">

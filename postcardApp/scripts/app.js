@@ -172,20 +172,24 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
             .then(res => {
                 if(res.data.success){
                     $scope.user.postcards.public[id] = res.data.postcard
-                    $scope.currentUser.voted_on = res.data.voter
+                    if($scope.currentUser && $scope.currentUser.voted_on){
+                        $scope.currentUser.voted_on = res.data.voter
+                    }
                 }                
             })
     }
 
     $scope.voted = (id) => {
-        if($scope.currentUser.voted_on[$scope.user._id][id]){
-            let p = $scope.currentUser.voted_on[$scope.user._id][id]
-            if(p.vote == 'up'){
-                return "upvoted"
-            }else if(p.vote == "down"){
-                return "downvoted"
-            }else{
-                return "voted"
+        if($scope.currentUser && $scope.currentUser.username !== $scope.user._id){
+            if($scope.currentUser.voted_on[$scope.user._id] && $scope.currentUser.voted_on[$scope.user._id][id]){
+                let p = $scope.currentUser.voted_on[$scope.user._id][id]
+                if(p.vote == 'up'){
+                    return "upvoted"
+                }else if(p.vote == "down"){
+                    return "downvoted"
+                }else{
+                    return "voted"
+                }
             }
         }
     }
