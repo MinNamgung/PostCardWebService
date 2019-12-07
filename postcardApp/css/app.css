@@ -104,3 +104,46 @@
     text-align: center;
     font-weight: bold;
 }
+
+#sort .btn.selected, #page .btn.selected{
+    font-weight: bold;
+}
+
+#sort, #page{
+    display: inline-block;
+}
+
+#sort{
+    margin-left: 30vw
+}
+
+.spinner{
+    border: 0.4vw solid #f3f3f3;
+    border-top: 0.4vw solid black;
+    border-radius: 50%;
+    width: 3vw;
+    height: 3vw;
+    animation: spin 2s linear infinite;
+    margin: 0;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    -ms-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+#main{
+    text-align: center;
+    margin-top: 20vh;
+}
+
+.loginform .form-control{
+    display: inline !important;
+    margin-left: 1vw;
+}

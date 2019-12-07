@@ -45,6 +45,8 @@ passport.deserializeUser(userController.deserializeUser)
 
 app.use(flash())
 
+//initialises postCardList
+userController.initPostcardList()
 app.use(require('./routes'))
 
 //Run on the port defined in the .env file.

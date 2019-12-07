@@ -5,6 +5,28 @@ const SocialController = require('./SocialController')
 
 const userController = {}
 
+let postcardList = []
+
+/**
+ * Initializes/Updates Postcard List 
+ */
+userController.initPostcardList = () => {
+
+    User.find({},(err, users) => {
+        if (err) {
+            res.send(err);
+        }
+        else {
+            postcardList = new Array()
+            users.map(user => user.postcards.public)
+                .filter(postcardArray => postcardArray.length > 0)
+                .forEach(postcardArray => postcardList = postcardList.concat(postcardArray));
+            
+            console.log("list updated")
+        }
+    });
+}
+
 /**
  * Create New User & Send verification email
  */
@@ -17,10 +39,6 @@ userController.createUser = (req, res) => {
 
         let salt = uuid()
         let hash = crypto.createHash('sha256')
-
-        let email = req.body.email
-        let firstname = req.body.firstname
-        let username = req.body.username
 
         let data = {
             _id: req.body.username,
@@ -307,11 +325,15 @@ function setAllPostcardId(postcardArray) {
                         res.writeHead(200,{'Content-Type':'application/json'});
                         res.write(JSON.stringify({'success':false,'message':"Failed to save postcard.", 'user': user}))
                         res.end()
+
+                        userController.initPostcardList()
                     }
                     else {
                         res.writeHead(200,{'Content-Type':'application/json'});
                         res.write(JSON.stringify({'success':true,'message':"Successfully saved postcard.", 'user': user}))
                         res.end()
+
+                        userController.initPostcardList()
                     }
                 });
             }
@@ -344,17 +366,22 @@ userController.deletePostcard = (req, res) => {
                         res.writeHead(200,{'Content-Type':'application/json'});
                         res.write(JSON.stringify({'success':false,'message':"Failed to save postcard.", 'user': user}))
                         res.end()
+                        
+                        userController.initPostcardList()
                     }
                     else {
                         res.writeHead(200,{'Content-Type':'application/json'});
                         res.write(JSON.stringify({'success':true,'message':"Successfully deleted postcard.", 'user': user}))
                         res.end();
+
+                        userController.initPostcardList()
                     }
                 });
             }
         })
     }
 }
+
 /**
  * Get postcard from any user
  */
@@ -383,20 +410,20 @@ userController.getPostcard = (req, res) => {
 userController.getPostcardPage = (req, res) => {
     let page = req.params.page;
     let pageSize = req.params.pageSize;
-    User.find({},(err, users) => {
-        if (err) {
-            res.send(err);
-        }
-        else {
-            let postcards = new Array();
-            users.map(user => user.postcards.public)
-                .filter(postcardArray => postcardArray.length > 0)
-                .forEach(postcardArray => postcards = postcards.concat(postcardArray));
-            postcards = postcards.sort((p1, p2) => p2.rating.score - p1.rating.score);
-            let postcardsInPage = postcards.splice(page * pageSize, pageSize);
-            res.json(JSON.stringify(postcardsInPage));
-        }
-    });
+
+    if(req.params.sortBy === "popular"){
+        postcardList.sort((a, b) => b.rating.score - a.rating.score)
+    }else if(req.params.sortBy === "new"){
+        postcardList.sort((a, b) => b.publishedOn - a.publishedOn)
+    }
+
+    let postcardsInPage = postcardList.slice(page * pageSize, pageSize);
+    while(postcardsInPage.length == 0 && page > 0){
+        page --
+        postcardsInPage = postcardList.slice(page * pageSize, pageSize);
+    }
+    
+    res.send({success: true, page: page, postcards:postcardsInPage});
 }
 
 /* 
@@ -454,7 +481,8 @@ userController.vote = (req, res) => {
                                                 if(err){
                                                     throw err
                                                 }else{
-                                                    res.send({success: true, postcard: postcard, voter: voter.postcards.voted_on})  
+                                                    res.send({success: true, postcard: postcard, voter: voter.postcards.voted_on})
+                                                    userController.initPostcardList()
                                                 }                                                
                                             })                                                                                         
                                         }

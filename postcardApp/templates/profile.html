@@ -82,6 +82,7 @@
           <div id="bg">            
           </div> 
           <div ng-controller="ProfileController">
+              <div class="spinner" ng-if="!user"></div>     
             <div ng-if="user">
               <h1>{{user.firstname}} {{user.lastname}}</h1>
               <h3>@{{user._id}}</h3>
