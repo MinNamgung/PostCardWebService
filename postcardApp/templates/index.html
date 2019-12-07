@@ -81,7 +81,7 @@
           </div>
         </nav>
 
-      <div class="container-fluid" >
+      <div class="container-fluid">
         <div ng-controller="HomeController">
           <div>
             <h1 class="gotham">Welcome to {POST}!</h1>
@@ -92,17 +92,13 @@
             </div>  
           </div>
           <hr>
-          <div id="public" class="postcards" >       
             <div class="spinner" ng-if="!postcards"></div>      
-            <div class="message" ng-if="postcards.length === 0">Sorry! No Postcards to display</div>     
-            <div class="postcard w3-animate-opacity" ng-repeat="postcard in postcards track by $index">
-              <a ng-href="/design/{{postcard.owner}}/public/{{postcard._id}}">
                 <div ng-bind-html="trust(postcard.outerHTML)" ng-attr-id="public-{{postcard._id}}"></div>
               </a>
               <div class="votes">
-                <img src="../resources/SVG/arrow.svg" class="vote-button" id="upvote" ng-click="vote(postcard._id,'up')" ng-class="voted(postcard._id)" ng-hide="user.postcards.private || !currentUser">
+                <img src="../resources/SVG/arrow.svg" class="vote-button" id="upvote" ng-click="vote(postcard.owner, postcard._id,'up',$index)" ng-class="voted(postcard.owner, postcard._id)" ng-hide="!currentUser || currentUser.username === postcard.owner">
                 {{postcard.rating.score}}
-                <img src="../resources/SVG/arrow.svg" class="vote-button" id="downvote" ng-click="vote(postcard._id,'down')" ng-class="voted(postcard._id)" ng-hide="user.postcards.private || !currentUser">
+                <img src="../resources/SVG/arrow.svg" class="vote-button" id="downvote" ng-click="vote(postcard.owner, postcard._id,'down',$index)" ng-class="voted(postcard.owner, postcard._id)" ng-hide="!currentUser || currentUser.username === postcard.owner">
               </div>
             </div>
           </div>        
