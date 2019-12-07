@@ -141,6 +141,37 @@ app.controller("HomeController", ['$scope', '$http', '$sce',($scope, $http, $sce
         $scope.update()
     }
 
+    $scope.$on('user', (event, data) =>{
+        $scope.currentUser = data
+    })
+
+    $scope.vote = (owner, id, vote, index) => {
+        $http.post(`/vote/${owner}/${id}`, {vote: vote, voter: $scope.currentUser.username})
+            .then(res => {
+                if(res.data.success){
+                    $scope.postcards[index] = res.data.postcard
+                    if($scope.currentUser && $scope.currentUser.voted_on){
+                        $scope.currentUser.voted_on = res.data.voter
+                    }
+                }                
+            })
+    }
+
+    $scope.voted = (owner, id) => {
+        if($scope.currentUser && $scope.currentUser.username !== owner){
+            if($scope.currentUser.voted_on[owner] && $scope.currentUser.voted_on[owner][id]){
+                let p = $scope.currentUser.voted_on[owner][id]
+                if(p.vote == 'up'){
+                    return "upvoted"
+                }else if(p.vote == "down"){
+                    return "downvoted"
+                }else{
+                    return "voted"
+                }
+            }
+        }
+    }
+
 }])
 
 app.controller("RegistrationController", ['$scope', '$http', ($scope, $http) => {
