@@ -98,6 +98,51 @@ app.controller("AuthController", ["$scope", "$http", "$rootScope",($scope, $http
     }
 }])
 
+app.controller("HomeController", ['$scope', '$http', '$sce',($scope, $http, $sce) => {
+    
+    $scope.postcards = null
+    $scope.mode = "popular"
+    $scope.page = {
+        req: 0,
+        display: 1
+    }
+
+    $scope.update = () => {
+        $scope.postcards = null        
+        $http.get(`/postcards/${$scope.mode}/${$scope.page.req}/15`)
+        .then(res => {
+            if(res.data.success){
+                $scope.postcards = res.data.postcards
+                $scope.page = {
+                    display: parseInt(res.data.page) + 1,
+                    req: parseInt(res.data.page)
+                }
+            }
+        })
+    }
+
+    $scope.update()
+
+    $scope.trust = html => {
+        return $sce.trustAsHtml(html)
+    }
+
+    $scope.changeMode = (mode) => {
+        $scope.mode = mode
+        $("#sort .btn").removeClass('selected')
+        $(`#sort #${mode}`).addClass('selected')
+
+        $scope.update()
+    }
+
+    $scope.changePage = page => {
+        $scope.page.req = page
+
+        $scope.update()
+    }
+
+}])
+
 app.controller("RegistrationController", ['$scope', '$http', ($scope, $http) => {
 
     $scope.user = {
@@ -167,7 +212,6 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
     })    
 
     $scope.vote = (id, vote) => {
-        console.log(id, vote)
         $http.post(`/vote/${$scope.user._id}/${id}`, {vote: vote, voter: $scope.currentUser.username})
             .then(res => {
                 if(res.data.success){
@@ -309,5 +353,4 @@ app.controller("AccountController", ['$scope', '$http', ($scope, $http) => {
             }
         })
     }
-
 }])

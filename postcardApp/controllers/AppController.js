@@ -6,11 +6,7 @@ const appController = {}
  * Serves Homepage
  */
 appController.showHome = (req,res) => {
-    if(req.user && !req.params.user){
-        res.redirect('/profile/'+req.user._id)
-    }else{
-        res.sendFile("/templates/index.html", {root: './postcardApp'})
-    }    
+    res.sendFile("/templates/index.html", {root: './postcardApp'}) 
 }
 
 /**
@@ -28,7 +24,13 @@ appController.showRegister = (req,res) => {
  * Serves Profile Page
  */
 appController.showProfile = (req,res) => {
-    res.sendFile("/templates/profile.html", {root: './postcardApp'})
+    if(req.user && !req.params.user){
+        res.redirect('/profile/'+req.user._id)
+    }else if(req.user){
+        res.sendFile("/templates/profile.html", {root: './postcardApp'})
+    }else{
+        res.redirect('/login')
+    }    
 }
 
 /**
@@ -48,6 +50,17 @@ appController.showDesign = (req, res)=> {
     }else{
         res.sendFile("/templates/design.html", {root: './postcardApp'})
     }  
+}
+
+/**
+ * Serves Login Page
+ */
+appController.showLogin = (req, res) => {
+    if(req.user){
+        res.redirect('/profile')
+    }else{
+        res.sendFile("/templates/login.html", {root: './postcardApp'})
+    }
 }
 
 /**
