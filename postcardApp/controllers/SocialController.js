@@ -82,9 +82,9 @@ socialController.verificationemail = (req, res) => {
         to: req.body.email,
         from: "postcardwebservice@gmail.com",
         subject: "PostCard Web Service Verification Email!",
-        html: "<p> Hello <b>" + req.body.firstname +"</b> Your username is "+ req.body.username + "<br/>" +
+        html: "<p> Hello <b>" + req.body.firstname +"</b> Your username is <b>"+ req.body.username + "</b><br/>" +
                 "If this is not your email, please contact us to <i>postcardwebservice@gmail.com </i>" + "<br/>" + "Thank you for joining our service! <br/>"+
-                "Please sign in http://localhost:8080 </p>"
+                "Please sign in <a href='https://postcard-service.herokuapp.com/'> PostCard Web Service </a></p>"
     }
     smtpTransport.sendMail(mailOptions, function(error, response) {
         if(error) {
