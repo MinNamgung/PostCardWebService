@@ -128,9 +128,10 @@ app.controller("HomeController", ['$scope', '$http', '$sce',($scope, $http, $sce
     $scope.trust = (html, textboxes) => {
 
         let postcard = $.parseHTML(html)[0]
-        
-        for(textbox of textboxes){
-            $(postcard).find(`#${textbox.id} textarea`).html(textbox.value)
+        if (textboxes) {
+            for(textbox of textboxes){
+                $(postcard).find(`#${textbox.id} textarea`).html(textbox.value)
+            }
         }
 
         return $sce.trustAsHtml($(postcard).prop('outerHTML'))
@@ -243,8 +244,10 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
 
         let postcard = $.parseHTML(html)[0]
 
-        for(textbox of textboxes){
-            $(postcard).find(`#${textbox.id} textarea`).html(textbox.value)
+        if (textboxes) {
+            for (textbox of textboxes) {
+                $(postcard).find(`#${textbox.id} textarea`).html(textbox.value)
+            }
         }
 
         return $sce.trustAsHtml($(postcard).prop('outerHTML'))
