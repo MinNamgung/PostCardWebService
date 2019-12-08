@@ -9,5 +9,9 @@
 }
 
 .postcardContainer div{
-    transform: scale(0.9) translate(-50%, -50%);
-}   
+    transform: scale(0.8) translate(-10%, -10%);
+} 
+
+.postcardContainer textarea{
+    transform: translate(-50%, -50%);
+}

@@ -107,8 +107,8 @@
               <div id="public" class="postcards">                  
                   <div class="postcard" ng-repeat="postcard in user.postcards.public track by $index">
                     <img ng-click="delete('public', postcard._id)" src="/resources/icons/delete.png" title="Delete Postcard" class="profile-icon" ng-if="user.postcards.private">
-                    <a ng-href="/design/{{user._id}}/public/{{postcard._id}}">
-                      <div ng-bind-html="trust(postcard.outerHTML)" ng-attr-id="public-{{postcard._id}}"></div>
+                    <a ng-href="/design/{{postcard.owner}}/public/{{postcard._id}}">
+                      <div ng-bind-html="trust(postcard.outerHTML, postcard.textboxes)" ng-attr-id="{{postcard.owner}}-{{postcard._id}}"></div>
                     </a>
                     <div class="votes">
                       <img src="../resources/SVG/arrow.svg" class="vote-button" id="upvote" ng-click="vote(postcard._id,'up')" ng-class="voted(postcard._id)" ng-hide="user.postcards.private || !currentUser">

@@ -117,14 +117,23 @@ app.controller("HomeController", ['$scope', '$http', '$sce',($scope, $http, $sce
                     display: parseInt(res.data.page) + 1,
                     req: parseInt(res.data.page)
                 }
+
+                console.log($scope.postcards)
             }
         })
     }
 
     $scope.update()
 
-    $scope.trust = html => {
-        return $sce.trustAsHtml(html)
+    $scope.trust = (html, textboxes) => {
+
+        let postcard = $.parseHTML(html)[0]
+        
+        for(textbox of textboxes){
+            $(postcard).find(`#${textbox.id} textarea`).html(textbox.value)
+        }
+
+        return $sce.trustAsHtml($(postcard).prop('outerHTML'))
     }
 
     $scope.changeMode = (mode) => {
@@ -230,8 +239,15 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
     $scope.query = window.location.pathname.slice(9)
     $scope.currentUser = null
     
-    $scope.trust = html => {
-        return $sce.trustAsHtml(html)
+    $scope.trust = (html, textboxes) => {
+
+        let postcard = $.parseHTML(html)[0]
+
+        for(textbox of textboxes){
+            $(postcard).find(`#${textbox.id} textarea`).html(textbox.value)
+        }
+
+        return $sce.trustAsHtml($(postcard).prop('outerHTML'))
     }
 
     $http.get('/user/'+$scope.query)

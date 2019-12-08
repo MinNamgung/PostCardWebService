@@ -18,7 +18,7 @@
   <link href="/css/postcard.css" rel="stylesheet">   
   <link href="/css/postcard-textbox.css" rel="stylesheet">
   <link href="/css/resize-handles.css" rel="stylesheet">
-  <link href="/css/profile.css" rel="stylesheet">  
+  <link href="/css/profile.css" rel="stylesheet">    
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> 
 
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
@@ -92,13 +92,17 @@
             </div>  
           </div>
           <hr>
-            <div class="spinner" ng-if="!postcards"></div>      
-                <div ng-bind-html="trust(postcard.outerHTML)" ng-attr-id="public-{{postcard._id}}"></div>
-              </a>
-              <div class="votes">
-                <img src="../resources/SVG/arrow.svg" class="vote-button" id="upvote" ng-click="vote(postcard.owner, postcard._id,'up',$index)" ng-class="voted(postcard.owner, postcard._id)" ng-hide="!currentUser || currentUser.username === postcard.owner">
-                {{postcard.rating.score}}
-                <img src="../resources/SVG/arrow.svg" class="vote-button" id="downvote" ng-click="vote(postcard.owner, postcard._id,'down',$index)" ng-class="voted(postcard.owner, postcard._id)" ng-hide="!currentUser || currentUser.username === postcard.owner">
+            <div class="spinner" ng-if="!postcards"></div>     
+            <div class="postcards">
+              <div class="postcard" ng-repeat="postcard in postcards track by $index">
+                <a ng-href="/design/{{postcard.owner}}/public/{{postcard._id}}"> 
+                  <div ng-bind-html="trust(postcard.outerHTML, postcard.textboxes)" ng-attr-id="postcard-{{$index}}"></div>
+                </a>
+                <div class="votes">
+                  <img src="../resources/SVG/arrow.svg" class="vote-button" id="upvote" ng-click="vote(postcard.owner, postcard._id,'up',$index)" ng-class="voted(postcard.owner, postcard._id)" ng-hide="!currentUser || currentUser.username === postcard.owner">
+                  {{postcard.rating.score}}
+                  <img src="../resources/SVG/arrow.svg" class="vote-button" id="downvote" ng-click="vote(postcard.owner, postcard._id,'down',$index)" ng-class="voted(postcard.owner, postcard._id)" ng-hide="!currentUser || currentUser.username === postcard.owner">
+                </div>
               </div>
             </div>
           </div>        
