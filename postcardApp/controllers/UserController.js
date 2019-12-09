@@ -109,13 +109,13 @@ userController.getUser = (req, res) => {
             throw err
         }else{
             if(user){
-                user.postcards.public = Object.values(user.postcards.public).sort((a, b) => b.publishedOn - a.publishedOn);
+                user.postcards.public = Object.values(user.postcards.public).sort((a, b) => b.publishedOn - a.publishedOn)
                 if(req.user){
                     if(req.user._id !== user._id){
                         user.postcards.private = null
                         user.postcards.voted_on = null
                     }else{
-                        user.postcards.private = Object.values(user.postcards.private).sort((a, b) => b.publishedOn - a.publishedOn);             
+                        user.postcards.private = Object.values(user.postcards.private).sort((a, b) => b.publishedOn - a.publishedOn)                    
                     }
                     res.send(user)
                 }else{
@@ -367,9 +367,8 @@ userController.deletePostcard = (req, res) => {
             }
             else {
                 //retrieve the collection to delete the postcard from
-                let postcard = user.postcards[req.params.visibility][req.params.id];
+                delete user.postcards[req.params.visibility][req.params.id];                
                 
-                removePostcard(user.postcards[req.params.visibility], postcard);
                 user.markModified('postcards')
                 user.save((err) => {
                     if (err) {

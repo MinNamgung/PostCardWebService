@@ -157,7 +157,7 @@ app.controller("HomeController", ['$scope', '$http', '$sce',($scope, $http, $sce
     })
 
     $scope.vote = (owner, id, vote, index) => {
-        $http.post(`/vote/${owner}/${id}`, {vote: vote, voter: $scope.currentUser.username})
+        $http.post(`/vote/${owner}/${$scope.sanitize(id)}`, {vote: vote, voter: $scope.currentUser.username})
             .then(res => {
                 if(res.data.success){
                     $scope.postcards[index] = res.data.postcard
@@ -266,7 +266,7 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
     })    
 
     $scope.vote = (id, vote) => {
-        $http.post(`/vote/${$scope.user._id}/${id}`, {vote: vote, voter: $scope.currentUser.username})
+        $http.post(`/vote/${$scope.user._id}/${$scope.sanitize(id)}`, {vote: vote, voter: $scope.currentUser.username})
             .then(res => {
                 if(res.data.success){
                     $scope.user.postcards.public[id] = res.data.postcard
@@ -292,11 +292,11 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
         }
     }
     
-    $scope.delete = (visibility, id) => {
+    $scope.delete = (visibility, id, index) => {
         $http.delete(`/postcard/${visibility}/${id}`)
         .then(res => {
             if (res.data.success){
-                $scope.user.postcards[visibility].splice(id, 1);
+                $scope.user.postcards[visibility].splice(index, 1);
             }
         })
     }

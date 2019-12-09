@@ -455,7 +455,7 @@ function init(postcard, editable=true) {
         })
     }else{
         selectedElement = $("#postcardContainer")[0];
-        deserializePostcard(postcard) 
+        deserializePostcard(postcard, editable) 
         setSelectedStyling();       
     }
 }
