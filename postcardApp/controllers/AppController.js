@@ -26,7 +26,7 @@ appController.showRegister = (req,res) => {
 appController.showProfile = (req,res) => {
     if(req.user && !req.params.user){
         res.redirect('/profile/'+req.user._id)
-    }else if(req.user || (!req.user && req.params.user)){
+    }else if(req.user||(!req.user && req.params.user)){
         res.sendFile("/templates/profile.html", {root: './postcardApp'})
     }else{
         res.redirect('/login')
