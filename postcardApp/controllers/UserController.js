@@ -280,7 +280,7 @@ function removePostcard(collection, postcard) {
                     //retrieve the collection to save the postcard to
                     let visibility = "public"
                     if (isPrivate) {
-                        postcards = "private";
+                        visibility = "private";
                     }else{
                         //add publisedOn timestamp for sorting by newest
                         postcard.publishedOn = new Date().getTime()
