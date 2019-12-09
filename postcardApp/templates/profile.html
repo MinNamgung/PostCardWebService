@@ -97,6 +97,13 @@
                       <a ng-href="/design/{{user._id}}/private/{{postcard._id}}">
                         <div ng-bind-html="trust(postcard.outerHTML)" ng-attr-id="private-{{postcard._id}}"></div>
                       </a>
+                      <div class="postcard-footer">
+                        <div class='postcard-title gotham'>{{postcard._id}}</div>
+                        <div class="controls">
+                          <a ng-href="/design/{{postcard.owner}}/private/{{sanitize(postcard._id)}}" class="btn btn-mini">edit</a>
+                          <a ng-href="/view/{{postcard.owner}}/private/{{sanitize(postcard._id)}}" class="btn btn-mini">view</a>
+                        </div>                      
+                      </div>
                     </div>
                     <hr>
                   </div>
