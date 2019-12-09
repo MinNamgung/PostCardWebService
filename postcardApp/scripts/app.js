@@ -16,9 +16,9 @@ app.controller("AuthController", ["$scope", "$http", "$rootScope",($scope, $http
     $scope.$on("user", (event, data) => {
         $scope.user = data
         if($scope.user){
-            $('#save').removeClass('hidden')
+            $('.loggedin').removeClass('hidden')
         }else{
-            $('#save').addClass('hidden')
+            $('.loggedin').addClass('hidden')
         }
     })
 
@@ -117,8 +117,6 @@ app.controller("HomeController", ['$scope', '$http', '$sce',($scope, $http, $sce
                     display: parseInt(res.data.page) + 1,
                     req: parseInt(res.data.page)
                 }
-
-                console.log($scope.postcards)
             }
         })
     }
@@ -126,7 +124,6 @@ app.controller("HomeController", ['$scope', '$http', '$sce',($scope, $http, $sce
     $scope.update()
 
     $scope.trust = (html, textboxes) => {
-
         let postcard = $.parseHTML(html)[0]
         if (textboxes) {
             for(textbox of textboxes){
@@ -135,6 +132,10 @@ app.controller("HomeController", ['$scope', '$http', '$sce',($scope, $http, $sce
         }
 
         return $sce.trustAsHtml($(postcard).prop('outerHTML'))
+    }
+
+    $scope.sanitize = (text) => {
+        return encodeURIComponent(text)
     }
 
     $scope.changeMode = (mode) => {
@@ -243,14 +244,17 @@ app.controller("ProfileController", ['$scope', '$http', '$sce',($scope, $http, $
     $scope.trust = (html, textboxes) => {
 
         let postcard = $.parseHTML(html)[0]
-
-        if (textboxes) {
-            for (textbox of textboxes) {
+        if(textboxes){
+            for(textbox of textboxes){
                 $(postcard).find(`#${textbox.id} textarea`).html(textbox.value)
             }
         }
 
         return $sce.trustAsHtml($(postcard).prop('outerHTML'))
+    }
+
+    $scope.sanitize = (text) => {
+        return encodeURIComponent(text)
     }
 
     $http.get('/user/'+$scope.query)
@@ -374,7 +378,6 @@ app.controller("AccountController", ['$scope', '$http', ($scope, $http) => {
     $scope.changePassword = () => {
         $http.put('/user', $scope.auth)
         .then((res) => {
-            console.log(res.data)
             if(res.data.success){
                 $scope.edit = {
                     username: false,

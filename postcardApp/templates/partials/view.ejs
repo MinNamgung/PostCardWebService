@@ -1,0 +1,73 @@
+
+<div class="d-flex" id="wrapper" ng-app="PostcardService">
+
+  <!-- Sidebar -->
+  <div class="bg-light border-right" id="sidebar-wrapper">
+          <div class="sidebar-heading"><a href="/"><img src="/resources/SVG/logo-black.svg"></a></div>
+    <div class="list-group list-group-flush">
+      <a href="/" class="list-group-item list-group-item-action bg-light">Home</a>
+      <a href="/profile" class="list-group-item list-group-item-action bg-light">Profile</a>
+      <a href="/design" class="list-group-item list-group-item-action bg-light">Design</a>
+    </div>
+  </div>
+  <!-- /#sidebar-wrapper -->
+
+  <!-- Page Content -->
+  <div id="page-content-wrapper">
+    
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+      <button class="btn btn-primary" id="menu-toggle">Toggle Menu</button>
+      
+      <div class="navbar-collapse" id="navbarSupportedContent" ng-controller="AuthController">
+        <a class="ml-auto nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-if="!user" ng-click="showlogin()">
+          Login
+        </a>
+        <p ng-if="user" class="ml-auto nav-link" id="loggedin"><strong>Hey there, {{user.username}}!</strong><br/> <a href="" ng-click="logout()">Logout</a></p>
+        <div id="login" class="dropdown dropdown-menu-right hidden">
+          <div id="loginform" class="m-3">
+              <form>
+                  <div class="form-group">
+                      <label for="username">Username</label><input class="form-control" type="text" id="uname" name="uname" ng-model="login.username" ng-change="validateLogin()">
+                      <label for="password">Password</label><input class="form-control" type="password" id="pword" name="pword" ng-model="login.password" ng-change="validateLogin()">
+                  </div>
+                  <input type="button" class="btn btn-primary" value="Login" ng-click="authenticate()"><p id="login-error">{{error}}</p>
+              </form>
+              <p>
+                  Don't have an account? <a href="/register" class>Register here</a>
+              </p>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container-fluid"> 
+        <h1 class="gotham center"><%= postcard._id %></h1> 
+        <div id="postcardContainer" class="container-fluid postcardContainer no-remove" type="postcard"></div>
+      </div>
+  </div>
+  <!-- /#page-content-wrapper -->
+
+</div>
+<!-- /#wrapper -->
+
+<!-- Bootstrap core JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+
+<!-- Menu Toggle Script -->
+<script>
+  $("#menu-toggle").click(function(e) {
+    e.preventDefault();
+    $("#wrapper").toggleClass("toggled");
+  });
+</script>
+
+<script>
+    $(window).on('load', () => {
+        let postcard = <%- JSON.stringify(postcard) %>
+        init(postcard, false)
+        $('.postcardContainer div').css('pointer-events','none')
+        $('textarea').css('pointer-events','none')
+    })
+</script>

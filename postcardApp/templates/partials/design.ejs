@@ -1,0 +1,255 @@
+<input id=dragTextImage class=dragImage>
+<div id=dragImage class=dragImage></div>
+<div class="d-flex" id="wrapper">
+
+<!-- Sidebar -->
+<div class="bg-light border-right" id="sidebar-wrapper">
+    <div class="sidebar-heading"><a href="/"><img src="/resources/SVG/logo-black.svg"></a>
+    <a href="/profile" class="list-group-item hidden loggedin">Back to your profile</a></div>
+    <div class="list-group list-group-flush">
+    <div class="list-group-item list-group-item-action bg-light">
+        Color: <input id="colorPicker" type="color"><img class="design-icon" src="/resources/icons/clear.png" onclick=clearColor() title="Clear Color">
+    </div>
+    <div class="list-group-item list-group-item-action bg-light">
+        Gradient:
+        <input id="gradientColor1" type=color>
+        <input id="gradientColor2" type=color>
+        <br>
+        To:
+        <select id="gradientOrientationSelector">
+        <option>Bottom</option>
+        <option>Top</option>
+        <option>Right</option>
+        <option>Left</option>
+        <option>Top Right</option>
+        <option>Top Left</option>
+        <option>Bottom Right</option>
+        <option>Bottom Left</option>
+        </select>
+        <button onclick="setSelectedElementGradientBackground()">Apply</button>
+    </div>
+    <div class="list-group-item list-group-item-action bg-light">
+        Box: 
+        <img src="/resources/icons/textbox.png" class="design-icon" draggable="true" ondragstart="dragStarted(event)"
+        onclick="sidebarClickTextBoxWithoutDrag(event)" data-type="input" style="width: 40px;">
+        Set Image: 
+        <img src="/resources/icons/addimage.png" id="imgPickerIcon"
+        draggable="true" ondragstart="imageDragStarted(event)" data-type="image" class="design-icon">
+        <input id="filePicker" type="file" accept="image/*">
+    </label>
+    </div>
+    <div class="list-group-item list-group-item-action bg-light">
+        Font:
+        <select id="fontFamilySelector">
+        <option>Arial</option>
+        <option>Arial Black</option>
+        <option>Bookman</option>
+        <option>Candara</option>
+        <option>Comic Sans MS</option>
+        <option>Courier</option>
+        <option>Courier New</option>
+        <option>Garamond</option>
+        <option>Georgia</option>
+        <option>Impact</option>
+        <option>Palatino</option>
+        <option>Roboto</option>
+        <option>Sans Serif</option>
+        <option>Times New Roman</option>
+        <option>Times</option>
+        <option>Verdana</option>
+        </select>  
+        <br>
+        Size:
+        <select id="fontSizeSelector">
+        <option>8</option>
+        <option>10</option>
+        <option selected>12</option>
+        <option>14</option>
+        <option>16</option>
+        <option>18</option>
+        <option>20</option>
+        <option>24</option>
+        <option>28</option>
+        <option>32</option>
+        <option>38</option>
+        <option>44</option>
+        <option>52</option>
+        <option>60</option>
+        <option>68</option>
+        </select>
+        Color:
+        <input id="fontColorPicker" type="color">
+        <br>
+    </div>
+    <div class="list-group-item list-group-item-action bg-light">
+        Order:
+        <img class="design-icon" id="sendToBack" src="/resources/icons/sendtoback.png" title="Send To Back" onclick=sendToBack()>
+        <img class="design-icon" id="sendBackwards" src="/resources/icons/sendbackward.png" title="Send Backward" onclick=sendBackwards()>
+        <img class="design-icon" id="sendForwards" src="/resources/icons/bringforward.png" title="Bring Forward" onclick=sendForwards()>
+        <img class="design-icon" id="sendToFront" src="/resources/icons/bringtofront.png" title="Bring To Front" onclick="sendToFront()">
+    </div>
+    <div class="list-group-item list-group-item-action bg-light">
+        <img id="downloadBtn" class="design-icon finish-icon" title="Download" src="/resources/icons/download.png">
+        <img class="design-icon finish-icon" title="Share" src="/resources/icons/share.png" onclick="on()" >
+        <img class="design-icon finish-icon" title="Browse Postcards" src="/resources/icons/browse.png">
+    </div>
+    </div>
+</div>
+<!-- /#sidebar-wrapper -->
+
+<!-- Page Content -->
+<div id="page-content-wrapper">
+    
+    <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
+        <button class="btn btn-primary" id="menu-toggle">Design</button>
+    <div id="save" class="dropdown save-dropdown loggedin">
+        Save
+        <div class="dropdown-content">
+            <button id="saveBtn" class="list-group-item list-group-item-action bg-light saveButton" type="button">Save</button>
+            <button id="saveAsBtn" class="list-group-item list-group-item-action bg-light saveButton" type="button">Save As</button>
+            <label for="title">Title:</label>
+            <input type="text" class="form-control" name="title" id="title" value= <%- postcard._id -%> />
+            <div id="isPrivateContainer">
+                <input id="isPrivateCheckbox" type="checkbox" isChecked="true"><span>Private</span>
+            </div>
+        </div>
+        </div>
+
+        <div class="navbar-collapse" id="navbarSupportedContent" ng-controller="AuthController">
+        <a class="ml-auto nav-link dropdown-toggle" href="#" id="loginDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" ng-if="!user" ng-click="showlogin()">
+            Login
+        </a>
+        <p ng-if="user" class="ml-auto nav-link" id="loggedin"><strong>Hey there, {{user.username}}!</strong><br/> <a href="" ng-click="logout()">Logout</a></p>
+        <div id="login" class="dropdown dropdown-menu-right hidden">
+            <div id="loginform" class="m-3">
+                <form>
+                    <div class="form-group">
+                        <label for="username">Username</label><input class="form-control" type="text" id="uname" name="uname" ng-model="login.username" ng-change="validateLogin()">
+                        <label for="password">Password</label><input class="form-control" type="password" id="pword" name="pword" ng-model="login.password" ng-change="validateLogin()">
+                    </div>
+                    <input type="button" class="btn btn-primary" value="Login" ng-click="authenticate()"><p id="login-error">{{error}}</p>
+                </form>
+                <p>
+                    Don't have an account? <a href="/register" class>Register here</a>
+                </p>
+            </div>
+        </div>
+        </div>
+    </nav>
+
+    <div id="content-container" class="container-fluid">
+        <div id="postcardContainer" class="container-fluid postcardContainer no-remove" type="postcard"></div>
+    </div>
+    <canvas id="canvas"></canvas>
+</div>
+<!-- /#page-content-wrapper -->
+
+<!-- Email Modal -->
+<div id="overlay">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Share</h5>
+            <button type="button" class="close" onclick="off()">
+            <span aria-hidden="true">&times;</span>
+            </button>
+            
+        </div>
+        <div class="modal-body">
+            <div class="tab">
+                <button class="tablinks" id="emailTab" onclick="tabOpen(event, 'emailTabContent')" >Email</button>
+                <button class="tablinks" id="textTab" onclick="tabOpen(event, 'textTabContent')">SMS</button>  
+                <button class="tablinks" id="whatsApp" onclick="tabOpen(event, 'whatsAppTabContent')">WhatsApp</button>   
+                <button class="tablinks" id="whatsApp" onclick="tabOpen(event, 'facebookTabContent')">Facebook</button>
+                <button class="tablinks" id="whatsApp" onclick="tabOpen(event, 'twitterTabContent')">Twitter</button>                 
+            </div>
+            <!--Content of email modal tab-->
+            <div class="tabcontent" id="emailTabContent">
+                <div class="form-group">
+                    <label for="name">Name: </label>
+                    <input type="text" class="form-control" id="name" name="name" required maxlength="50" placeholder="Name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email <a data-toggle="tooltip" data-placement="right" title="If you want to send emails to multiple recipients, plese use ',' for separation!" >
+                        <image src='/resources/svg/icons8-info.svg' width='15' height='15' alt='icon' id='question'/>
+                        <div class="text-primary">Use ',' to send multiple recipients</div>
+                        </a>
+                    </label>
+                    <input type="email" class="form-control" id="email" name="email" required maxlength="256" placeholder="Email">
+                </div>
+                <div class="form-group">
+                    <label for="name">Message: </label>
+                    <textarea class="form-control" type="textarea" name="message" id="message" placeholder="Your Message Here" maxlength="6000" rows="5"></textarea>
+                </div>
+                <button type="submit" class="btn btn-lg btn-success btn-block" id="btnContactUs" onclick="">Send →</button> <br/>
+            </div>
+            <!--Content of text modal tab-->
+            <div class="tabcontent" id="textTabContent">
+                <div class="form-group">
+                    <label for="number">Send To: </label>
+                    <input type="text" class="form-control" id="number" name="number" required maxlength="50" placeholder="Number">
+                </div>
+                <div class="form-group">
+                    <label for="txtMessage">Text Message: </label>
+                    <textarea class="form-control" type="textarea" name="txtMessage" id="txtMessage" placeholder="Your Message Here" maxlength="6000" rows="5"></textarea>
+                </div>
+                <button type="submit" class="btn btn-lg btn-success btn-block" id="sendTextMessage" onclick="">Send →</button> <br/>
+            </div>
+            <!--Content of whatsapp messanger modal tab-->
+            <div class="tabcontent" id="whatsAppTabContent">
+                <div class="form-group">
+                <label for="whatsapNumeber">Send To: </label>
+                <input type="text" class="form-control" id="whatsapNumeber" name="whatsapNumeber" required maxlength="50" placeholder="Whatsapp Number">
+            </div>
+            <div class="form-group">
+                <label for="whatsappMessage">Message: </label>
+                <textarea class="form-control" type="textarea" name="whatsappMessage" id="whatsappMessage" placeholder="Your Message Here" maxlength="6000" rows="5"></textarea>
+            </div>
+            <button type="submit" class="btn btn-lg btn-success btn-block" id="sendWhatsAppMessage" onclick="">Send →</button> <br/>
+            </div>
+            <div class="tabcontent" id="facebookTabContent">
+                <br/>
+                <label for="Facebookshare">Share to Facebook</label>
+                <button type="submit" class="btn-primary btn-lg btn-block fa fa-facebook" id="FacebookBtn" onclick=""></button> <br/>
+            </div>
+            <div class="tabcontent" id="twitterTabContent">
+                <br/>
+                <label for="Twittershare">Share to Twitter</label>
+                <button type="submit" class="btn-info btn-lg btn-block fa fa-twitter" id="twitterBtn" onclick="window.location.href= 'http://twitter.com/share?url=<URL>&text=<TEXT>&via=<VIA>';"></button> <br/>
+            </div>
+            
+            
+        </div>
+            <!--Facebook-->
+        <div class="modal-footer">
+            <!-- <a class="btn share-btn facebook" id="FacebookBtn">
+            <i class="fa fa-facebook"></i>
+            </a> -->
+
+            <!-- Twitter -->
+            <!-- <a href="http://twitter.com/share?url=<URL>&text=<TEXT>&via=<VIA>" target="_blank" class="btn share-btn twitter">
+            <i class="fa fa-twitter"></i>
+            </a> -->
+        </div>
+        </div>
+    </div>
+    </div> 
+<!-- /#Email Modal -->
+</div>
+<!-- /#wrapper -->
+
+<div id="toaster" class="toast">
+    <div id="toastHeader" class="toast-header">
+    Toast Header
+    </div>
+    <div id="toastBody" class="toast-body">
+    Some text inside the toast body
+    </div>
+</div>
+
+<script>
+    $(window).on('load', () => {
+        let postcard = <%- JSON.stringify(postcard) %>
+        init(postcard)
+    })
+</script>

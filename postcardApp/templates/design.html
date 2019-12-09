@@ -41,7 +41,8 @@
 
     <!-- Sidebar -->
     <div class="bg-light border-right" id="sidebar-wrapper">
-        <div class="sidebar-heading"><a href="/"><img src="/resources/SVG/logo-black.svg"></a></div>
+        <div class="sidebar-heading"><a href="/"><img src="/resources/SVG/logo-black.svg"></a>
+        <a href="/profile" class="list-group-item hidden loggedin">Back to your profile</a></div>
       <div class="list-group list-group-flush">
         <div class="list-group-item list-group-item-action bg-light">
             Color: <input id="colorPicker" type="color"><img class="design-icon" src="/resources/icons/clear.png" onclick=clearColor() title="Clear Color">
@@ -138,11 +139,13 @@
         
         <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
           <button class="btn btn-primary" id="menu-toggle">Design</button>
-        <div id="save" class="dropdown save-dropdown">
+        <div id="save" class="dropdown save-dropdown loggedin">
             Save
             <div class="dropdown-content">
                 <button id="saveBtn" class="list-group-item list-group-item-action bg-light saveButton" type="button">Save</button>
                 <button id="saveAsBtn" class="list-group-item list-group-item-action bg-light saveButton" type="button">Save As</button>
+                <label for="title">Title:</label>
+                <input type="text" class="form-control" name="title" id="title"/>
                 <div id="isPrivateContainer">
                   <input id="isPrivateCheckbox" type="checkbox" isChecked="true"><span>Private</span>
                 </div>

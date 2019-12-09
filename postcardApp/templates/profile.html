@@ -90,8 +90,8 @@
               <hr/>
               <div ng-if="user.postcards.private">
                   <h3>Your Private Postcards</h3>
-                  <p  ng-if="!user.postcards || user.postcards.private.length === 0"> Sorry! No postcards to display</p>
-                  <div id="private" class="postcards">                  
+                  <div id="private" class="postcards">     
+                    <a class="new-postcard" href="/design">+</a>             
                     <div class="postcard" ng-repeat="postcard in user.postcards.private track by $index">
                       <img ng-click="delete('private', postcard._id)" src="/resources/icons/delete.png" title="Delete Postcard" class="profile-icon">
                       <a ng-href="/design/{{user._id}}/private/{{postcard._id}}">
@@ -103,17 +103,24 @@
               </div>
               <h3 ng-if="!currentUser || currentUser.username !== user._id">{{user._id}}'s Public Postcards</h3>
               <h3 ng-if="currentUser && currentUser.username === user._id">Your Public Postcards</h3>
-              <p  ng-if="!user.postcards || user.postcards.public.length === 0"> Sorry! No postcards to display</p>
-              <div id="public" class="postcards">                  
+              <div id="public" class="postcards">     
+                  <a class="new-postcard" href="/design" ng-if="user.postcards.private">+</a>             
                   <div class="postcard" ng-repeat="postcard in user.postcards.public track by $index">
                     <img ng-click="delete('public', postcard._id)" src="/resources/icons/delete.png" title="Delete Postcard" class="profile-icon" ng-if="user.postcards.private">
-                    <a ng-href="/design/{{postcard.owner}}/public/{{postcard._id}}">
-                      <div ng-bind-html="trust(postcard.outerHTML, postcard.textboxes)" ng-attr-id="{{postcard.owner}}-{{postcard._id}}"></div>
-                    </a>
-                    <div class="votes">
-                      <img src="../resources/SVG/arrow.svg" class="vote-button" id="upvote" ng-click="vote(postcard._id,'up')" ng-class="voted(postcard._id)" ng-hide="user.postcards.private || !currentUser">
-                      {{postcard.rating.score}}
-                      <img src="../resources/SVG/arrow.svg" class="vote-button" id="downvote" ng-click="vote(postcard._id,'down')" ng-class="voted(postcard._id)" ng-hide="user.postcards.private || !currentUser">
+                    <div ng-bind-html="trust(postcard.outerHTML, postcard.textboxes)" ng-attr-id="{{postcard.owner}}-{{postcard._id}}"></div>
+                    <hr/>
+                    <div class="postcard-footer">
+                      <div class="votes">
+                        <img src="../resources/SVG/arrow.svg" class="vote-button" id="upvote" ng-click="vote(postcard._id,'up')" ng-class="voted(postcard._id)" ng-hide="user.postcards.private || !currentUser">
+                        {{postcard.rating.score}}
+                        <img src="../resources/SVG/arrow.svg" class="vote-button" id="downvote" ng-click="vote(postcard._id,'down')" ng-class="voted(postcard._id)" ng-hide="user.postcards.private || !currentUser">
+                      </div>
+                      <div class='postcard-title gotham'>{{postcard._id}}</div>
+                      <div class="controls">
+                        <a ng-href="/design/{{postcard.owner}}/public/{{sanitize(postcard._id)}}" class="btn btn-mini" ng-if="user.postcards.private">edit</a>
+                        <a ng-href="/design/{{postcard.owner}}/public/{{sanitize(postcard._id)}}" class="btn btn-mini" ng-if="!user.postcards.private">use</a>
+                        <a ng-href="/view/{{postcard.owner}}/public/{{sanitize(postcard._id)}}" class="btn btn-mini">view</a>
+                      </div>                      
                     </div>
                   </div>
               </div>

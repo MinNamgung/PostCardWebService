@@ -86,7 +86,7 @@ function validateWhatsappInput(whatsapNumeber){
 }
 
 $(document).ready(function(){
-  var address = "http://localhost:8080/facebookSend";
+  var address = "/facebookSend";
   $("#FacebookBtn").click(function(){
     let postcard = document.getElementById("postcardContainer");
       elementToCanvas(postcard, (canvas) => {
@@ -100,7 +100,7 @@ $(document).ready(function(){
 });
 
 $(document).ready(function(){
-  var address = "http://localhost:8080/send";
+  var address = "/send";
   $("#btnContactUs").click(function(){      
     let from = $("#name").val().trim();
     let emails =$("#email").val().trim();
@@ -126,7 +126,7 @@ $(document).ready(function(){
 
 
 $(document).ready(function(){
-  var address2 = "http://localhost:8080/sendtxt";
+  var address2 = "/sendtxt";
   $("#sendTextMessage").click(function(){      
     let number = $("#number").val().trim();
     let txtMessage =$("#txtMessage").val().trim();
@@ -147,7 +147,7 @@ $(document).ready(function(){
 
 
 $(document).ready(function(){
-  var address= "http://localhost:8080/sendwhatsapp";
+  var address= "/sendwhatsapp";
   $("#sendWhatsAppMessage").click(function(){      
     let recipient = $("#whatsapNumeber").val().trim();
     let whatsappMessage =$("#whatsappMessage").val().trim();

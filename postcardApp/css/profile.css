@@ -6,12 +6,68 @@
     width: 20vw !important;
     height: 13.3333vw !important;
     border-radius: 10px;
+    color:  black;
+    pointer-events: none;
 }
 
 .postcardContainer div{
-    transform: scale(0.8) translate(-10%, -10%);
-} 
+    transform: scale(0.9) translate(-25%, -25%);
+    pointer-events: none;
+}  
 
-.postcardContainer textarea{
-    transform: translate(-50%, -50%);
+.postcardContainer div textarea{
+    pointer-events: none;
+}
+
+.new-postcard{
+    border: solid black 1px;
+    font-size: 9em;
+    margin-top: 50px;
+    margin-bottom: 20px;
+    text-align: center;
+    text-decoration: none;
+    width: 20vw !important;
+    height: 13.3333vw !important;
+    border-radius: 10px;
+    color:  black;
+}
+
+.new-postcard:hover{
+    border: solid black 2px;
+}
+
+.new-postcard:hover{
+    text-decoration: none !important;
+    color:  black;
+}
+
+.postcard-footer{
+    display: flex;
+    align-items: center;
+}
+
+.display-footer div{
+    margin-left: 10px;
+}
+
+.postcard-title{
+    font-size: 1.5em;
+}
+
+.controls .btn{
+    padding: 3px;
+}
+
+.controls{
+    margin-left: 20px;
+}
+
+.profile-link{
+    position: relative;
+    left: 10%;
+    font-weight: bold;
+}
+
+.profile-link:hover, .controls a:hover{
+    transform: scale(1.01);
 }

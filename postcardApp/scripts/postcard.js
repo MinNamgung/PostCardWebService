@@ -389,73 +389,76 @@ function zShift(shiftAmount){
 /*
 Set default values and attach event handlers.
 */
-$(document).ready(function () {
-    selectedElement = $("#postcardContainer")[0];
-    //Waits on a promise to initialize the postcard as empty or load from db using ajax
-    loadPostcard().then(
-        result => {
-            selectedElement = $("#postcardContainer")[0];
-            setSelectedStyling();
-            $("#postcardContainer").on("click", onSelect);
-            $("#postcardContainer").on("drop", imageDrop);
-            $("#postcardContainer").on("drop", drop);
-            $("#postcardContainer").on("dragover", allowDrop);
-        },
-        error => {
-            alert(error);
-        }
-    );
+function init(postcard, editable=true) {
+    
+    if(editable){        
+        selectedElement = $("#postcardContainer")[0];
 
-    //set the private checkbox selected based on if a public or private postcard is loaded
-    let urlParts = document.location.pathname.trim().split("/");
-    if (urlParts.length === 5) {
-        if (urlParts[3] === "private") {
-            $("#isPrivateCheckbox").attr("checked", true);
+        if(postcard._id !== ""){
+            deserializePostcard(postcard)
+        }     
+
+        setSelectedStyling();
+        $("#postcardContainer").on("click", onSelect);
+        $("#postcardContainer").on("drop", imageDrop);
+        $("#postcardContainer").on("drop", drop);
+        $("#postcardContainer").on("dragover", allowDrop);
+
+        //set the private checkbox selected based on if a public or private postcard is loaded
+        let urlParts = document.location.pathname.trim().split("/");
+        if (urlParts.length === 5) {
+            if (urlParts[3] === "private") {
+                $("#isPrivateCheckbox").attr("checked", true);
+            }
+            else {
+                $("#isPrivateCheckbox").attr("checked", false);
+            }
         }
-        else {
-            $("#isPrivateCheckbox").attr("checked", false);
-        }
+
+        $("#imgPickerIcon").click(() => {
+            $("#filePicker").trigger("click");
+        });
+        $("#downloadBtn").on("click", () => downloadPostcard("postcard.png"));
+        $("#colorPicker").on("change", colorPickerChanged);
+        $("#fontFamilySelector").on("change", fontFamilyChanged);
+        $("#fontSizeSelector").on("change", fontSizeChanged);
+        $("#fontColorPicker").on("change", fontColorChanged);
+
+        $(document).keydown(function (e) {
+            let keyCodes =
+            {
+                Backspace: 8,
+                Delete: 46,
+                q: 81,
+                y: 89,
+                z: 90,
+            }
+            if (e.keyCode === keyCodes.Delete || (e.ctrlKey && e.keyCode === keyCodes.q)) {
+                deleteElement(selectedElement);
+            }
+            else if (e.ctrlKey && e.keyCode === keyCodes.z) {
+                e.preventDefault();
+                e.stopPropagation();
+                let undoCallback = undo.pop();
+                if (undoCallback) {
+                    undoCallback();
+                }
+            }
+            else if (e.ctrlKey && e.keyCode === keyCodes.y) {
+                e.preventDefault();
+                e.stopPropagation();
+                let redoCallback = redo.pop();
+                if (redoCallback) {
+                    redoCallback();
+                }
+            }
+        })
+    }else{
+        selectedElement = $("#postcardContainer")[0];
+        deserializePostcard(postcard) 
+        setSelectedStyling();       
     }
-
-    $("#imgPickerIcon").click(() => {
-        $("#filePicker").trigger("click");
-    });
-    $("#downloadBtn").on("click", () => downloadPostcard("postcard.png"));
-    $("#colorPicker").on("change", colorPickerChanged);
-    $("#fontFamilySelector").on("change", fontFamilyChanged);
-    $("#fontSizeSelector").on("change", fontSizeChanged);
-    $("#fontColorPicker").on("change", fontColorChanged);
-
-    $(document).keydown(function (e) {
-        let keyCodes =
-        {
-            Backspace: 8,
-            Delete: 46,
-            q: 81,
-            y: 89,
-            z: 90,
-        }
-        if (e.keyCode === keyCodes.Delete || (e.ctrlKey && e.keyCode === keyCodes.q)) {
-            deleteElement(selectedElement);
-        }
-        else if (e.ctrlKey && e.keyCode === keyCodes.z) {
-            e.preventDefault();
-            e.stopPropagation();
-            let undoCallback = undo.pop();
-            if (undoCallback) {
-                undoCallback();
-            }
-        }
-        else if (e.ctrlKey && e.keyCode === keyCodes.y) {
-            e.preventDefault();
-            e.stopPropagation();
-            let redoCallback = redo.pop();
-            if (redoCallback) {
-                redoCallback();
-            }
-        }
-    })
-})
+}
 
 /*
 Deletes the element.
@@ -622,9 +625,9 @@ function elementToCanvas(element, onConversion) {
     canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
     canvas.width = element.offsetWidth;
     canvas.height = element.offsetHeight;
-    let options = { canvas: canvas, scale: 1 };
-    html2canvas(element, options).then(function (canvas) {
-        onConversion(canvas);
+    let options = { canvas: canvas, scale: 1};
+    html2canvas(element, options).then(function(canvas) { 
+        onConversion(canvas); 
     });
 }
 
@@ -719,37 +722,41 @@ function serializePostcard() {
 Transforms the JSON string representing a postcard to HTML content.
 See the serializePostcard function for the contents of the json parameter.
 */
-function deserializePostcard(json) {
-    let postcard = JSON.parse(json);
+function deserializePostcard(json, editable=true) {
+    let postcard = json
     let postcardElement = $("#postcardContainer")[0];
     postcardElement.outerHTML = postcard.outerHTML;
     $("#postcardContainer")[0].dataset["postcardId"] = postcard._id;
-    deserializePostcardTextboxes(postcard);
+    deserializePostcardTextboxes(postcard, editable);
 }
 
 /*
 Deserializes the postcard's textboxes from the json object.
 Adds event handlers and recreates the resize handles.
 */
-function deserializePostcardTextboxes(postcard) {
+function deserializePostcardTextboxes(postcard, editable=true) {
     if (postcard.textboxes) {
-        Array.from(postcard.textboxes).forEach(boxData => {
-            let box = document.getElementById(boxData.id);
+       for(data of postcard.textboxes){
+            let box = document.getElementById(data.id);
             /*Adding the event handlers to the resize handles 
-            doesn't work, so recreating them acts as a workaround.*/
+            doesn't work, so recreating them acts as a workaround.*/    
             Array.from(box.children).forEach(child => {
                 if (child.classList.contains("ui-resizable-handle")) {
                     box.removeChild(child);
                 }
             })
             let textBox = box.firstChild;
-            setTextboxEventHandlers(textBox);
-            setBoxDraggable(box);
-            setBoxResizable(box);
+            if(editable){
+                setTextboxEventHandlers(textBox);
+                setBoxDraggable(box);
+                setBoxResizable(box);
+            }
             let textarea = box.getElementsByClassName("postcard-textarea")[0];
-            setTextAreaEventHandlers(textarea);
-            textarea.value = boxData.value;
-        })
+            if(editable){
+                setTextAreaEventHandlers(textarea);
+            }
+            textarea.value = data.value;
+        }
     }
 }
 
@@ -773,7 +780,7 @@ function savePostcard(isUpdate, username) {
                     if (imageUrl) {
                         element.style.backgroundImage = decodeURI(imageUrl);
                         resolve();
-                    } else {
+                    }else{
                         reject();
                     }
                 })
@@ -791,32 +798,12 @@ function savePostcard(isUpdate, username) {
         data.isPrivate = isPrivate;
         data.isUpdate = isUpdate;
         data.username = username;
-        $.post("/postcards", data).done(data => {
+        data.title = $("#title").val()  
+        $.post("/postcard", data).done(data => {
             displayToast("Saving Postcard", data.message);
             enableCanvasModificationButtons();
         });
         setSelectedStyling();
-    });
-}
-
-/*
-Load the postcard from the server to be displayed
-*/
-function loadPostcard() {
-    return new Promise((resolve, reject) => {
-        //Check if a postcard needs to be loaded
-        let url = document.location.pathname.trim().split("/").splice(1);
-        //If the url has more than length one, we need to load a postcard
-        if (url.length > 1) {
-            url[0] = "/postcard";
-            $.get(url.join("/")).done(data => {
-                deserializePostcard(data);
-                resolve();
-            });
-        }
-        else {
-            resolve();
-        }
     });
 }
 
@@ -861,8 +848,8 @@ function postImage(imageFile, successCallback) {
         cache: false,
         contentType: false,
         processData: false,
-        method: 'POST',
-        complete: function (data) {
+        method: 'POST', 
+        complete: function(data){
             let response = data.responseJSON;
             if (response.success) {
                 displayToast(imageFile.name, "Saved to " + response.src);

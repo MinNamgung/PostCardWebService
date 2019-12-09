@@ -127,3 +127,8 @@ h1.gotham{
   width: 40px;
   margin: 10px;
 }
+
+a.loggedin, a.loggedin:hover{
+  text-decoration: none;
+  color: black;
+}

@@ -3,6 +3,11 @@
     flex-wrap: wrap;
 }
 
+.center{
+    text-align: center;
+    margin-bottom: 2vh;
+}
+
 .postcard{
     margin: 20px 10px 10px 10px;
 }
