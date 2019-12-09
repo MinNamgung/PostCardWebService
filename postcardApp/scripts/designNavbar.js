@@ -22,7 +22,6 @@ $(document).ready( function() {
 
     /* Conditionally render save/save_as buttons based on if the user 
      is logged in and designing another user's public postcard */
-    
     $("#saveBtn").on("click", () => {
         savePostcard(true, username);
     });

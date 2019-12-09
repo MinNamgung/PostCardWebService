@@ -18,7 +18,7 @@ userController.initPostcardList = () => {
         }
         else {
             postcardList = new Array()
-            users.map(user => user.postcards.public)
+            users.map(user => Object.values(user.postcards.public))
                 .filter(postcardArray => postcardArray.length > 0)
                 .forEach(postcardArray => postcardList = postcardList.concat(postcardArray));
             
@@ -50,8 +50,8 @@ userController.createUser = (req, res) => {
                 password: hash.update(req.body.password + salt,'utf8').digest('hex') 
             },
             postcards: {
-                public: [],
-                private: [],
+                public: {},
+                private: {},
                 voted_on: {}
             }
         }
@@ -109,18 +109,21 @@ userController.getUser = (req, res) => {
             throw err
         }else{
             if(user){
+                user.postcards.public = Object.values(user.postcards.public).sort(postcardList.sort((a, b) => b.publishedOn - a.publishedOn))
                 if(req.user){
                     if(req.user._id !== user._id){
                         user.postcards.private = null
                         user.postcards.voted_on = null
+                    }else{
+                        user.postcards.private = Object.values(user.postcards.private).sort(postcardList.sort((a, b) => b.publishedOn - a.publishedOn))                    
                     }
                     res.send(user)
                 }else{
                     user.postcards.private = null
                     user.postcards.voted_on = null
+
                     res.send(user)
-                }
-                
+                }                
             }else{
                 res.status(401)
                 res.end("User not found")
@@ -156,6 +159,7 @@ userController.handleSearch = (req, res) => {
         })
     }
 }
+
  /**
   * Takes username and returns User object
   * Used by passport.deserializeUser() method
@@ -234,24 +238,15 @@ userController.deleteUser = (req, res) => {
 /*
  * Adds a postcard to the end of array and sets the _id property of postcard.
  */
-function addPostcard(array, postcard) {
-    postcard._id = array.length;
-    array.push(postcard);
+function addPostcard(collection, postcard) {
+    collection[postcard._id] = postcard;
 }
 
 /*
  * Removes a postcard from the array and sets the remaining postcards _id property.
  */
-function removePostcard(array, postcard) {
-    array.splice(postcard._id, 1);
-    setAllPostcardId(array);
-}
-
-/*
- * Sets the _id property of each postcard to its index in the array.
- */
-function setAllPostcardId(postcardArray) {
-    postcardArray.forEach((postcard, index) => postcard._id = index);
+function removePostcard(collection, postcard) {
+    delete collection[postcard._id]
 }
 
  /*
@@ -265,81 +260,96 @@ function setAllPostcardId(postcardArray) {
         score: 0
     }
     //true if the _id property is nonempty and defined
-    let idIsSet = (postcard._id != "") && (typeof postcard._id != "undefined");
     let isPrivate = JSON.parse(req.body.isPrivate);
     let isUpdate = JSON.parse(req.body.isUpdate);
     let privateStateChanged = JSON.parse(req.body.isPrivateStateChanged);
     let username = req.body.username;
+    let title = req.body.title;
     if (req.user) {
 
         //setting owner property so that the postcard owners can be referenced in contexts where postcard is retrieved outside of owner's profile
-        postcard.owner = req.user._id
+        postcard.owner = req.user._id             
 
         let userId = req.user._id;
-        User.findOne({_id: userId}, (err, user) => {
-            if (err) {
-                res.send({success: false, message: err.message});
-            }
-            else {
-                //retrieve the collection to save the postcard to
-                let postcards = user.postcards.public;
-                if (isPrivate) {
-                    postcards = user.postcards.private;
-                }else{
-                    //add publisedOn timestamp for sorting by newest
-                    postcard.publishedOn = new Date().getTime()
-                }
-
-                /* If username doesn't match the logged in user, then 
-                the logged in user is trying to save another user's public postcard. */
-                let copyOtherUsersPostcard = username != req.user._id;
-                if (copyOtherUsersPostcard) {
-                    postcard.createdOn = new Date().getTime()
-                    addPostcard(postcards, postcard);
-                }
-                /* 
-                If the postcard has been moved from private <=> public and this is an update, remove 
-                it from its original collection and add to the new collection.
-                */
-                else if (privateStateChanged && isUpdate && idIsSet) {
-                    //remove the postcard from its old collection. (could be public or private)
-                    let newCollection = postcards;
-                    let oldCollection = newCollection === user.postcards.private ? user.postcards.public : user.postcards.private;
-
-                    removePostcard(oldCollection, postcard);
-                    //add to the new collection (could be public or private)
-                    addPostcard(newCollection, postcard);
+        if(title && title.length > 0){
+            User.findOne({_id: userId}, (err, user) => {
+                if (err) {
+                    res.send({success: false, message: err.message});
                 }
                 else {
-                    //_id field must be defined to be an update, else save it as a new postcard
-                    if (isUpdate && idIsSet) {
-                        postcards.set(postcard._id, postcard);
+                    //retrieve the collection to save the postcard to
+                    let visibility = "public"
+                    if (isPrivate) {
+                        postcards = "private";
+                    }else{
+                        //add publisedOn timestamp for sorting by newest
+                        postcard.publishedOn = new Date().getTime()
                     }
-                    else {
+
+                    //set name as ID if availale
+                    let i = 0
+                    postcard._id = title
+                    while(user.postcards[visibility][postcard._id] && !isUpdate){
+                        i++
+                        postcard._id = title + i
+                    }
+
+                    /* If username doesn't match the logged in user, then 
+                    the logged in user is trying to save another user's public postcard. */
+                    let copyOtherUsersPostcard = username != req.user._id;
+                    if (copyOtherUsersPostcard) {
                         postcard.createdOn = new Date().getTime()
-                        addPostcard(postcards, postcard);
+                        user.postcards[visibility][postcard._id] = postcard
+                        user.markModified('postcards')
                     }
-                }
-                user.save((err) => {
-                    if (err) {
-                        res.writeHead(200,{'Content-Type':'application/json'});
-                        res.write(JSON.stringify({'success':false,'message':"Failed to save postcard.", 'user': user}))
-                        res.end()
+                    /* 
+                    If the postcard has been moved from private <=> public and this is an update, remove 
+                    it from its original collection and add to the new collection.
+                    */
+                    else if (privateStateChanged && isUpdate) {
+                        //remove the postcard from its old collection. (could be public or private)
+                        let oldVisibility = visibility === "private" ? "public" : "private"
 
-                        userController.initPostcardList()
+                        delete user.postcards[oldVisibility][postcard._id]
+                        //add to the new collection (could be public or private)
+                        user.postcards[visibility][postcard._id] = postcard
+                        user.markModified('postcards')
                     }
                     else {
-                        res.writeHead(200,{'Content-Type':'application/json'});
-                        res.write(JSON.stringify({'success':true,'message':"Successfully saved postcard.", 'user': user}))
-                        res.end()
-
-                        userController.initPostcardList()
+                        //_id field must be defined to be an update, else save it as a new postcard
+                        if (isUpdate) {
+                            user.postcards[visibility][postcard._id] = postcard
+                            user.markModified('postcards')
+                        }
+                        else {
+                            postcard.createdOn = new Date().getTime()
+                            user.postcards[visibility][postcard._id] = postcard
+                            user.markModified('postcards')
+                        }
                     }
-                });
-            }
-        })
-    }
-    else {
+                    user.save((err) => {
+                        if (err) {
+                            res.writeHead(200,{'Content-Type':'application/json'});
+                            res.write(JSON.stringify({'success':false,'message':"Failed to save postcard.", 'user': user._id}))
+                            res.end()
+                        }
+                        else {
+                            res.writeHead(200,{'Content-Type':'application/json'});
+                            res.write(JSON.stringify({'success':true,'message':"Successfully saved postcard.", 'user': user._id}))
+                            res.end()
+                        }
+
+                        //only update postcardList if a public postcard is created
+                        if(visibility === "public"){
+                            userController.initPostcardList()
+                        }
+                    });
+                }
+            })
+        }else{
+            res.send({'success':false,'message':"Cannot save with empty title", 'user': req.user._id})
+        }
+    } else {
         res.writeHead(200,{'Content-Type':'application/json'});
         res.write(JSON.stringify({'success':false,'message':"You must be logged in to save a postcard.", 'user': null}))
         res.end()
@@ -360,20 +370,20 @@ userController.deletePostcard = (req, res) => {
                 let postcard = user.postcards[req.params.visibility][req.params.id];
                 
                 removePostcard(user.postcards[req.params.visibility], postcard);
-
+                user.markModified('postcards')
                 user.save((err) => {
                     if (err) {
                         res.writeHead(200,{'Content-Type':'application/json'});
                         res.write(JSON.stringify({'success':false,'message':"Failed to save postcard.", 'user': user}))
                         res.end()
-                        
-                        userController.initPostcardList()
                     }
                     else {
                         res.writeHead(200,{'Content-Type':'application/json'});
                         res.write(JSON.stringify({'success':true,'message':"Successfully deleted postcard.", 'user': user}))
                         res.end();
-
+                    }
+                    //only update postcardList if a public postcard is deleted
+                    if(req.params.visibility === "public"){
                         userController.initPostcardList()
                     }
                 });
@@ -385,8 +395,7 @@ userController.deletePostcard = (req, res) => {
 /**
  * Get postcard from any user
  */
-userController.getPostcard = (req, res) => {
-    
+userController.getPostcard = (req, res) => {    
     User.findOne({_id: req.params.username}, (err, user) => {
         if(err){
             res.end(400)
@@ -395,6 +404,52 @@ userController.getPostcard = (req, res) => {
                 let postcard = user.postcards[req.params.visibility][req.params.id]
                 if(postcard){
                     res.json(JSON.stringify(postcard));
+                }else{
+                    res.writeHeader(400);
+                    res.end()
+                }                
+            }
+        }
+    })
+}
+
+/**
+ * Render Design Page
+ */
+userController.designPostcard = (req, res) => {
+    if(req.url !== '/design'){
+        User.findOne({_id: req.params.username}, (err, user) => {
+            if(err){
+                res.end(400)
+            }else{
+                if(user){
+                    let postcard = user.postcards[req.params.visibility][req.params.id]
+                    if(postcard){
+                        res.render('partials/design', {postcard: postcard});
+                    }else{
+                        res.writeHeader(400);
+                        res.end()
+                    }                
+                }
+            }
+        })
+    }else{
+        res.render('partials/design', {postcard: {_id: ""}});
+    }
+}
+
+/**
+ * Render view postcard Page
+ */
+userController.showPostcard = (req, res) => {
+    User.findOne({_id: req.params.username}, (err, user) => {
+        if(err){
+            res.end(400)
+        }else{
+            if(user){
+                let postcard = user.postcards[req.params.visibility][req.params.id]
+                if(postcard){
+                    res.render('partials/view', {postcard: postcard});
                 }else{
                     res.writeHeader(400);
                     res.end()
@@ -460,7 +515,8 @@ userController.vote = (req, res) => {
                                     }
                 
                                     postcard.rating.score = postcard.rating.up - postcard.rating.down
-                                    user.postcards.public.set(postcard._id, postcard)
+                                    //user.postcards.public.set(postcard._id, postcard)
+                                    user.markModified("postcards")
                 
                                     user.save((err, user) => {
                                         if(err){

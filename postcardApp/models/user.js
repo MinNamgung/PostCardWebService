@@ -10,8 +10,8 @@ let UserSchema = new mongoose.Schema({
         password: String
     },
     postcards:{
-        private: [{}],
-        public: [{}],
+        private: {},
+        public: {},
         voted_on: {}
     }
 }, { collection: 'User', minimize: false})

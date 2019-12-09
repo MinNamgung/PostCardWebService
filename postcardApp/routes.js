@@ -29,10 +29,11 @@ module.exports = router
 router.get('/', appController.showHome)
 router.get('/register', appController.showRegister)
 router.get(['/profile', '/profile/:user'], appController.showProfile)
-router.get(['/design', '/design/:username/:visibility/:id'], appController.showDesign)
+router.get(['/design','/design/:username/:visibility/:id'], userController.designPostcard)
 router.get('/404', appController.show404)
 router.get('/account', appController.showAccountManagement)
 router.get('/login', appController.showLogin)
+router.get('/view/:username/:visibility/:id', userController.showPostcard)
 
 //Current User Routes
 router.get('/user',appController.getUser)
@@ -56,7 +57,7 @@ router.post('/sendwhatsapp', socialController.sendWhatsappMsg)
 router.post('/facebookSend', socialController.makeFacebookPost);
 
 //Postcard Routes
-router.post("/postcards", userController.savePostcard)
+router.post("/postcard", userController.savePostcard)
 router.get("/postcards/:sortBy/:page/:pageSize", userController.getPostcardPage)
 router.get('/postcard/:username/:visibility/:id', userController.getPostcard)
 router.get("/images/:username/:imageName", appController.getImage)
