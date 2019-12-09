@@ -32,72 +32,85 @@ function imageDragStarted(ev) {
     ev.dataTransfer.setData("text/plain", "chosenFile");
 }
 
+//Get the box of the selectedElement
+function getBox(e){
+    let box = e.target;
+    if (box.className != "postcard-box"){
+        box = $(e.target).parents(".postcard-box")[0];
+    }
+    return box;
+}
+
 /*
 Methods for showing the "move" cursor only when hovering over the containing div, not the 
 actual element (otherwise it is confused with entering text, etc.)
 */
 function dragHover(e){
-    e.target.style.cursor = "move";
+    let box = getBox(e);
+    if (e.target.className == "postcard-textbox"){
+        box.style.cursor = "move";
+    }
 }
 
 //Event for onmouseout for inner element
 function enableDragHover(e){
-    e.target.parentElement.addEventListener("mouseover", dragHover);
+    let box = getBox(e);
+    box.addEventListener("mouseover", dragHover(event));
 }
 
 //Event for onmouseover for inner element
 function disableDragHover(e){
-    e.target.parentElement.removeEventListener("mouseover", dragHover);
-    e.target.style.cursor = "default";
+    let box = getBox(e);
+    box.removeEventListener("mouseover", dragHover(event));
+    box.style.cursor = "default";
 }
 
 function textHover(e){
-    e.target.style.cursor = "text";
+    let box = getBox(e);
+    let textArea = $(box).find(".postcard-textarea")[0];
+    textArea.style.cursor = "text";
 }
 
 //Sets cursor for each corner resize
 function resizeHover(e){
-    let resizeClass = e.target.classList[1];
-    if (resizeClass.includes("ne") || resizeClass.includes("sw")){
-        e.target.style.cursor = "ne-resize";
+    let box = getBox(e);
+    let resizeClass = box.classList[1];
+    if (resizeClass.includes("ne")){
+        box.style.cursor = "ne-resize";
     }
-    else{
+    else if (resizeClass.includes("nw")){
+        box.style.cursor = "nw-resize";
+    }
+    else if (resizeClass.includes("sw")){
+        box.style.cursor = "sw-resize";
+    }
+    else if (resizeClass.includes("se")){
         e.target.style.cursor = "se-resize";
     }
-    
 }
 
-function selectParent(e){
+function selectTextBox(e){
     e.stopPropagation();
-    setSelected(e.target.parentElement);
+    let box = getBox(e);
+    setSelected(box.firstChild);
 }
 
 //Lightly outlines unselected elements when moused over
-function setHoverStyling(event) {
-    event.stopPropagation();
+function setHoverStyling(e) {
+    e.stopPropagation();
+    let box = getBox(e);
     // Avoid highlighting textareas
-    if (event.target != selectedElement && event.target.tagName != "TEXTAREA"){
-        event.target.style.outlineColor = "grey";
+    if (box.firstChild != selectedElement){
+        box.firstChild.style.outlineColor = "grey";
     }
 }
 
 //Remove outline on mouse out
-function exitHoverStyling(event){
-    event.stopPropagation();
+function exitHoverStyling(e){
+    e.stopPropagation();
+    let box = getBox(e);
     // Avoid highlighting textareas
-    if (event.target != selectedElement && event.target.tagName != "TEXTAREA"){
-        event.target.style.outlineColor = "transparent";
-    }
-}
-
-function setParentHoverStyling(event){
-    if (event.target.parentElement != selectedElement){
-        event.target.parentElement.style.outlineColor = "grey";
-    }
-}
-
-function exitParentHoverStyling(event){
-    if (event.target.parentElement != selectedElement){
-        event.target.parentElement.style.outlineColor = "transparent";
+    if (box.firstChild != selectedElement){
+        box.firstChild.style.outlineColor = "transparent";
     }
 }

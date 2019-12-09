@@ -92,14 +92,18 @@ function sidebarClickTextBoxWithoutDrag(e) {
 
 //Creates a div with a textbox in it to allow dragging and resizing
 function createTextBox(e) {
+    let box = document.createElement("div");
+    box.className = "postcard-box";
+    box.id = Date.now();
+    box.style.zIndex = 1;
     let textBox = document.createElement("div");
-    textBox.id = Date.now();
     textBox.className = "postcard-textbox";
-    $("#postcardContainer").append(textBox);
+    $(box).append(textBox);
+    $("#postcardContainer").append(box);
 
     setTextboxEventHandlers(textBox);
-    setTextboxDraggable(textBox);
-    setTextboxResizable(textBox);
+    setBoxDraggable(box);
+    setBoxResizable(box);
 
     let textArea = document.createElement("textarea");
     textArea.className = "postcard-textarea";
@@ -109,7 +113,7 @@ function createTextBox(e) {
     textBox.append(textArea);
 
     setSelected(textBox);
-    sendToFront();
+    bringToFront(); //Will move the new selected textBox to front
 
     //Set focus on the textbox textarea
     $(textArea).focus();
@@ -121,9 +125,10 @@ function createTextBox(e) {
 
     textboxUndo(textBox);
 
-    return textBox;
+    return box;
 }
 
+//Undo the creation of a text box
 function textboxUndo(textBox){
     /*
     Get the parent element, so that it is captured in the closure below.
@@ -141,6 +146,7 @@ function textboxUndo(textBox){
    })
 }
 
+//Undo latest change to text contents
 function textUndo(event){
     //Get the text area and current/previous text contents for capturing in the closure
     let textArea = event.target;
@@ -165,7 +171,6 @@ function textUndo(event){
 Sets event handlers for a postcard's textbox.
 */
 function setTextboxEventHandlers(textBox) {
-    textBox.addEventListener("mouseover", dragHover);
     //Hover events
     textBox.addEventListener("mouseover", setHoverStyling);
     textBox.addEventListener("mouseout", exitHoverStyling);
@@ -189,38 +194,36 @@ function setTextboxEventHandlers(textBox) {
 /*
 Makes the textbox resizable and attaches event handlers to the resize handles.
 */
-function setTextboxResizable(textBox) {
-    $(textBox).resizable({
+function setBoxResizable(box) {
+    $(box).resizable({
         containment: "#postcardContainer",
         handles: "ne, nw, se, sw"
     });
-    setTextboxResizeHandlesEventHandlers(textBox);
+    setBoxResizeHandlesEventHandlers(box);
 }
 
 /*
 Makes the textbox draggable.
 */
-function setTextboxDraggable(textBox) {
-    $(textBox).draggable({ containment: "#postcardContainer", scroll: false });
+function setBoxDraggable(box) {
+    $(box).draggable({ containment: "#postcardContainer", scroll: false });
+    //Mouse indicator
+    box.firstChild.addEventListener("mouseover", dragHover);
 }
 
 /*
 Sets event handlers for a textboxes' textarea element.
 */
 function setTextAreaEventHandlers(textArea) {
-    //Mouse indicator events
-    textArea.addEventListener("mouseover", disableDragHover);
-    textArea.addEventListener("mouseout", enableDragHover);
-
-    //Parent hover events
-    textArea.addEventListener("mouseover", setParentHoverStyling);
-    textArea.addEventListener("mouseout", exitParentHoverStyling);
+    //TextBox hover events
+    textArea.addEventListener("mouseover", setHoverStyling);
+    textArea.addEventListener("mouseout", exitHoverStyling);
 
     //Text cursor on hover
     textArea.addEventListener("mouseover", textHover);
 
-    //Select parent on click
-    textArea.addEventListener("click", selectParent);
+    //Select text box on click
+    textArea.addEventListener("click", selectTextBox);
 
     //For text undo/redo
     textArea.addEventListener("input", textUndo);
@@ -229,9 +232,9 @@ function setTextAreaEventHandlers(textArea) {
 /*
 Sets the event handlers for a textboxes' resize handles.
 */
-function setTextboxResizeHandlesEventHandlers(textbox) {
-    //Add event listeners to all the corner resize handles
-    let resizeHandles = Array.from(textbox.getElementsByClassName("ui-resizable-handle"));
+function setBoxResizeHandlesEventHandlers(box) {
+    //remove event listeners to all the corner resize handles
+    let resizeHandles = Array.from(box.getElementsByClassName("ui-resizable-handle"));
     resizeHandles.forEach(handle => setResizeHandleEventHandlers(handle));
 }
 
@@ -239,20 +242,18 @@ function setTextboxResizeHandlesEventHandlers(textbox) {
 Sets the event handlers for a resize handle element.
 */
 function setResizeHandleEventHandlers(resizeHandle) {
-    $(resizeHandle).on("mouseover", disableDragHover);
-    $(resizeHandle).on("mouseout", enableDragHover);
     $(resizeHandle).on("mouseover", resizeHover);
-    $(resizeHandle).on("click", selectParent);
-    $(resizeHandle).on("mouseover", setParentHoverStyling);
-    $(resizeHandle).on("mouseout", exitParentHoverStyling);
+    $(resizeHandle).on("click", selectTextBox);
+    $(resizeHandle).on("mouseover", setHoverStyling);
+    $(resizeHandle).on("mouseout", exitHoverStyling);
 }
 
 /*
-Move the selected element in front of all other elements
+Move the selected element's box in front of all other elements
 */
-function sendToFront() {
+function bringToFront() {
     if (selectedElement != $("#postcardContainer")[0]) {
-        selectedElement.style.zIndex = getFrontZ() + 1;
+        selectedElement.parentElement.style.zIndex = getFrontZ() + 1;
     }
 }
 
@@ -268,10 +269,10 @@ function getFrontZ() {
 }
 
 //Move the selected element in front of the element immediately in front of it
-function sendForwards() {
+function bringForward() {
     if (selectedElement != $("#postcardContainer")[0]) {
         let nextZ = getNextFrontZ();
-        selectedElement.style.zIndex = nextZ + 1;
+        selectedElement.parentElement.style.zIndex = nextZ + 1;
     }
 }
 
@@ -279,12 +280,12 @@ function sendForwards() {
 Finds the z-index of the closests element in front of the selected element
 */
 function getNextFrontZ() {
-    let currentZ = Number(selectedElement.style.zIndex);
+    let currentZ = Number(selectedElement.parentElement.style.zIndex);
     let elements = zSortedElements();
 
     //Sequential search backwards until a closer or even element is found
     for (let i = elements.length - 1; i >= 0; i--) {
-        if (elements[i] != selectedElement) {
+        if (elements[i].firstChild != selectedElement) {
             let tempZ = Number(elements[i].style.zIndex);
             if (tempZ == currentZ) {
                 return tempZ + 1;
@@ -301,7 +302,7 @@ Places the selected element behind all others
 */
 function sendToBack() {
     if (selectedElement != $("#postcardContainer")[0]) {
-        selectedElement.style.zIndex = getBackZ() - 1;
+        selectedElement.parentElement.style.zIndex = getBackZ() - 1;
     }
 }
 
@@ -322,7 +323,7 @@ Places the element behind the closest back element
 function sendBackwards() {
     if (selectedElement != $("#postcardContainer")[0]) {
         let nextZ = getNextBackZ();
-        selectedElement.style.zIndex = nextZ - 1;
+        selectedElement.parentElement.style.zIndex = nextZ - 1;
     }
 }
 
@@ -330,11 +331,11 @@ function sendBackwards() {
 Finds the z-index of the closests element behind the selected element
 */
 function getNextBackZ() {
-    let currentZ = Number(selectedElement.style.zIndex);
+    let currentZ = Number(selectedElement.parentElement.style.zIndex);
     let elements = zSortedElements();
 
     for (let i = 0; i < elements.length; i++) {
-        if (elements[i] != selectedElement) {
+        if (elements[i].firstChild != selectedElement) {
             let tempZ = Number(elements[i].style.zIndex);
             if (tempZ == currentZ) {
                 return tempZ - 1;
@@ -351,7 +352,16 @@ function getNextBackZ() {
 Sort the postcard elements by z index descending (frontmost elements are first)
 */
 function zSortedElements() {
-    let elements = $("#postcardContainer").children();
+    let elements = $("#postcardContainer").children().toArray();
+
+    //If any elements have z index of 0, shift all elements forward
+    for (let i = 0; i < elements.length; i++) {
+        if (elements[i].style.zIndex <= 0){
+            zShift(10);
+            break;
+        }
+    }
+
     if (elements.length === 0) {
         return null;
     }
@@ -366,6 +376,14 @@ function zSortedElements() {
 
     //elements are now sorted
     return elements;
+}
+
+//Shift all elements forward to avoid any elements having a z-index < 0
+function zShift(shiftAmount){
+    $("#postcardContainer").children().toArray().forEach((element) => {
+        let z = Number(element.style.zIndex);
+        element.style.zIndex = z + shiftAmount;
+    });
 }
 
 /*
@@ -676,11 +694,12 @@ JSON object for a postcard is as follows:
 */
 function serializePostcard() {
     let postcardElement = $("#postcardContainer")[0];
-    let textboxes = postcardElement.getElementsByClassName("postcard-textarea");
+    let textAreas = postcardElement.getElementsByClassName("postcard-textarea");
     let postcardTextboxes = new Array();
-    Array.from(textboxes).forEach(textbox => {
-        let textboxElement = textbox.parentElement;
-        let postcardTextbox = { id: textboxElement.id, value: textbox.value };
+    Array.from(textAreas).forEach(textArea => {
+        let textBox = textArea.parentElement;
+        let box = textBox.parentElement;
+        let postcardTextbox = { id: box.id, value: textArea.value };
         postcardTextboxes.push(postcardTextbox);
     })
     let html = postcardElement.outerHTML;
@@ -714,21 +733,22 @@ Adds event handlers and recreates the resize handles.
 */
 function deserializePostcardTextboxes(postcard) {
     if (postcard.textboxes) {
-        Array.from(postcard.textboxes).forEach(textbox => {
-            let textboxElement = document.getElementById(textbox.id);
+        Array.from(postcard.textboxes).forEach(boxData => {
+            let box = document.getElementById(boxData.id);
             /*Adding the event handlers to the resize handles 
             doesn't work, so recreating them acts as a workaround.*/
-            Array.from(textboxElement.children).forEach(child => {
+            Array.from(box.children).forEach(child => {
                 if (child.classList.contains("ui-resizable-handle")) {
-                    textboxElement.removeChild(child);
+                    box.removeChild(child);
                 }
             })
-            setTextboxEventHandlers(textboxElement);
-            setTextboxDraggable(textboxElement);
-            setTextboxResizable(textboxElement);
-            let textarea = textboxElement.getElementsByClassName("postcard-textarea")[0];
+            let textBox = box.firstChild;
+            setTextboxEventHandlers(textBox);
+            setBoxDraggable(box);
+            setBoxResizable(box);
+            let textarea = box.getElementsByClassName("postcard-textarea")[0];
             setTextAreaEventHandlers(textarea);
-            textarea.value = textbox.value;
+            textarea.value = boxData.value;
         })
     }
 }
